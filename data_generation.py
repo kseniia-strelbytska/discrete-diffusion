@@ -1,5 +1,4 @@
 import torch
-import copy
 import itertools
 
 def generate_seq(length):
