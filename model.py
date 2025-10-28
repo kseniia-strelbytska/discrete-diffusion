@@ -17,5 +17,5 @@ class Model(torch.nn.Module):
         X = self.relu(X)
         X = self.l3(X)
 
-        return X.view(-1, self.dim, self.category_count)
+        return X.view(-1, self.category_count, self.dim)
 
