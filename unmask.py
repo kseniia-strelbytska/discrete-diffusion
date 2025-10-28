@@ -10,7 +10,8 @@ class Unmasker(nn.Module):
         y_pred = self.model(X)
 
         mask = torch.rand_like(X) < alpha
+
         X_unmasked = X.clone()
-        X_unmasked[mask] = y_pred[mask].argmax(dim=1)
+        X_unmasked[X==2 & mask] = y_pred[X==2 & mask].argmax(dim=1)
         return X_unmasked
         
