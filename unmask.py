@@ -12,5 +12,5 @@ class Unmasker(nn.Module):
         mask = torch.rand_like(X) < alpha
 
         X_unmasked = X.clone()
-        X_unmasked[torch.isclose(X, 2) & mask] = y_pred[torch.isclose(X, 2) & mask].argmax(dim=1)
+        X_unmasked[torch.isclose(X, 2) & mask] = y_pred[torch.isclose(X, 2) & mask].argmax(dim=2)
         return X_unmasked
