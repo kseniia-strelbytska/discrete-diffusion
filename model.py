@@ -1,4 +1,36 @@
 import torch
+import torch.nn as nn
+
+class TransformerClassifier(torch.nn.Module):
+
+    def __init__(self,
+                 vocab_size: int,
+                 num_layers: int = 2,
+                 embedding_size: int = 8,
+                 l: int = 20):
+        super().__init__()
+        # Embedding layer
+        self.embedding_size = embedding_size
+        self.embed = nn.Embedding(vocab_size, embedding_size)
+        # Transformer/encoder layer
+        encoder_layer = nn.TransformerEncoderLayer(embedding_size, 2)
+        self.encoder = nn.TransformerEncoder(encoder_layer, num_layers)
+        # Predictor head: a simple linear layer
+        self.l = l
+        self.predictor = nn.Linear(embedding_size, 2)
+
+    def forward(self,
+                input: torch.Tensor):
+        # Turn input into embedding
+        embedded = self.embed(input)
+        # Pass through network
+        logits = self.forward_with_embedding(embedded)
+        return logits
+
+    def forward_with_embedding(self, embedded: torch.Tensor):
+        b = self.encoder(embedded)
+        logits = self.predictor(b.view(-1, self.embedding_size)).view(-1, 2, self.l)
+        return logits
 
 class Model(torch.nn.Module):
     def __init__(self, dim, category_count, hidden_count1, hidden_count2):
