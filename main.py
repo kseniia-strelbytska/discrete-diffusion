@@ -9,6 +9,6 @@ import torch
 ds = Dataset(20, 0.01)
 train_dataloader = torch.utils.data.DataLoader(ds, batch_size=64, shuffle=True)
 loss = rblb()
-model = Model(20, 2, 32, 32)
+model = Model(20, 2, 256, 256)
 optim = Adam(model.parameters(), 0.01)
-model = train_model(model, train_dataloader, loss, optim, 10)
+model = train_model(model, train_dataloader, loss, optim, 30)

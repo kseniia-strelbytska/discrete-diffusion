@@ -32,7 +32,8 @@ class Dataset(torch.utils.data.Dataset):
         return self.data.shape[0]
     
     def __getitem__(self, index):
-        return self.data[index][0].float(), torch.nn.functional.one_hot(self.data[index][1], num_classes=2).float().permute(1, 0)
+        return self.data[index][0].float(), torch.nn.functional.one_hot(self.data[index][1], 
+               num_classes=2).float().permute(1, 0), torch.sum(self.data[index][0] != 2).float()/20.0
 
 # ds = Dataset(20, 0.01)
 # train_dataloader = torch.utils.data.DataLoader(ds, batch_size=64, shuffle=True)
