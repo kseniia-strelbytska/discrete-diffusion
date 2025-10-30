@@ -12,7 +12,19 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 np.random.seed(1)
 
+# t1 = sample_uniform_t(10)
+# t2 = sample_inverse_t(10)
+
+# seqs = sample_masked(20, 10, t2)
+
+# print(seqs)
+
+# # print(t1[0:10], '\n', t2[0:10])
+
+# exit(0)
+
 ds = Dataset(20, 0.01)
+
 train_dataloader = torch.utils.data.DataLoader(ds, batch_size=64, shuffle=True)
 loss = rblb().to(device)
 

@@ -57,15 +57,19 @@ def sample_inverse_t(batch_size):
 
 def sample_masked(length, batch_size, t):
     seqs = generate_seq(length)
+
+    batch_size = min(batch_size, seqs.size(0))
+
     sampled_seqs = seqs[torch.randint(0, seqs.size(0), (batch_size,))]
+    sampled_masks = torch.where(torch.rand((batch_size, length)) < t[:, None], torch.full((batch_size, length), torch.tensor(2)), sampled_seqs)
 
-    sampled_seqs = torch.where(torch.rand((batch_size, length)) < t[:, None], torch.full((batch_size, length), torch.tensor(2)), sampled_seqs)
-
-    return sampled_seqs
+    return torch.cat((sampled_masks[:, None, :], sampled_seqs[:, None, :]), dim=1) 
 
 class Dataset(torch.utils.data.Dataset):
-    def __init__(self, length, sample_prob):
-        self.data = gen_data(length, sample_prob)
+    def __init__(self, length, sample_prob, batch_size=10**5):
+        t = sample_inverse_t(batch_size)
+        # self.data = gen_data(length, sample_prob)
+        self.data = sample_masked(length, batch_size, t)
         self.length = length
     
     def __len__(self):
