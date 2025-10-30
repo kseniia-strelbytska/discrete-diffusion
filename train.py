@@ -27,7 +27,9 @@ def train_model(model, data_loader, loss_fn, optimizer, device, num_epochs=10):
         avg_loss = total_loss / len(data_loader)
         print(f"Epoch {epoch+1}/{num_epochs}, Loss: {avg_loss:.4f}")
 
-        sample = torch.tensor([[0, 2, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1]], dtype = torch.long)
+        sample = torch.tensor([[0, 2, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1]], dtype = torch.float)
+        # sample = torch.tensor([[0, 2, 0, 0, 1, 1]], dtype = torch.float)
+
         out = model(sample)
         result = torch.argmax(out, dim=1)
 

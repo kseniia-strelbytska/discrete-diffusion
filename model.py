@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 
 class TransformerClassifier(torch.nn.Module):
-
     def __init__(self,
                  vocab_size: int,
                  num_layers: int = 2,
@@ -22,7 +21,7 @@ class TransformerClassifier(torch.nn.Module):
     def forward(self,
                 input: torch.Tensor):
         # Turn input into embedding
-        embedded = self.embed(input)
+        embedded = self.embed(input.to(torch.long))
         # Pass through network
         logits = self.forward_with_embedding(embedded)
         return logits

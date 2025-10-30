@@ -2,6 +2,7 @@ import torch
 import itertools
 import noise
 import random
+import numpy as np
 
 def generate_seq(length):
     idxs = torch.arange(length).tolist()
@@ -23,6 +24,44 @@ def gen_data(length, prob):
         for y in x:
             out.append([list(y), list(x[0])])
     return torch.Tensor(out).long()
+
+def sample_uniform_t(batch_size):
+    # sample time t between 0 and 1 (t = fraction of tokens that are masked)
+    t = np.random.uniform(0, 1, (batch_size))
+
+    return torch.tensor(t)
+
+def sample_inverse_t(batch_size):
+    # assume area between 0.01 and 1
+    total_area = np.log(1) - np.log(0.01)
+    sampled_area = np.random.uniform(0.01, total_area, (batch_size))
+
+    sampled_t = []
+
+    for area in sampled_area:
+        l, r = 0.001, 1 
+
+        while r - l > 0.001:
+            mid = (l + r) / 2.0 
+
+            point_area = np.log(mid) - np.log(0.01)
+
+            if point_area < area:
+                l = mid 
+            else:
+                r = mid
+
+        sampled_t.append((l + r) / 2.0)
+
+    return torch.tensor(sampled_t)
+
+def sample_masked(length, batch_size, t):
+    seqs = generate_seq(length)
+    sampled_seqs = seqs[torch.randint(0, seqs.size(0), (batch_size,))]
+
+    sampled_seqs = torch.where(torch.rand((batch_size, length)) < t[:, None], torch.full((batch_size, length), torch.tensor(2)), sampled_seqs)
+
+    return sampled_seqs
 
 class Dataset(torch.utils.data.Dataset):
     def __init__(self, length, sample_prob):
