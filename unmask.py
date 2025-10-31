@@ -8,12 +8,13 @@ class Unmasker(nn.Module):
         self.alpha = alpha
 
     def forward(self, X):
-        y_pred = self.model(X)
+        y_pred = self.model(X).argmax(1)
 
-        mask = torch.rand_like(X) < self.alpha
+        mask = torch.rand_like(X.float()) < self.alpha
 
         X_unmasked = X.clone()
-        X_unmasked[torch.isclose(X, 2) & mask] = y_pred[torch.isclose(X, 2) & mask].argmax(dim=2)
+        X_unmasked[(X == 2) & mask] = y_pred[(X == 2) & mask]
+        
         return X_unmasked
     
 def get_unmasker(model):

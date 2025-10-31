@@ -8,6 +8,7 @@ import torch
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+from unmask import Unmasker
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -34,8 +35,15 @@ model = TransformerClassifier(vocab_size=3, num_layers=2, embedding_size=8, l=20
 optim = AdamW(model.parameters(), 0.001)
 
 model.load_state_dict(torch.load('./models/diffusion_model_31_10_80epochs'))
-
 print("Loaded model (pre-trained for 80 epochs)")
+
+unmasker = Unmasker(model, 0.1)
+sample = torch.tensor([[2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], dtype = torch.long)
+result = unmasker(sample)
+
+print(result)
+
+exit(0)
 
 def gather_stats(model):
     exact, valid, invalid = [], [], []
