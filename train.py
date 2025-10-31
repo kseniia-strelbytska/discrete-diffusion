@@ -40,5 +40,8 @@ def train_model(model, data_loader, loss_fn, optimizer, device, num_epochs=10):
 
         if epoch % 10 == 9:
             plt.hist(cs)
-            plt.show()
+            plt.savefig(f'./figures/inverse_t_{epoch + 1 + 30}epochs')
+
+            torch.save(model.state_dict(), f'./models/diffusion_model_31_10_{epoch + 1 + 30}epochs')
+    
     return model
