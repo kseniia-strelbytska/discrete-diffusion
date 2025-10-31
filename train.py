@@ -23,14 +23,14 @@ def train_model(model, data_loader, loss_fn, optimizer, device, num_epochs=10):
 
             total_loss += loss.item()
             a = nn.functional.softmax(y_pred, dim=-1)
-            b = torch.argmax(a, dim=1)
+            b = (X_batch == 2) * torch.argmax(a, dim=1) + (X_batch != 2) * X_batch
             c = b.sum(dim=1)
             cs.extend(c.cpu())
         
         avg_loss = total_loss / len(data_loader)
         print(f"Epoch {epoch+1}/{num_epochs}, Loss: {avg_loss:.4f}")
 
-        sample = torch.tensor([[0, 2, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1]], dtype = torch.float)
+        sample = torch.tensor([[2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype = torch.float).to(device)
         # sample = torch.tensor([[0, 2, 0, 0, 1, 1]], dtype = torch.float)
 
         out = model(sample)
@@ -38,7 +38,7 @@ def train_model(model, data_loader, loss_fn, optimizer, device, num_epochs=10):
 
         print(f"Epoch {epoch}, prediction: {result}")
 
-        if epoch % 10 == 9:
+        if epoch % 10 == 0:
             plt.hist(cs)
             plt.savefig(f'./figures/inverse_t_{epoch + 1 + 30}epochs')
 

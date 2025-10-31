@@ -1,6 +1,7 @@
 import train
 from data_generation import Dataset, sample_uniform_t, sample_inverse_t, sample_masked
 from train import train_model
+from unmask import get_unmasker
 from model import Model, TransformerClassifier
 from loss import rblb
 from torch.optim import Adam, AdamW
@@ -11,6 +12,7 @@ from tqdm import tqdm
 from unmask import Unmasker
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# device = "cpu"
 
 np.random.seed(1)
 
