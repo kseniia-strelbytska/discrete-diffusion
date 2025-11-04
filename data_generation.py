@@ -59,6 +59,7 @@ def sample_masked(length, batch_size, t):
     seqs = generate_seq(length)
 
     batch_size = min(batch_size, seqs.size(0))
+    t = t[:batch_size] # batch_size might change
 
     sampled_seqs = seqs[torch.randint(0, seqs.size(0), (batch_size,))]
     sampled_masks = torch.where(torch.rand((batch_size, length)) < t[:, None], torch.full((batch_size, length), torch.tensor(2)), sampled_seqs)

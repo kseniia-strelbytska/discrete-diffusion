@@ -39,7 +39,8 @@ def train_model(model, data_loader, loss_fn, optimizer, device, num_epochs=10):
         print(f"Epoch {epoch}, prediction: {result}")
 
         if epoch % 10 == 0:
-            plt.hist(cs)
+            plt.hist(cs, bins = model.l, range = [0.0, model.l])
+            plt.xticks(range(0, model.l + 1))
             plt.savefig(f'./figures/inverse_t_{epoch + 1 + 30}epochs')
 
             torch.save(model.state_dict(), f'./models/diffusion_model_31_10_{epoch + 1 + 30}epochs')

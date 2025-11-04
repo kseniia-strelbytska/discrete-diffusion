@@ -10,6 +10,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 from unmask import Unmasker
+from noise_schedule_unmask import ScheduledUnmasker, get_scheduled_unmasker
+import matplotlib.pyplot as plt
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # device = "cpu"
@@ -27,7 +29,7 @@ np.random.seed(1)
 
 # exit(0)
 
-ds = Dataset(20, 0.01)
+ds = Dataset(20, 1.0, 10**5)
 train_dataloader = torch.utils.data.DataLoader(ds, batch_size=64, shuffle=True)
 loss = rblb().to(device)
 
@@ -39,11 +41,24 @@ optim = AdamW(model.parameters(), 0.001)
 model.load_state_dict(torch.load('./models/diffusion_model_31_10_80epochs'))
 print("Loaded model (pre-trained for 80 epochs)")
 
-unmasker = Unmasker(model, 0.1)
-sample = torch.tensor([[2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], dtype = torch.long)
-result = unmasker(sample)
+unmasker = get_scheduled_unmasker(model, 0.1)
+correct = 0
+cs = []
 
-print(result)
+for X, y in tqdm(ds.data):
+    x_pred = unmasker(X.unsqueeze(0))
+
+    cnt_1 = (x_pred == 1).sum(1)
+    if cnt_1 == 10:
+        correct += 1 
+
+    cs.append(cnt_1[0].item())
+
+print(cs)
+
+plt.hist(cs, bins=20, range = [0, 20])
+plt.xticks(range(0, 21))
+plt.savefig(f'./figures/scheduled_unmasker_all')
 
 exit(0)
 
