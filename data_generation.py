@@ -55,9 +55,7 @@ def sample_inverse_t(batch_size):
 
     return torch.tensor(sampled_t)
 
-def sample_masked(length, batch_size, t):
-    seqs = generate_seq(length)
-
+def sample_masked(length, batch_size, t, seqs):
     batch_size = min(batch_size, seqs.size(0))
     t = t[:batch_size] # batch_size might change
 
@@ -66,11 +64,41 @@ def sample_masked(length, batch_size, t):
 
     return torch.cat((sampled_masks[:, None, :], sampled_seqs[:, None, :]), dim=1) 
 
+def satisfies_rule_2(seq):
+    if len(seq) == 1:
+        return False 
+
+    if seq[0] != seq[1] or seq[-1] != seq[-2]:
+        return False 
+    
+    for i in range(1, len(seq) - 1):
+        if seq[i] != seq[i - 1] and seq[i] != seq[i + 1]:
+            return False 
+
+    return True
+
+def select_satisfies_rule_2(seqs):
+    # binary sequences that satisfy rule #2:
+    # each consecutive block of equal characters has length >= 2
+    res = torch.empty_like(seqs[0].unsqueeze(0)) 
+
+    for seq in seqs:
+        if satisfies_rule_2(seq):
+            res = torch.cat((res, seq.unsqueeze(0)), dim=0)
+    
+    return res
+
 class Dataset(torch.utils.data.Dataset):
-    def __init__(self, length, sample_prob, batch_size=10**5):
+    def __init__(self, length, sample_prob, batch_size=10**5, rule2=False):
         t = sample_inverse_t(batch_size)
         # self.data = gen_data(length, sample_prob)
-        self.data = sample_masked(length, batch_size, t)
+
+        seqs = generate_seq(length)
+
+        if rule2 == True:
+            seqs = select_satisfies_rule_2(seqs)
+
+        self.data = sample_masked(length, batch_size, t, seqs)
         self.length = length
     
     def __len__(self):

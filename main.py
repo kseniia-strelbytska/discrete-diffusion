@@ -1,5 +1,5 @@
 import train
-from data_generation import Dataset, sample_uniform_t, sample_inverse_t, sample_masked
+from data_generation import Dataset, sample_uniform_t, sample_inverse_t, sample_masked, generate_seq, satisfies_rule_2, select_satisfies_rule_2
 from train import train_model
 from unmask import get_unmasker
 from model import Model, TransformerClassifier
@@ -29,7 +29,8 @@ np.random.seed(1)
 
 # exit(0)
 
-ds = Dataset(20, 1.0, 10**5)
+ds = Dataset(20, 1.0, 10**5, True)
+
 train_dataloader = torch.utils.data.DataLoader(ds, batch_size=64, shuffle=True)
 loss = rblb().to(device)
 
