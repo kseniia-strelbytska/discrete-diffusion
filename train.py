@@ -3,8 +3,34 @@ import torch.nn as nn
 import torch.optim as optim
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+from noise_schedule_unmask import get_scheduled_unmasker
+from data_generation import sample_masked, generate_seq
 
-def train_model(model, data_loader, loss_fn, optimizer, device, num_epochs=10):
+def inference(model, data, figure_path='figures/'):
+    # uniform masking (p_mask=0.5)
+    unmaskModel = get_scheduled_unmasker(model, 0.1)
+
+    valid = 0
+    cs = []
+
+    for idx, X in enumerate(tqdm(data)):
+        y_pred = unmaskModel(X.unsqueeze(0))[0]
+
+        if y_pred.sum() == y_pred.shape[0] // 2:
+            valid += 1
+        
+        cs.append(y_pred.sum().to('cpu'))
+
+    plt.hist(cs, bins=20, range = [0, 20])
+    plt.xticks(range(0, 21))
+    plt.savefig(f'./{figure_path}uniform_masking_inference')
+
+    print(f'Valid solutions: {valid}/{data.shape[0]} ({valid/data.shape[0]})')
+
+def train_model(model, data_loader, loss_fn, optimizer, device, num_epochs=50000, dict_path='models/', figure_path='figures/'):
+    seqs = generate_seq(model.l)
+    data = sample_masked(model.l, 100, torch.full((10**5, ), torch.tensor(0.5)), seqs)[:, 0, :] # (batch, 2, l) -> (batch, l)
+
     model.train()
     for epoch in range(num_epochs):
         total_loss = 0
@@ -22,27 +48,13 @@ def train_model(model, data_loader, loss_fn, optimizer, device, num_epochs=10):
             optimizer.step()
 
             total_loss += loss.item()
-            a = nn.functional.softmax(y_pred, dim=-1)
-            b = (X_batch == 2) * torch.argmax(a, dim=1) + (X_batch != 2) * X_batch
-            c = b.sum(dim=1)
-            cs.extend(c.cpu())
         
         avg_loss = total_loss / len(data_loader)
         print(f"Epoch {epoch+1}/{num_epochs}, Loss: {avg_loss:.4f}")
 
-        sample = torch.tensor([[2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype = torch.float).to(device)
-        # sample = torch.tensor([[0, 2, 0, 0, 1, 1]], dtype = torch.float)
+        if (epoch + 1) % 50 == 0:
+            inference(model, data, figure_path)
 
-        out = model(sample)
-        result = torch.argmax(out, dim=1)
-
-        print(f"Epoch {epoch}, prediction: {result}")
-
-        if epoch % 10 == 0:
-            plt.hist(cs, bins = model.l, range = [0.0, model.l])
-            plt.xticks(range(0, model.l + 1))
-            plt.savefig(f'./figures/inverse_t_{epoch + 1 + 30}epochs')
-
-            torch.save(model.state_dict(), f'./models/diffusion_model_31_10_{epoch + 1 + 30}epochs')
+            torch.save(model.state_dict(), f'./{dict_path}scaled_up_diffusion_model_{epoch + 1}epochs')
     
     return model

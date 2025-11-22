@@ -3,17 +3,20 @@ import torch.nn as nn
 
 class TransformerClassifier(torch.nn.Module):
     def __init__(self,
+                 device: 'cpu',
                  vocab_size: int,
-                 num_layers: int = 2,
-                 embedding_size: int = 8,
+                 num_layers: int = 7,
+                 embedding_size: int = 10,
                  l: int = 20):
         super().__init__()
+
+        self.device = device
         # Embedding layer
         self.embedding_size = embedding_size
         self.embed = nn.Embedding(vocab_size, embedding_size)
         # Transformer/encoder layer
-        encoder_layer = nn.TransformerEncoderLayer(embedding_size, 2)
-        self.encoder = nn.TransformerEncoder(encoder_layer, num_layers)
+        encoder_layer = nn.TransformerEncoderLayer(d_model=embedding_size, nhead=5, dim_feedforward=1024, dropout=0.1, layer_norm_eps=6e-3)
+        self.encoder = nn.TransformerEncoder(encoder_layer=encoder_layer, num_layers=num_layers)
         # Predictor head: a simple linear layer
         self.l = l
         self.predictor = nn.Linear(embedding_size, 2)
@@ -27,8 +30,12 @@ class TransformerClassifier(torch.nn.Module):
         return logits
 
     def forward_with_embedding(self, embedded: torch.Tensor):
-        b = self.encoder(embedded)
+        # (B, L, E) = (batch, sequence length, embedding size)
+        b = self.encoder(embedded) # (B, L, E)
+        # flatten b to (B*L, E), receive predictor result (B*L, 2), 
+        # unflatten to (B, 2, L)
         logits = self.predictor(b.view(-1, self.embedding_size)).view(-1, 2, self.l)
+
         return logits
 
 class Model(torch.nn.Module):
