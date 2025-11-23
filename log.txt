@@ -1,0 +1,4 @@
+Taining samples:
+Total number of masks 799865/3695120
+Average number of masks per training sample 4.32930459633246/20
+Number of masks unmasked as 1s 400484 (0.5006895065307617)

@@ -11,7 +11,14 @@ class ScheduledUnmasker(nn.Module):
     # fraction (0 <= fr <= 1) specifies the next step 
     def forward(self, X):
         X = X.to(self.device)
-        y_pred = self.model(X).argmax(1)
+        self.model.eval()
+
+        y_pred = self.model(X)
+        y_pred = nn.functional.softmax(y_pred, dim=1)
+        y_pred = y_pred[:, 1, :] # probability of getting 1
+        y_pred = torch.bernoulli(y_pred).to(torch.long)
+
+        self.model.train()
 
         # count proportion of masked tokens
         # higher -> larger timestep
@@ -19,7 +26,7 @@ class ScheduledUnmasker(nn.Module):
         alpha_t = 1 - timestep_t # prob of (un)masking a token
 
         # move one fraction step in the clean signal direction
-        timestep_s = torch.maximum(torch.tensor(0), timestep_t - self.fraction)
+        timestep_s = torch.minimum(torch.tensor(1), timestep_t - self.fraction)
         alpha_s = 1 - timestep_s 
 
         prob = (alpha_s - alpha_t) / (1 - alpha_t)

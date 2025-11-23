@@ -6,15 +6,20 @@ from tqdm import tqdm
 from noise_schedule_unmask import get_scheduled_unmasker
 from data_generation import sample_masked, generate_seq
 
-def inference(model, data, figure_path='figures/'):
+def inference(model, data, epoch, figure_path='figures/'):
+    model.eval()
     # uniform masking (p_mask=0.5)
-    unmaskModel = get_scheduled_unmasker(model, 0.1)
+    unmaskModel = get_scheduled_unmasker(model, 0.02)
 
     valid = 0
     cs = []
+    n_ones, n_masks = 0, 0
 
-    for idx, X in enumerate(tqdm(data)):
+    for idx, X in enumerate(tqdm(data, desc="Inference")):
         y_pred = unmaskModel(X.unsqueeze(0))[0]
+
+        n_ones += y_pred[X==2].sum()
+        n_masks += y_pred[X==2].shape[0]
 
         if y_pred.sum() == y_pred.shape[0] // 2:
             valid += 1
@@ -23,9 +28,12 @@ def inference(model, data, figure_path='figures/'):
 
     plt.hist(cs, bins=20, range = [0, 20])
     plt.xticks(range(0, 21))
-    plt.savefig(f'./{figure_path}uniform_masking_inference')
+    plt.savefig(f'./{figure_path}eval_mode_uniform_masking_inference_epoch{epoch}')
 
     print(f'Valid solutions: {valid}/{data.shape[0]} ({valid/data.shape[0]})')
+    print(f'Number of masks unmasked as 1s {n_ones} ({n_ones/n_masks})')
+
+    model.train()
 
 def train_model(model, data_loader, loss_fn, optimizer, device, num_epochs=50000, dict_path='models/', figure_path='figures/'):
     seqs = generate_seq(model.l)
@@ -36,7 +44,7 @@ def train_model(model, data_loader, loss_fn, optimizer, device, num_epochs=50000
         total_loss = 0
         cs = []
 
-        for X_batch, y_batch, alpha in tqdm(data_loader):
+        for X_batch, y_batch, alpha in tqdm(data_loader, desc=f"Training epoch #{epoch + 1}"):
             X_batch = X_batch.to(device)
             y_batch = y_batch.to(device)
             alpha = alpha.to(device)
@@ -52,8 +60,8 @@ def train_model(model, data_loader, loss_fn, optimizer, device, num_epochs=50000
         avg_loss = total_loss / len(data_loader)
         print(f"Epoch {epoch+1}/{num_epochs}, Loss: {avg_loss:.4f}")
 
-        if (epoch + 1) % 50 == 0:
-            inference(model, data, figure_path)
+        if (epoch + 1) % 1 == 0:
+            inference(model, data, epoch + 1, figure_path)
 
             torch.save(model.state_dict(), f'./{dict_path}scaled_up_diffusion_model_{epoch + 1}epochs')
     
