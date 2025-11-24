@@ -26,10 +26,10 @@ def gen_data(length, prob):
     return torch.Tensor(out).long()
 
 def sample_uniform_t(batch_size):
-    # sample time t between 0 and 1 (t = fraction of tokens that are masked)
-    t = np.random.uniform(0, 1, (batch_size))
+    # sample time t between 0.01 and 1 (t = fraction of tokens that are masked)
+    t = np.random.uniform(0.01, 1, (batch_size))
 
-    return torch.tensor(t)
+    return torch.tensor(t).to(torch.float32)
 
 def sample_inverse_t(batch_size):
     # assume area between 0.01 and 1
@@ -90,7 +90,7 @@ def select_satisfies_rule_2(seqs):
 
 class Dataset(torch.utils.data.Dataset):
     def __init__(self, length, sample_prob, batch_size=10**5, rule2=False):
-        t = sample_inverse_t(batch_size)
+        t = sample_uniform_t(batch_size)
         # self.data = gen_data(length, sample_prob)
 
         seqs = generate_seq(length)
@@ -99,14 +99,14 @@ class Dataset(torch.utils.data.Dataset):
             seqs = select_satisfies_rule_2(seqs)
 
         self.data = sample_masked(length, batch_size, t, seqs)
+        self.timestep = t
         self.length = length
     
     def __len__(self):
         return self.data.shape[0]
     
     def __getitem__(self, index):
-        return self.data[index][0].float(), torch.nn.functional.one_hot(self.data[index][1], 
-               num_classes=2).float().permute(1, 0), torch.sum(self.data[index][0] != 2).float()/self.length
+        return self.data[index][0].float(), self.data[index][1].long(), self.timestep[index]
 
 # ds = Dataset(20, 0.01)
 # train_dataloader = torch.utils.data.DataLoader(ds, batch_size=64, shuffle=True)

@@ -11,12 +11,11 @@ class ScheduledUnmasker(nn.Module):
     # fraction (0 <= fr <= 1) specifies the next step 
     def forward(self, X):
         X = X.to(self.device)
+        
         self.model.eval()
 
-        y_pred = self.model(X)
-        y_pred = nn.functional.softmax(y_pred, dim=1)
-        y_pred = y_pred[:, 1, :] # probability of getting 1
-        y_pred = torch.bernoulli(y_pred).to(torch.long)
+        y_pred = self.model(X) # (B, 2, L)
+        y_pred = torch.distributions.Categorical(logits=y_pred.permute(0, 2, 1)).sample()
 
         self.model.train()
 
@@ -30,12 +29,11 @@ class ScheduledUnmasker(nn.Module):
         alpha_s = 1 - timestep_s 
 
         prob = (alpha_s - alpha_t) / (1 - alpha_t)
-
         mask = torch.rand_like(X, dtype=torch.float32) < prob
 
         X_unmasked = X.clone()        
         X_unmasked[(X == 2) & mask] = y_pred[(X == 2) & mask]
-        
+
         return X_unmasked
     
 def get_scheduled_unmasker(model, fraction):

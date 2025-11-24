@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from torch.nn.utils import clip_grad_norm_
 import torch.optim as optim
 import matplotlib.pyplot as plt
 from tqdm import tqdm
@@ -44,15 +45,19 @@ def train_model(model, data_loader, loss_fn, optimizer, device, num_epochs=50000
         total_loss = 0
         cs = []
 
-        for X_batch, y_batch, alpha in tqdm(data_loader, desc=f"Training epoch #{epoch + 1}"):
+        for X_batch, y_batch, timestep in tqdm(data_loader, desc=f"Training epoch #{epoch + 1}"):
             X_batch = X_batch.to(device)
             y_batch = y_batch.to(device)
-            alpha = alpha.to(device)
+            timestep = timestep.to(device)
 
             optimizer.zero_grad()
             y_pred = model(X_batch)
-            loss = loss_fn(y_pred, y_batch, alpha)
+            loss = loss_fn(X_batch, y_pred, y_batch, timestep)
             loss.backward()
+
+            MAX_NORM = 1.0 
+            clip_grad_norm_(parameters=model.parameters(), max_norm=MAX_NORM)
+
             optimizer.step()
 
             total_loss += loss.item()
@@ -60,7 +65,7 @@ def train_model(model, data_loader, loss_fn, optimizer, device, num_epochs=50000
         avg_loss = total_loss / len(data_loader)
         print(f"Epoch {epoch+1}/{num_epochs}, Loss: {avg_loss:.4f}")
 
-        if (epoch + 1) % 1 == 0:
+        if (epoch + 1) % 10 == 0:
             inference(model, data, epoch + 1, figure_path)
 
             torch.save(model.state_dict(), f'./{dict_path}scaled_up_diffusion_model_{epoch + 1}epochs')

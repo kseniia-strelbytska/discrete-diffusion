@@ -62,24 +62,21 @@ def gather_training_stats(train_dataloader):
     print(f'Number of masks unmasked as 1s {n_ones} ({n_ones/n_masks})')
 
 
-torch.manual_seed(47)
+torch.manual_seed(1)
 device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
 num_workers = 30 if device == torch.device("cuda") else 0
 
 model = TransformerClassifier(device=device, vocab_size=3, num_layers=7, embedding_size=10, l=20).to(device)
 ds = Dataset(20, 1.0, 10**6, False)
 train_dataloader = torch.utils.data.DataLoader(ds, batch_size=128, shuffle=True, num_workers=num_workers, pin_memory=True)
-loss = rblb().to(device)
-optim = AdamW(model.parameters(), 0.002)
+loss = rblb(device).to(device)
+
+optim = AdamW(model.parameters(), 0.1)
 
 seqs = generate_seq(model.l)
 data = sample_masked(model.l, 100, torch.full((10**5, ), torch.tensor(0.5)), seqs)[:, 0, :] # (batch, 2, l) -> (batch, l)
-print('Example test sequence: ', data[0])
-model.load_state_dict(torch.load('./models/scaled_up/scaled_up_diffusion_model_900epochs', map_location=device))
 
-inference(model, data, 900, 'figures/test/')
-
-# model = train_model(model=model, data_loader=train_dataloader, loss_fn=loss, optimizer=optim, device=device, num_epochs=50000, dict_path='models/test/', figure_path='figures/test/')
+model = train_model(model=model, data_loader=train_dataloader, loss_fn=loss, optimizer=optim, device=device, num_epochs=50000, dict_path='models/test/', figure_path='figures/test/')
 
 exit(0)
 
