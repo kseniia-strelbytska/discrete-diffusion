@@ -18,10 +18,10 @@ def gather_stats(model):
 
     changed_tokens, total_tokens = 0, 0
 
-    for X, y in tqdm(ds.data):
+    for X, y, timestep in tqdm(ds.data):
         # remove batch
 
-        y_pred = model(X)[0].argmax(0)
+        y_pred = model(X, timestep)[0].argmax(0)
 
         if torch.equal(y_pred, y):
             exact.append((X, y_pred))
@@ -67,11 +67,16 @@ device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.ba
 num_workers = 30 if device == torch.device("cuda") else 0
 
 model = TransformerClassifier(device=device, vocab_size=3, num_layers=7, embedding_size=10, l=20).to(device)
-ds = Dataset(20, 1.0, 10**6, False)
+ds = Dataset(20, 1.0, 10**2, False)
 train_dataloader = torch.utils.data.DataLoader(ds, batch_size=128, shuffle=True, num_workers=num_workers, pin_memory=True)
+
+# for X, y, t in train_dataloader:
+#     print(X.shape, y.shape, t.shape)
+#     exit(0)
+
 loss = rblb(device).to(device)
 
-optim = AdamW(model.parameters(), 0.1)
+optim = AdamW(model.parameters(), 0.002)
 
 seqs = generate_seq(model.l)
 data = sample_masked(model.l, 100, torch.full((10**5, ), torch.tensor(0.5)), seqs)[:, 0, :] # (batch, 2, l) -> (batch, l)

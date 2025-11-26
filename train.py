@@ -17,7 +17,7 @@ def inference(model, data, epoch, figure_path='figures/'):
     n_ones, n_masks = 0, 0
 
     for idx, X in enumerate(tqdm(data, desc="Inference")):
-        y_pred = unmaskModel(X.unsqueeze(0))[0]
+        y_pred = unmaskModel(X.unsqueeze(0), torch.full((X.shape[0],), torch.tensor(0.5)))[0]
 
         n_ones += y_pred[X==2].sum()
         n_masks += y_pred[X==2].shape[0]
@@ -51,12 +51,9 @@ def train_model(model, data_loader, loss_fn, optimizer, device, num_epochs=50000
             timestep = timestep.to(device)
 
             optimizer.zero_grad()
-            y_pred = model(X_batch)
+            y_pred = model(X_batch, timestep)
             loss = loss_fn(X_batch, y_pred, y_batch, timestep)
             loss.backward()
-
-            MAX_NORM = 1.0 
-            clip_grad_norm_(parameters=model.parameters(), max_norm=MAX_NORM)
 
             optimizer.step()
 
@@ -65,7 +62,7 @@ def train_model(model, data_loader, loss_fn, optimizer, device, num_epochs=50000
         avg_loss = total_loss / len(data_loader)
         print(f"Epoch {epoch+1}/{num_epochs}, Loss: {avg_loss:.4f}")
 
-        if (epoch + 1) % 10 == 0:
+        if (epoch + 1) % 100 == 0:
             inference(model, data, epoch + 1, figure_path)
 
             torch.save(model.state_dict(), f'./{dict_path}scaled_up_diffusion_model_{epoch + 1}epochs')

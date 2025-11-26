@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import math
 
 class TransformerClassifier(torch.nn.Module):
     def __init__(self,
@@ -14,17 +15,39 @@ class TransformerClassifier(torch.nn.Module):
         # Embedding layer
         self.embedding_size = embedding_size
         self.embed = nn.Embedding(vocab_size, embedding_size)
+
         # Transformer/encoder layer
-        encoder_layer = nn.TransformerEncoderLayer(d_model=embedding_size, nhead=5, dim_feedforward=1024, dropout=0.1, layer_norm_eps=6e-3)
+        encoder_layer = nn.TransformerEncoderLayer(batch_first=True, d_model=embedding_size, nhead=5, dim_feedforward=1024, dropout=0.1, layer_norm_eps=6e-3)
         self.encoder = nn.TransformerEncoder(encoder_layer=encoder_layer, num_layers=num_layers)
         # Predictor head: a simple linear layer
         self.l = l
         self.predictor = nn.Linear(embedding_size, 2)
 
+        self.time_mlp = nn.Sequential(
+            nn.Linear(embedding_size, embedding_size),
+            nn.SiLU(),
+            nn.Linear(embedding_size, embedding_size)
+        )
+
     def forward(self,
-                input: torch.Tensor):
+                input: torch.Tensor, timestep : torch.Tensor):
         # Turn input into embedding
-        embedded = self.embed(input.long())
+        embedded = self.embed(input.long()) # (B, L, E) = (128, 20, 10)
+        timestep = timestep.unsqueeze(1).unsqueeze(2) * torch.tensor(1000) # (128, 1, 1)
+
+        B, L, E = embedded.shape
+
+        div_term = torch.exp(torch.arange(0, E, 2) / E * torch.log(torch.tensor([10000]))).to(self.device) #Define the division term seen in the formula. Defining 10000^... as a multiplication is numerically more stable
+        div_term = div_term.unsqueeze(0).unsqueeze(0) # (1, 1, E/2)
+
+        pe = torch.zeros(B, L, E).to(self.device) # (128, 20, 10)
+        pe[:, :, 0::2] = torch.sin(timestep / div_term) # (128, 20, 5) = (128, 1, 5)
+        pe[:, :, 1::2] = torch.cos(timestep / div_term) # (128, 20, 5) = (128, 1, 5)
+
+        pe = self.time_mlp(pe)
+
+        embedded = embedded + pe
+
         # Pass through network
         logits = self.forward_with_embedding(embedded)
         return logits

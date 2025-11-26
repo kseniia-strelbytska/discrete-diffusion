@@ -17,6 +17,6 @@ class rblb(nn.Module):
         f = nn.functional.cross_entropy(y_pred, y_true, reduction="none") * global_mask
 
         # calculating weighted loss
-        f = 1/timestep * f.sum(dim=-1)
+        f = 1/(timestep + 1e-4) * f.mean(dim=-1)
 
         return f.sum()

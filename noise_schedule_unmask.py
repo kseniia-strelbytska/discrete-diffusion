@@ -9,12 +9,12 @@ class ScheduledUnmasker(nn.Module):
         self.device = model.device
 
     # fraction (0 <= fr <= 1) specifies the next step 
-    def forward(self, X):
+    def forward(self, X, timestep):
         X = X.to(self.device)
-        
+
         self.model.eval()
 
-        y_pred = self.model(X) # (B, 2, L)
+        y_pred = self.model(X, timestep) # (B, 2, L)
         y_pred = torch.distributions.Categorical(logits=y_pred.permute(0, 2, 1)).sample()
 
         self.model.train()
