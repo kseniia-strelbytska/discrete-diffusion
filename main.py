@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 from unmask import Unmasker, get_unmasker
-from noise_schedule_unmask import ScheduledUnmasker, get_scheduled_unmasker
+from noise_schedule_unmask import ScheduledUnmasker, SequencedScheduledUnmasker
 import matplotlib.pyplot as plt
 
 def gather_stats(model):
@@ -66,20 +66,27 @@ torch.manual_seed(1)
 device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
 num_workers = 30 if device == torch.device("cuda") else 0
 
-model = TransformerClassifier(device=device, vocab_size=3, num_layers=7, embedding_size=10, l=20).to(device)
-ds = Dataset(20, 1.0, 10**2, False)
+seq_len = 20
+
+model = TransformerClassifier(device=device, vocab_size=3, num_layers=7, embedding_size=10, l=seq_len).to(device)
+ds = Dataset(seq_len, 1.0, 10**8, False)
+print("Generated Dataset")
 train_dataloader = torch.utils.data.DataLoader(ds, batch_size=128, shuffle=True, num_workers=num_workers, pin_memory=True)
 
-# for X, y, t in train_dataloader:
-#     print(X.shape, y.shape, t.shape)
-#     exit(0)
 
 loss = rblb(device).to(device)
-
 optim = AdamW(model.parameters(), 0.002)
+
+unmask_model = SequencedScheduledUnmasker(model, 0.02)
 
 seqs = generate_seq(model.l)
 data = sample_masked(model.l, 100, torch.full((10**5, ), torch.tensor(0.5)), seqs)[:, 0, :] # (batch, 2, l) -> (batch, l)
+
+# print(data[0])
+# f = unmask_model(data[0].unsqueeze(0).to(device), torch.full((1, ), torch.tensor(0.5)).to(device))
+# print(f)
+
+# exit(0)
 
 model = train_model(model=model, data_loader=train_dataloader, loss_fn=loss, optimizer=optim, device=device, num_epochs=50000, dict_path='models/test/', figure_path='figures/test/')
 
@@ -123,8 +130,8 @@ correct = sum([1 if i == 10 else 0 for i in cs])
 
 print(correct / len(cs))
 
-plt.hist(cs, bins=20, range = [0, 20])
-plt.xticks(range(0, 21))
+plt.hist(cs, bins=seq_len, range = [0, seq_len])
+plt.xticks(range(0, seq_len + 1))
 plt.savefig(f'./figures/scheduled_unmasker_all')
 
 exit(0)

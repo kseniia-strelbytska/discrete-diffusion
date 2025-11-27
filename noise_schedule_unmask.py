@@ -35,9 +35,26 @@ class ScheduledUnmasker(nn.Module):
         X_unmasked[(X == 2) & mask] = y_pred[(X == 2) & mask]
 
         return X_unmasked
-    
-def get_scheduled_unmasker(model, fraction):
-    return nn.Sequential(
-        *[ScheduledUnmasker(model, fraction) for _ in range(40)],
-        ScheduledUnmasker(model, 1.0)
-    )
+
+class SequencedScheduledUnmasker(nn.Module):
+    def __init__(self, model, fraction):
+        super().__init__()
+        self.model = model 
+        self.unmasker_model = ScheduledUnmasker(model, fraction)
+
+        self.fraction = fraction
+        self.device = model.device
+
+    def forward(self, X, timestep):
+        X_unmasked = X.clone()
+
+        for _ in range(40):
+            X_unmasked = self.unmasker_model(X_unmasked, timestep).to(self.device)
+
+        return X_unmasked
+
+# def get_scheduled_unmasker(model, fraction):
+#     return nn.Sequential(
+#         *[ScheduledUnmasker(model, fraction) for _ in range(40)],
+#         ScheduledUnmasker(model, 1.0)
+#     )

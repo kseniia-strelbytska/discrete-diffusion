@@ -24,8 +24,6 @@ class TransformerClassifier(torch.nn.Module):
         self.predictor = nn.Linear(embedding_size, 2)
 
         self.time_mlp = nn.Sequential(
-            nn.Linear(embedding_size, embedding_size),
-            nn.SiLU(),
             nn.Linear(embedding_size, embedding_size)
         )
 

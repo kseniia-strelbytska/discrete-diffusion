@@ -90,27 +90,20 @@ def select_satisfies_rule_2(seqs):
 
 class Dataset(torch.utils.data.Dataset):
     def __init__(self, length, sample_prob, batch_size=10**5, rule2=False):
+        t = sample_uniform_t(batch_size)
         # self.data = gen_data(length, sample_prob)
 
-        self.seqs = generate_seq(length)
+        seqs = generate_seq(length)
 
         if rule2 == True:
-            self.seqs = select_satisfies_rule_2(self.seqs)
+            seqs = select_satisfies_rule_2(seqs)
 
+        self.data = sample_masked(length, batch_size, t, seqs)
+        self.timestep = t
         self.length = length
-        self.batch_size = batch_size
     
     def __len__(self):
-        return self.seqs.shape[0]
+        return self.data.shape[0]
     
     def __getitem__(self, index):
-        t = sample_uniform_t(1)
-        seqs = self.seqs[torch.randint(0, self.seqs.shape[0] - 1, (1, ))]
-        masked_seqs = sample_masked(self.length, 1, t, seqs)
-
-        return masked_seqs[:, 0, :].float(), masked_seqs[:, 1, :].float(), t.float().squeeze(-1)
-
-        # return self.data[index][0].float(), self.data[index][1].long(), self.timestep[index]
-
-# ds = Dataset(20, 0.01)
-# train_dataloader = torch.utils.data.DataLoader(ds, batch_size=64, shuffle=True)
+        return self.data[index][0].float(), self.data[index][1].long(), self.timestep[index]
