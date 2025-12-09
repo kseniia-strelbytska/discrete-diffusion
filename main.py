@@ -68,14 +68,14 @@ num_workers = 30 if device == torch.device("cuda") else 0
 
 seq_len = 20
 
-model = TransformerClassifier(device=device, vocab_size=3, num_layers=7, embedding_size=10, l=seq_len).to(device)
+model = TransformerClassifier(device=device, vocab_size=3, num_layers=7, embedding_size=128, l=seq_len).to(device)
 ds = Dataset(seq_len, 1.0, 10**8, False)
 print("Generated Dataset")
+
 train_dataloader = torch.utils.data.DataLoader(ds, batch_size=128, shuffle=True, num_workers=num_workers, pin_memory=True)
 
-
 loss = rblb(device).to(device)
-optim = AdamW(model.parameters(), 0.002)
+optim = AdamW(model.parameters(), 0.01)
 
 unmask_model = SequencedScheduledUnmasker(model, 0.02)
 
@@ -85,8 +85,6 @@ data = sample_masked(model.l, 100, torch.full((10**5, ), torch.tensor(0.5)), seq
 # print(data[0])
 # f = unmask_model(data[0].unsqueeze(0).to(device), torch.full((1, ), torch.tensor(0.5)).to(device))
 # print(f)
-
-# exit(0)
 
 model = train_model(model=model, data_loader=train_dataloader, loss_fn=loss, optimizer=optim, device=device, num_epochs=50000, dict_path='models/test/', figure_path='figures/test/')
 
