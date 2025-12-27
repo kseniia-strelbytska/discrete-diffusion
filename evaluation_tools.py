@@ -29,7 +29,7 @@ def evaluation_from_generation(model, l, samples, data=None, epoch='nan', figure
     
     unmaskModel = ScheduledUnmasker(model)
 
-    correct, total, printed = 0, 0, 0
+    correct, total, printed, printed_incorrect = 0, 0, 0, 0
     cs = []
     n_ones, n_masks = 0, 0
     
@@ -47,6 +47,10 @@ def evaluation_from_generation(model, l, samples, data=None, epoch='nan', figure
                 if printed < 5:
                     printed += 1
                     print('Example of correct generative prediction: ', s.tolist(), y_pred.tolist())
+            else:
+                if printed_incorrect < 5:
+                    printed_incorrect += 1
+                    print('Example of INcorrect generative prediction: ', s.tolist(), y_pred.tolist())
 
             # n_ones += y_pred[s==2].sum()
             # n_masks += (s==2).float().sum()
