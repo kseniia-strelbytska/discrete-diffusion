@@ -1,38 +1,56 @@
 import torch
 import torch.nn as nn
+import numpy as np
 
 class ScheduledUnmasker(nn.Module):
-    def __init__(self, model, fraction):
+    def __init__(self, model):
         super().__init__()
         self.model = model
-        self.fraction = fraction
-        self.device = model.device
 
     # fraction (0 <= fr <= 1) specifies the next step 
-    def forward(self, X, timestep):
-        X = X.to(self.device)
-
+    def forward(self, init_X, timestep):
+        X = init_X.clone().long()
+        L = X.shape[0]
+        
         self.model.eval()
         with torch.no_grad():
-            y_pred = self.model(X) # (B, L, 2)
-            y_pred = torch.distributions.Categorical(logits=y_pred).sample()
-
-            # count proportion of masked tokens
-            # higher -> larger timestep
-            timestep_t = (X == 2).sum(1) / X.size(1)
-            alpha_t = 1 - timestep_t # prob of (un)masking a token
-
-            # move one fraction step in the clean signal direction
-            timestep_s = torch.minimum(torch.tensor(1), timestep_t - self.fraction)
-            alpha_s = 1 - timestep_s 
-
-            prob = (alpha_s - alpha_t) / (1 - alpha_t)
-            mask = torch.rand_like(X, dtype=torch.float32) < prob
-
-            X_unmasked = X.clone()        
-            X_unmasked[(X == 2) & mask] = y_pred[(X == 2) & mask]
-
-            return X_unmasked
+            T = 100
+            
+            while timestep > 0.00 and (X == 2).sum() > 0:
+                t = timestep
+                s = max(0.0, t - (1/T if timestep > 0.01 else 0.001))
+                timestep = s
+                
+                # Linear schedule: α_t = 1 - t
+                alpha_t = 1 - t
+                alpha_s = 1 - s
+                
+                # Get model predictions
+                logits = self.model(X.unsqueeze(0))[0]  # (L, 3)
+                
+                # Convert to probabilities (x_θ in the paper)
+                probs = torch.softmax(logits, dim=-1)  # (L, 3)
+                
+                # For each position independently
+                for pos in range(L):
+                    if X[pos] == 2:  # If masked
+                        # Create transition distribution
+                        transition_probs = torch.zeros(3, device=X.device)
+                        
+                        # p(z_s = k) = (α_s - α_t)/(1-α_t) * x_θ^k  for k ≠ MASK
+                        unmask_coeff = (alpha_s - alpha_t) / (1 - alpha_t)
+                        transition_probs[0] = unmask_coeff * probs[pos, 0]
+                        transition_probs[1] = unmask_coeff * probs[pos, 1]
+                        
+                        # p(z_s = MASK) = (1 - α_s)/(1-α_t)
+                        stay_masked_prob = (1 - alpha_s) / (1 - alpha_t)
+                        transition_probs[2] = stay_masked_prob
+                        
+                        # Sample from this distribution
+                        X[pos] = torch.multinomial(transition_probs, 1).item()
+                    
+                    # If not masked, it stays the same (carry-over)
+            return X 
 
 class SequencedScheduledUnmasker(nn.Module):
     def __init__(self, model, fraction):
@@ -41,12 +59,11 @@ class SequencedScheduledUnmasker(nn.Module):
         self.unmasker_model = ScheduledUnmasker(model, fraction)
 
         self.fraction = fraction
-        self.device = model.device
 
     def forward(self, X, timestep):
         X_unmasked = X.clone()
         for _ in range(40):
-            X_unmasked = self.unmasker_model(X_unmasked, timestep).to(self.device)
+            X_unmasked = self.unmasker_model(X_unmasked, timestep)
 
         return X_unmasked
 

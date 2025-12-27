@@ -1,6 +1,7 @@
 import torch
 from tqdm import tqdm
 from generation_and_predictions import generate_seq, get_prediction_masked
+from noise_schedule_unmask import ScheduledUnmasker
 from loss import rblb
 
 def evaluation_loss(model, dataloader):
@@ -26,7 +27,7 @@ def evaluation_from_generation(model, l, samples, data=None, epoch='nan', figure
     seqs = seqs[torch.randperm(seqs.shape[0])]
     seqs = seqs[:samples]
     
-    # unmaskModel = SequencedScheduledUnmasker(model, 0.02).to(model.device)
+    unmaskModel = ScheduledUnmasker(model)
 
     correct, total, printed = 0, 0, 0
     cs = []
@@ -34,22 +35,18 @@ def evaluation_from_generation(model, l, samples, data=None, epoch='nan', figure
     
     model.eval()
     with torch.no_grad():
-        for idx, s in enumerate(tqdm(seqs, desc="Inference")):
+        for idx, s in enumerate(tqdm(seqs, desc="Evaluation from generation")):
             total += 1
-            
-            p = torch.rand((1, ))
-            mask = torch.rand_like(s, dtype=torch.float) < p.item()
-            s[mask == True] = 2
-            # y_pred = unmaskModel(s.unsqueeze(0), p.unsqueeze(0)).to(model.device)[0] # remove batch dimension
-            
-            y_pred = get_prediction_masked(model, s.unsqueeze(0))
+            y_pred = unmaskModel(s, ((s == 2).sum() / torch.numel(s))) # no batch dimension
+
+            # y_pred = get_prediction_masked(model, s.unsqueeze(0))
 
             if torch.sum(y_pred) == l // 2:
                 correct += 1
                 
                 if printed < 5:
                     printed += 1
-                    print('Example of correct generative prediction: ', p.item(), s.tolist(), y_pred.tolist())
+                    print('Example of correct generative prediction: ', s.tolist(), y_pred.tolist())
 
             # n_ones += y_pred[s==2].sum()
             # n_masks += (s==2).float().sum()

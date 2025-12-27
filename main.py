@@ -39,7 +39,7 @@ class Dataset(torch.utils.data.Dataset):
     
     def __getitem__(self, index):
         y_sample = self.y[index]
-        prob = torch.rand((1, ))
+        prob = torch.rand((1, )) # prob of having a mask (ie the timestep)
         mask = torch.rand_like(y_sample, dtype=torch.float) < prob.item()
         X_sample = torch.where(mask == True, torch.full_like(y_sample, torch.tensor(2)), y_sample)
         
@@ -82,13 +82,11 @@ if __name__ == '__main__':
     train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=32, shuffle=True)
     test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=32, shuffle=True)
     
-    model = TransformerClassifier(max_len=l, vocab_size=4, n_head=1, n_layers=1, embed_dim=16, dim_feedforward=1, dropout=0.1)
+    model = TransformerClassifier(max_len=l, vocab_size=4, n_head=1, n_layers=1, embed_dim=128, dim_feedforward=1, dropout=0.1)
     model = train(model=model, dataloader=train_dataloader, epochs=5, lr=1e-3, dict_path='models/test/', figure_path='figures/test/')
     torch.save(model.state_dict(), f'./diffusion_transformer')
     # model.load_state_dict(torch.load('./diffusion_transformer'))
 
     evaluation_loss(model, test_dataloader)
-    
     test_data = torch.stack([test_dataset[i][0] for i in range(len(test_dataset))])    
-
     evaluation_from_generation(model, l, 100, data=test_data)
