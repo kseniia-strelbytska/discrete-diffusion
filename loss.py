@@ -2,21 +2,27 @@ import torch
 import torch.nn as nn
 
 class rblb(nn.Module):
-    def __init__(self, device):
+    def __init__(self):
         super(rblb, self).__init__()
 
-        self.device = device
+        self.loss_fn = nn.CrossEntropyLoss(reduction='none')
         
-    def forward(self, X, y_pred, y_true, timestep):        
+    def forward(self, X, logits, y_true, timestep):   
+        B, L = X.shape
         # X (B, L); float32
-        # y_pred (B, 2, L); float32
+        # logits (B, L, 2); float32
         # y_true (B, L); long
-
-        # hardcode: removing guesses for unmasked tokens -> set Loss over these tokens to 0
-        global_mask = (X.to(torch.long) == 2).to(torch.float32)
-        f = nn.functional.cross_entropy(y_pred, y_true, reduction="none") * global_mask
+        
+        loss = self.loss_fn(logits.view(B*L, -1), y_true.view(B*L))
+        mask = (X==2).view(B*L).float()
+        loss *= mask
+        loss = torch.sum(loss) / torch.sum(mask)
+        
+        return loss
 
         # calculating weighted loss
-        f = 1/(timestep + 1e-4) * f.sum(dim=-1)
+        loss = loss.reshape((B, L))
+        loss = 1/(timestep.unsqueeze(-1) + 1e-4) * loss
+        loss = torch.sum(loss) / torch.sum(mask)
 
-        return f.mean()
+        return loss

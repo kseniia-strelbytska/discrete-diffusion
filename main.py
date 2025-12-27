@@ -1,136 +1,94 @@
-import train
-from data_generation import Dataset, sample_uniform_t, sample_inverse_t, sample_masked, generate_seq, satisfies_rule_2, select_satisfies_rule_2
-from train import train_model, inference
-from unmask import get_unmasker
-from model import Model, TransformerClassifier
-from loss import rblb
-from torch.optim import Adam, AdamW
 import torch
-import numpy as np
-import matplotlib.pyplot as plt
+import torch.nn as nn
 from tqdm import tqdm
-from unmask import Unmasker, get_unmasker
-from noise_schedule_unmask import ScheduledUnmasker, SequencedScheduledUnmasker
-import matplotlib.pyplot as plt
+from evaluation_tools import evaluation_loss, evaluation_from_generation
+from loss import rblb
+from generation_and_predictions import generate_seq
 
-def gather_stats(model):
-    exact, valid, invalid = [], [], []
+class TransformerClassifier(torch.nn.Module):
+    def __init__(self, max_len=16, vocab_size=3, n_head=4, n_layers=2, embed_dim=128, dim_feedforward=1024, dropout=0.1):
+        super().__init__()
 
-    changed_tokens, total_tokens = 0, 0
+        self.l = max_len
+        
+        self.embedding = nn.Embedding(vocab_size, embed_dim)
+        
+         # Transformer/encoder layer
+        self.layer = nn.TransformerEncoderLayer(d_model=embed_dim, nhead=n_head, dim_feedforward=dim_feedforward, dropout=dropout, batch_first=True)
+        self.transformer_encoder = nn.TransformerEncoder(self.layer, num_layers=n_layers)
 
-    for X, y, timestep in tqdm(ds.data):
-        # remove batch
+        # Predictor head: a simple linear layer
+        self.fc = nn.Linear(embed_dim, 2)
 
-        y_pred = model(X, timestep)[0].argmax(0)
+    def forward(self,
+                X: torch.Tensor):
+        B, L = X.shape
+        X = self.embedding(X) # (B, L, E) = (128, 20, 10)        
+        # Pass through network
+        X = self.transformer_encoder(src=X)
+        X = self.fc(X)
 
-        if torch.equal(y_pred, y):
-            exact.append((X, y_pred))
-        elif y_pred.sum() == y_pred.size(0) // 2:
-            valid.append((X, y_pred))
-            changed_tokens += torch.where(y != y_pred, torch.ones_like(y), torch.zeros_like(y)).sum() - (y == 2).sum()
-            total_tokens += (y != 2).sum()
-        else:
-            invalid.append((X, y_pred))
+        return X
 
-    with open('./figures/prediction_results.txt', 'w') as f:
-        print(f'Changed tokens: {changed_tokens}/{total_tokens} ({changed_tokens/total_tokens:.4f}) (unmasked -> unmasked)')
+class Dataset(torch.utils.data.Dataset):
+    def __init__(self, y):
+        self.y = y
+        
+    def __len__(self):
+        return self.y.shape[0]
+    
+    def __getitem__(self, index):
+        y_sample = self.y[index]
+        prob = torch.rand((1, ))
+        mask = torch.rand_like(y_sample, dtype=torch.float) < prob.item()
+        X_sample = torch.where(mask == True, torch.full_like(y_sample, torch.tensor(2)), y_sample)
+        
+        return X_sample, y_sample, prob
 
-        for case in [(exact, 'Exact'), (valid, 'Valid'), (invalid, 'Invalid')]:
-            f.write(f"{case[1]} solutions: {len(case[0])}" + "\n")
-            for X, y in case[0]:
-                X = ''.join([str(i) for i in X.numpy()])
-                y = ''.join([str(i) for i in y.numpy()])
+def train(model, dataloader, epochs=5, lr=1e-3, dict_path='models/', figure_path='figures/'):
+    optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
+    loss_fn = rblb()
+    
+    model.train()
+    for epoch in range(epochs):
+        total_loss = 0
+        cs = []
+        
+        for X_batch, y_batch, timestep in dataloader:
+            optimizer.zero_grad()
+            logits = model(X_batch)
+            loss = loss_fn(X_batch, logits, y_batch, timestep)
+            loss.backward()
 
-                f.write(X + " " + y + "\n")
+            optimizer.step()
+            total_loss += loss.item()
+        
+        avg_loss = total_loss / len(dataloader)
+        print(f"Epoch {epoch+1}/{epochs}, Loss: {avg_loss:.4f}")
 
-    print(f'Exact solutions: {len(exact)}, valid solutions: {len(valid)}, invalid solutions: {len(invalid)}')
+        # if (epoch + 1) % 1 == 0:
+        #     torch.save(model.state_dict(), f'./{dict_path}scaled_up_diffusion_model_{epoch + 1}epochs')
+    
+    return model
 
-def gather_training_stats(train_dataloader):
-    n_ones, n_masks, samples = 0, 0, 0
+if __name__ == '__main__':
+    l = 16
 
-    for X, y, alpha in tqdm(train_dataloader, desc="Processing training samples"):
-        y = torch.argmax(y, dim=1)
+    seqs = generate_seq(l)
+    dataset = Dataset(seqs)        
+    train_dataset, test_dataset = torch.utils.data.random_split(dataset, [0.8, 0.2])
+    print(f'Dataset len: {len(dataset)}')
 
-        masks = y[(X==2)]
+    train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=32, shuffle=True)
+    test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=32, shuffle=True)
+    
+    model = TransformerClassifier(max_len=l, vocab_size=4, n_head=1, n_layers=1, embed_dim=16, dim_feedforward=1, dropout=0.1)
+    model = train(model=model, dataloader=train_dataloader, epochs=5, lr=1e-3, dict_path='models/test/', figure_path='figures/test/')
+    torch.save(model.state_dict(), f'./diffusion_transformer')
+    # model.load_state_dict(torch.load('./diffusion_transformer'))
 
-        n_ones += torch.sum(masks)
-        n_masks += torch.numel(masks)
-        samples += X.shape[0]
+    evaluation_loss(model, test_dataloader)
+    
+    test_data = torch.stack([test_dataset[i][0] for i in range(len(test_dataset))])    
 
-    print(f'Total number of masks {n_masks}/{samples * model.l}')
-    print(f'Average number of masks per training sample {n_masks / samples}/{model.l}')
-    print(f'Number of masks unmasked as 1s {n_ones} ({n_ones/n_masks})')
-
-
-torch.manual_seed(1)
-device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
-num_workers = 30 if device == torch.device("cuda") else 0
-
-seq_len = 20
-
-model = TransformerClassifier(device=device, vocab_size=3, num_layers=7, embedding_size=128, l=seq_len).to(device)
-ds = Dataset(seq_len, 1.0, 10**8, False)
-print("Generated Dataset")
-
-train_dataloader = torch.utils.data.DataLoader(ds, batch_size=128, shuffle=True, num_workers=num_workers, pin_memory=True)
-
-loss = rblb(device).to(device)
-optim = AdamW(model.parameters(), 0.01)
-
-unmask_model = SequencedScheduledUnmasker(model, 0.02)
-
-seqs = generate_seq(model.l)
-data = sample_masked(model.l, 100, torch.full((10**5, ), torch.tensor(0.5)), seqs)[:, 0, :] # (batch, 2, l) -> (batch, l)
-
-# print(data[0])
-# f = unmask_model(data[0].unsqueeze(0).to(device), torch.full((1, ), torch.tensor(0.5)).to(device))
-# print(f)
-
-model = train_model(model=model, data_loader=train_dataloader, loss_fn=loss, optimizer=optim, device=device, num_epochs=50000, dict_path='models/test/', figure_path='figures/test/')
-
-exit(0)
-
-# model = train_model(model, train_dataloader, loss, optim, device, 50)
-
-# To do:
-# one test 
-# lr scheduling
-
-# torch.save(model.state_dict(), './models/diffusion_model_31_10')
-
-# device = "cpu"
-
-np.random.seed(1)
-
-# model = Model(dim=20, category_count=2, hidden_count1=256, hidden_count2=256)
-
-# model = train_model(model, train_dataloader, loss, optim, device, 50, './recentmodels/')
-
-# exit(0)
-
-model.load_state_dict(torch.load('./models/diffusion_model_31_10_80epochs'))
-print("Loaded model (pre-trained for 80 epochs)")
-
-unmasker = get_unmasker(model)
-correct = 0
-cs = []
-
-for X, y in tqdm(ds.data):
-    x_pred = unmasker(X.unsqueeze(0))
-
-    cnt_1 = (x_pred == 1).sum(1)
-    if cnt_1 == 10:
-        correct += 1 
-
-    cs.append(cnt_1[0].item())
-
-correct = sum([1 if i == 10 else 0 for i in cs])
-
-print(correct / len(cs))
-
-plt.hist(cs, bins=seq_len, range = [0, seq_len])
-plt.xticks(range(0, seq_len + 1))
-plt.savefig(f'./figures/scheduled_unmasker_all')
-
-exit(0)
-
+    evaluation_from_generation(model, l, 100, data=test_data)

@@ -1,6 +1,9 @@
 import torch
 import torch.nn as nn
 
+# Warning: CHANGED : y_pred (B, 2, L) -> (B, L, 2). 
+# This section probably needs changes
+
 class Unmasker(nn.Module):
     def __init__(self, model, alpha):
         super(Unmasker, self).__init__()

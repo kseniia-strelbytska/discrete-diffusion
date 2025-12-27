@@ -13,28 +13,26 @@ class ScheduledUnmasker(nn.Module):
         X = X.to(self.device)
 
         self.model.eval()
+        with torch.no_grad():
+            y_pred = self.model(X) # (B, L, 2)
+            y_pred = torch.distributions.Categorical(logits=y_pred).sample()
 
-        y_pred = self.model(X, timestep) # (B, 2, L)
-        y_pred = torch.distributions.Categorical(logits=y_pred.permute(0, 2, 1)).sample()
+            # count proportion of masked tokens
+            # higher -> larger timestep
+            timestep_t = (X == 2).sum(1) / X.size(1)
+            alpha_t = 1 - timestep_t # prob of (un)masking a token
 
-        self.model.train()
+            # move one fraction step in the clean signal direction
+            timestep_s = torch.minimum(torch.tensor(1), timestep_t - self.fraction)
+            alpha_s = 1 - timestep_s 
 
-        # count proportion of masked tokens
-        # higher -> larger timestep
-        timestep_t = (X == 2).sum(1) / X.size(1)
-        alpha_t = 1 - timestep_t # prob of (un)masking a token
+            prob = (alpha_s - alpha_t) / (1 - alpha_t)
+            mask = torch.rand_like(X, dtype=torch.float32) < prob
 
-        # move one fraction step in the clean signal direction
-        timestep_s = torch.minimum(torch.tensor(1), timestep_t - self.fraction)
-        alpha_s = 1 - timestep_s 
+            X_unmasked = X.clone()        
+            X_unmasked[(X == 2) & mask] = y_pred[(X == 2) & mask]
 
-        prob = (alpha_s - alpha_t) / (1 - alpha_t)
-        mask = torch.rand_like(X, dtype=torch.float32) < prob
-
-        X_unmasked = X.clone()        
-        X_unmasked[(X == 2) & mask] = y_pred[(X == 2) & mask]
-
-        return X_unmasked
+            return X_unmasked
 
 class SequencedScheduledUnmasker(nn.Module):
     def __init__(self, model, fraction):
@@ -47,7 +45,6 @@ class SequencedScheduledUnmasker(nn.Module):
 
     def forward(self, X, timestep):
         X_unmasked = X.clone()
-
         for _ in range(40):
             X_unmasked = self.unmasker_model(X_unmasked, timestep).to(self.device)
 
@@ -58,3 +55,4 @@ class SequencedScheduledUnmasker(nn.Module):
 #         *[ScheduledUnmasker(model, fraction) for _ in range(40)],
 #         ScheduledUnmasker(model, 1.0)
 #     )
+
