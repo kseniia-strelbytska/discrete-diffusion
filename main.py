@@ -84,16 +84,16 @@ if __name__ == '__main__':
     test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=32, shuffle=True)
     
     model = TransformerClassifier(max_len=l, vocab_size=4, n_head=4, n_layers=4, embed_dim=128, dim_feedforward=128, dropout=0.1)
-    # model = train(model=model, dataloader=train_dataloader, epochs=6, lr=1e-3, dict_path='models/test/', figure_path='figures/test/')
-    # torch.save(model.state_dict(), f'./diffusion_transformer')
-    model.load_state_dict(torch.load('./diffusion_transformer'))
+    model = train(model=model, dataloader=train_dataloader, epochs=6, lr=1e-3, dict_path='models/test/', figure_path='figures/test/')
+    torch.save(model.state_dict(), f'./diffusion_transformer')
+    # model.load_state_dict(torch.load('./diffusion_transformer'))
 
     evaluation_loss(model, test_dataloader)
     test_data = torch.stack([test_dataset[i][0] for i in range(len(test_dataset))])    
-    evaluation_from_generation(model, l, 10, data=test_data)
+    evaluation_from_generation(model, l, 1000, data=test_data)
     
     hardcore_data = seqs.clone()
     p = 0.8 + 0.2 * torch.rand((seqs.shape[0], 1))
     mask = torch.rand_like(hardcore_data, dtype=torch.float) < p
     hardcore_data[mask] = 2     
-    evaluation_from_generation(model, l, 100, data=hardcore_data)
+    evaluation_from_generation(model, l, 1000, data=hardcore_data)

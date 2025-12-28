@@ -38,7 +38,7 @@ def evaluation_from_generation(model, l, samples, data=None, epoch='nan', figure
         for idx, s in enumerate(tqdm(seqs, desc="Evaluation from generation")):
             total += 1
             y_pred = unmaskModel(s, ((s == 2).sum() / torch.numel(s))) # no batch dimension
-
+            
             # y_pred = get_prediction_masked(model, s.unsqueeze(0))
 
             if torch.sum(y_pred) == l // 2:

@@ -21,7 +21,7 @@ class rblb(nn.Module):
 
         # calculating weighted loss
         loss = loss.reshape((B, L))
-        loss = 1.0/torch.sqrt(timestep.unsqueeze(-1) + 1e-5) * loss
+        loss = 1.0/(timestep.unsqueeze(-1) + 1e-5) * loss
         loss = loss.sum() / B
 
         return loss
