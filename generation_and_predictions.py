@@ -2,6 +2,13 @@ import torch
 import torch.nn as nn
 import itertools
 
+'''
+Rule 1: #0s=#1s
+Rule 2: substrings 010 and 101 are not allowed
+
+'''
+
+# Rule 1
 def generate_seq(length):
     idxs = torch.arange(length).tolist()
 
@@ -11,6 +18,21 @@ def generate_seq(length):
     data[torch.arange(len(combs))[:, None], combs] = 1
 
     return data
+
+# Rule 2
+def select_rule_2(seqs):
+    valid = []
+    
+    for seq in seqs:
+        valid_seq = True 
+        for idx in range(1, len(seq) - 1):
+            if seq[idx] != seq[idx - 1] and seq[idx] != seq[idx + 1]:
+                valid_seq = False 
+                
+        if valid_seq == True:
+            valid.append(seq.unsqueeze(0))
+    
+    return torch.cat(valid, dim=0)    
 
 def get_prediction_masked(model, input):
     seq = input.clone()

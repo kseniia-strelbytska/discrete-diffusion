@@ -1,4 +1,2 @@
-- Model that fills in the blanks
-- Training data
-- Benchmark
-- Training pipeline
+[ ] - investigate incorrect generations
+[ ] - impl completion evaluation 
