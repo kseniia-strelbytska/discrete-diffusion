@@ -7,6 +7,7 @@ from evaluation_tools import evaluation_loss, evaluation_from_generation
 from loss import rblb
 from generation_and_predictions import generate_seq, select_rule_2
 from noise_schedule_unmask import ScheduledUnmasker
+from evaluation_tools import does_satisfy_rule1, does_satisfy_rule2
 
 class TransformerClassifier(torch.nn.Module):
     def __init__(self, max_len=16, vocab_size=3, n_head=4, n_layers=2, embed_dim=128, dim_feedforward=1024, dropout=0.1):
@@ -90,7 +91,7 @@ def train(model, dataloader, epochs=5, lr=1e-3, dict_path='models/', figure_path
         rule2_data.append(rule2/total)
         bothrules_data.append(bothrules/total)
 
-        epochtimes = 1000 + np.arange(epoch + 1)
+        epochtimes = np.arange(epoch + 1)
         plt.plot(epochtimes, rule1_data)
         plt.plot(epochtimes, rule2_data)
         plt.plot(epochtimes, bothrules_data)
@@ -120,17 +121,15 @@ if __name__ == '__main__':
     mask = torch.rand_like(hardcore_data, dtype=torch.float) < p
     hardcore_data[mask] = 2    
     
-    model = TransformerClassifier(max_len=l, vocab_size=4, n_head=4, n_layers=4, embed_dim=64, dim_feedforward=128, dropout=0.1)
-    model.load_state_dict(torch.load('./models/diffusion_transformer_1000_epochs_embd_64'))
-    model = train(model=model, dataloader=train_dataloader, epochs=1000, lr=1e-3, dict_path='models/test/', figure_path='figures/test/', test_data=hardcore_data)
-    torch.save(model.state_dict(), f'./models/diffusion_transformer_2000_epochs_embd_64')
+    model = TransformerClassifier(max_len=l, vocab_size=4, n_head=4, n_layers=4, embed_dim=16, dim_feedforward=128, dropout=0.1)
+    # model.load_state_dict(torch.load('./models/diffusion_transformer_1000_epochs_embd_128'))
+    model = train(model=model, dataloader=train_dataloader, epochs=2000, lr=1e-3, dict_path='models/test/', figure_path='figures/test/', test_data=hardcore_data)
+    torch.save(model.state_dict(), f'./models/diffusion_transformer_2000_epochs_embd_16')
     
     unmask = ScheduledUnmasker(model)
     X = torch.tensor([2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2])
-    y = unmask(X, (torch.sum(X) / torch.numel(X)))
-    print(y.sum())
-    print(y.tolist())
-        
+    
     evaluation_loss(model, test_dataloader)
+    # evaluation_from_generation(model, l, 1000, data=torch.full((1000, l), torch.tensor(2)))
     evaluation_from_generation(model, l, 100, data=test_data)
     evaluation_from_generation(model, l, 1000, data=hardcore_data)

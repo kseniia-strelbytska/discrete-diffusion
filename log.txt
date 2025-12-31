@@ -2,3 +2,11 @@ Taining samples:
 Total number of masks 799865/3695120
 Average number of masks per training sample 4.32930459633246/20
 Number of masks unmasked as 1s 400484 (0.5006895065307617)
+
+1000 epochs 
+model = TransformerClassifier(max_len=16, vocab_size=4, n_head=4, n_layers=4, embed_dim=64, dim_feedforward=128, dropout=0.1)
+
+Accuracy on fully masked sequences: 
+Evaluation from generation satisfies rule #1: 859/1000 (0.859)
+Evaluation from generation satisfies rule #2: 863/1000 (0.863)
+Evaluation from generation satisfies btoh rules: 747/1000 (0.747)

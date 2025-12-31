@@ -32,6 +32,9 @@ def evaluation_loss(model, dataloader):
     print(f'Evaluation, Loss: {total_loss/len(dataloader)}')
 
 def evaluation_from_generation(model, l, samples, data=None, epoch='nan', figure_path='figures/'):
+    with open('./incorrect_generation.txt', 'w') as f:
+        f.write('')
+    
     seqs = generate_seq(l) if data == None else data
     seqs = seqs[torch.randperm(seqs.shape[0])]
     seqs = seqs[:samples]
@@ -66,6 +69,9 @@ def evaluation_from_generation(model, l, samples, data=None, epoch='nan', figure
             #         printed += 1
             #         print('Example of correct generative prediction: ', s.tolist(), y_pred.tolist())
             # else:
+            #     with open('./incorrect_generation.txt', 'a') as f:
+            #         f.write(' '.join([str(i) for i in s.tolist()]) + ', ' + ' '.join([str(i) for i in y_pred.tolist()]) + '\n')
+    
             #     if printed_incorrect < 5:
             #         printed_incorrect += 1
             #         print('Example of INcorrect generative prediction: ', s.tolist(), y_pred.tolist())
