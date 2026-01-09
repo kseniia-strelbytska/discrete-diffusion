@@ -91,7 +91,7 @@ def train(model, dataloader, epochs=5, lr=1e-3, dict_path='models/', figure_path
         rule2_data.append(rule2/total)
         bothrules_data.append(bothrules/total)
 
-        epochtimes = np.arange(epoch + 1)
+        epochtimes = 3000 + np.arange(epoch + 1)
         plt.plot(epochtimes, rule1_data)
         plt.plot(epochtimes, rule2_data)
         plt.plot(epochtimes, bothrules_data)
@@ -122,9 +122,9 @@ if __name__ == '__main__':
     hardcore_data[mask] = 2    
     
     model = TransformerClassifier(max_len=l, vocab_size=4, n_head=4, n_layers=12, embed_dim=16, dim_feedforward=128, dropout=0.1)
-    # model.load_state_dict(torch.load('./models/diffusion_transformer_1000_epochs_embd_128'))
-    model = train(model=model, dataloader=train_dataloader, epochs=2000, lr=1e-3, dict_path='models/test/', figure_path='figures/test/', test_data=hardcore_data)
-    torch.save(model.state_dict(), f'./models/diffusion_transformer_2000_epochs_embd_16_n_layers_12')
+    model.load_state_dict(torch.load('./models/diffusion_transformer_3000_epochs_embd_16_n_layers_12'))
+    model = train(model=model, dataloader=train_dataloader, epochs=1000, lr=1e-3, dict_path='models/test/', figure_path='figures/test/', test_data=hardcore_data)
+    torch.save(model.state_dict(), f'./models/diffusion_transformer_4000_epochs_embd_16_n_layers_12')
     
     unmask = ScheduledUnmasker(model)
     X = torch.tensor([2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2])
