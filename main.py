@@ -3,11 +3,12 @@ import torch.nn as nn
 from tqdm import tqdm
 import numpy as np
 import matplotlib.pyplot as plt
-from evaluation_tools import evaluation_loss, evaluation_from_generation
 from loss import rblb
-from generation_and_predictions import generate_seq, select_rule_2
 from noise_schedule_unmask import ScheduledUnmasker
-from evaluation_tools import does_satisfy_rule1, does_satisfy_rule2
+from evaluation_tools import evaluation_loss, evaluation_from_generation
+from anbn import anbnGrammar
+from initialgrammar import initialGrammar
+from constants import EOS_token, SOS_token, PAD_token, MASK_token
 
 class TransformerClassifier(torch.nn.Module):
     def __init__(self, max_len=16, vocab_size=3, n_head=4, n_layers=2, embed_dim=128, dim_feedforward=1024, dropout=0.1):
@@ -22,7 +23,7 @@ class TransformerClassifier(torch.nn.Module):
         self.transformer_encoder = nn.TransformerEncoder(self.layer, num_layers=n_layers)
 
         # Predictor head: a simple linear layer
-        self.fc = nn.Linear(embed_dim, 2)
+        self.fc = nn.Linear(embed_dim, 5) # do not allow mask (5) prediction 
         
         PE = torch.zeros((max_len, embed_dim))
         pos = torch.arange(max_len).unsqueeze(-1)
@@ -58,7 +59,7 @@ class Dataset(torch.utils.data.Dataset):
         y_sample = self.y[index]
         prob = torch.rand((1, )) # prob of having a mask (ie the timestep)
         mask = torch.rand_like(y_sample, dtype=torch.float) < prob.item()
-        X_sample = torch.where(mask == True, torch.full_like(y_sample, torch.tensor(2)), y_sample)
+        X_sample = torch.where(mask == True, torch.full_like(y_sample, torch.tensor(MASK_token)), y_sample)
         
         return X_sample, y_sample, prob
 
@@ -66,7 +67,7 @@ def train(model, dataloader, epochs=5, lr=1e-3, dict_path='models/', figure_path
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
     loss_fn = rblb()
     
-    rule1_data, rule2_data, bothrules_data, total_data = [], [], [], []
+    stats = [[], [], [], []] #r1, r2, both, epochsteps
     
     model.train()
     for epoch in range(epochs):
@@ -79,36 +80,37 @@ def train(model, dataloader, epochs=5, lr=1e-3, dict_path='models/', figure_path
             logits = model(X_batch)
             loss = loss_fn(X_batch, logits, y_batch, timestep)
             loss.backward()
-
             optimizer.step()
             total_loss += loss.item()
         
         avg_loss = total_loss / len(dataloader)
         print(f"Epoch {epoch+1}/{epochs}, Loss: {avg_loss:.4f}")
         
-        rule1, rule2, bothrules, total = evaluation_from_generation(model, model.l, 100, test_data, 0)
-        rule1_data.append(rule1/total)
-        rule2_data.append(rule2/total)
-        bothrules_data.append(bothrules/total)
-
-        epochtimes = 3000 + np.arange(epoch + 1)
-        plt.plot(epochtimes, rule1_data)
-        plt.plot(epochtimes, rule2_data)
-        plt.plot(epochtimes, bothrules_data)
-        plt.legend(["Rule 1", "Rule 2", "Both Rules"], loc="lower right")
-        plt.savefig('./plot')
-        plt.clf()
-
+        if (epoch + 1) % 40 == 0:
+            new_stats = evaluation_from_generation(model, grammar, data=test_data, samples_type='full', n_samples=100)
+            for i in range(3):
+                stats[i].append(new_stats[i]) 
+            stats[3].append(epoch + 1)
+            
+            plt.plot(stats[3], stats[0])
+            plt.plot(stats[3], stats[1])
+            plt.plot(stats[3], stats[2])
+            plt.legend(["Rule 1", "Rule 2", "Both Rules"], loc="lower right")
+            plt.savefig('./plot')
+            plt.clf()
+            
+            torch.save(model.state_dict(), f'./models/anbn_diffusion/diffusion_epochs={epoch + 1}')
+        
     return model
 
 if __name__ == '__main__':
-    l = 16
-
-    seqs = generate_seq(l)
-    seqs2 = select_rule_2(seqs)
-    seqs, seqs2 = seqs2, seqs    
+    torch.manual_seed(1)
+    l = 256
+    
+    grammar = anbnGrammar(l)
+    grammar.data = grammar.generate_seq()
         
-    dataset = Dataset(seqs)        
+    dataset = Dataset(grammar.data)        
     train_dataset, test_dataset = torch.utils.data.random_split(dataset, [0.9, 0.1])
     print(f'Dataset len: {len(dataset)}')
 
@@ -116,20 +118,15 @@ if __name__ == '__main__':
     test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=32, shuffle=True)
     
     test_data = torch.stack([test_dataset[i][0] for i in range(len(test_dataset))]) 
-    hardcore_data = seqs.clone()
-    p = 0.8 + 0.2 * torch.rand((seqs.shape[0], 1))
+    hardcore_data = grammar.data.clone()
+    p = 0.8 + 0.2 * torch.rand((grammar.data.shape[0], 1))
     mask = torch.rand_like(hardcore_data, dtype=torch.float) < p
-    hardcore_data[mask] = 2    
+    hardcore_data[mask] = MASK_token
     
-    model = TransformerClassifier(max_len=l, vocab_size=4, n_head=4, n_layers=12, embed_dim=16, dim_feedforward=128, dropout=0.1)
-    model.load_state_dict(torch.load('./models/diffusion_transformer_3000_epochs_embd_16_n_layers_12'))
-    model = train(model=model, dataloader=train_dataloader, epochs=1000, lr=1e-3, dict_path='models/test/', figure_path='figures/test/', test_data=hardcore_data)
-    torch.save(model.state_dict(), f'./models/diffusion_transformer_4000_epochs_embd_16_n_layers_12')
+    model = TransformerClassifier(max_len=l+2, vocab_size=6, n_head=4, n_layers=4, embed_dim=16, dim_feedforward=128, dropout=0.1)
+    # model.load_state_dict(torch.load('./models/anbn_diffusion/diffusion_epochs=40'))
+    model = train(model=model, dataloader=train_dataloader, epochs=15000, lr=1e-3, dict_path='models/test/', figure_path='figures/test/', test_data=hardcore_data)
+    # torch.save(model.state_dict(), f'./models/anbn_diffusion/diffusion_epochs=5000')
     
-    unmask = ScheduledUnmasker(model)
-    X = torch.tensor([2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2])
-    
-    evaluation_loss(model, test_dataloader)
     # evaluation_from_generation(model, l, 1000, data=torch.full((1000, l), torch.tensor(2)))
-    evaluation_from_generation(model, l, 100, data=test_data)
-    evaluation_from_generation(model, l, 1000, data=hardcore_data)
+    evaluation_from_generation(model, grammar, data=test_data, samples_type='full', n_samples=100)

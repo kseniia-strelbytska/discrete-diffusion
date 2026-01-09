@@ -1,9 +1,11 @@
 import torch
 import torch.nn as nn
+from constants import EOS_token, SOS_token, PAD_token, MASK_token
 
 class rblb(nn.Module):
     def __init__(self):
         super().__init__()
+        
         self.loss_fn = nn.CrossEntropyLoss(reduction='none')
         
     def forward(self, X, logits, y_true, timestep): 
@@ -16,7 +18,7 @@ class rblb(nn.Module):
         loss = self.loss_fn(logits.view(B*L, -1), y_true.view(B*L))
         loss = loss.view((B, L))
         
-        mask = (X==2).float()
+        mask = (X==MASK_token).float()
         loss *= mask
 
         # calculating weighted loss

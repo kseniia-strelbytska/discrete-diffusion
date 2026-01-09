@@ -1,29 +1,26 @@
-import torch
+import torch 
+import torch.nn as nn
+import numpy as np
 from tqdm import tqdm
-from generation_and_predictions import generate_seq, get_prediction_masked
 from noise_schedule_unmask import ScheduledUnmasker
-from loss import rblb
-
-def does_satisfy_rule1(seq):
-    return (torch.sum(seq) == torch.numel(seq) // 2)
-
-def does_satisfy_rule2(seq):
-    for idx in range(1, len(seq) - 1):
-        if seq[idx] != seq[idx - 1] and seq[idx] != seq[idx + 1]:
-            return False 
-    return True
+from constants import EOS_token, SOS_token, PAD_token, MASK_token
 
 def evaluation_loss(model, dataloader):
-    loss_fn = rblb()
+    loss_fn = nn.CrossEntropyLoss(reduction='none', ignore_index=PAD_token)
     
     model.eval()
     total_loss = 0
+    
     with torch.no_grad():
-        for X_batch, y_batch, timestep in dataloader:
+        for X_batch, y_batch in dataloader:
             B, L = X_batch.shape
             with torch.no_grad():
                 logits = model(X_batch)
-                loss = loss_fn(X_batch, logits, y_batch, timestep) 
+                loss = loss_fn(logits.view(B*L, -1), y_batch.view(B*L))
+                mask = (X_batch==MASK_token).view(B*L).float()
+                loss *= mask
+                loss = torch.sum(loss) / torch.sum(mask)
+                
                 total_loss += loss
                 # predictions = torch.argmax(logits, dim=-1)
                 # print("Predictions:", predictions)
@@ -31,62 +28,36 @@ def evaluation_loss(model, dataloader):
             
     print(f'Evaluation, Loss: {total_loss/len(dataloader)}')
 
-def evaluation_from_generation(model, l, samples, data=None, epoch='nan', figure_path='figures/'):
-    with open('./incorrect_generation.txt', 'w') as f:
-        f.write('')
+# eval_type: next_token or prefix
+# samples_type for anbn: random or full
+def evaluation_from_generation(model, grammar, data=None, samples_type='random', n_samples=100):
+    # prefixes = select_rule_2(generate_seq(max(1, round(l * 0.5))))
+    # prefixes = select_rule_2(generate_seq(max(1, round(l * 0.75))))
     
-    seqs = generate_seq(l) if data == None else data
-    seqs = seqs[torch.randperm(seqs.shape[0])]
-    seqs = seqs[:samples]
+    stats = np.array([0, 0, 0])
+    total = 0
     
+    if data == None:
+        noise_level = 0.8
+        data = grammar.data.clone()
+        data[torch.rand_like(data, dtype=torch.float) < noise_level] = MASK_token
+    
+    data = data[torch.randperm(data.shape[0])]
+    data = data[:n_samples]
+        
     unmaskModel = ScheduledUnmasker(model)
 
-    total, printed, printed_incorrect = 0, 0, 0
-    rule1, rule2, bothrules = 0, 0, 0 
-    cs = []
-    n_ones, n_masks = 0, 0
-    
     model.eval()
     with torch.no_grad():
-        for idx, s in enumerate(tqdm(seqs, desc="Evaluation from generation")):
+        for s in data:
             total += 1
-            y_pred = unmaskModel(s, ((s == 2).sum() / torch.numel(s))) # no batch dimension
-            
-            # y_pred = get_prediction_masked(model, s.unsqueeze(0))
-            
-            r1, r2 = does_satisfy_rule1(y_pred), does_satisfy_rule2(y_pred)
-            both = (r1 & r2)
-            
-            if r1 == True:
-                rule1 += 1 
-            if r2 == True:
-                rule2 += 1 
-            if both == True:
-                bothrules += 1
-
-            # if  both == True:
-            #     if printed < 5:
-            #         printed += 1
-            #         print('Example of correct generative prediction: ', s.tolist(), y_pred.tolist())
-            # else:
-            #     with open('./incorrect_generation.txt', 'a') as f:
-            #         f.write(' '.join([str(i) for i in s.tolist()]) + ', ' + ' '.join([str(i) for i in y_pred.tolist()]) + '\n')
+            y_pred = unmaskModel(s, ((s == MASK_token).sum() / torch.numel(s))) # no batch dimension
+            y_pred_stats = grammar.evaluate(y_pred)
+            stats += y_pred_stats
+              
+    print(f'Evaluation from generation satisfies rule #1: {stats[0]}/{total} ({stats[0]/total})')
+    print(f'Evaluation from generation satisfies rule #2: {stats[1]}/{total} ({stats[1]/total})')
+    print(f'Evaluation from generation satisfies both rules: {stats[2]}/{total} ({stats[2]/total})')
     
-            #     if printed_incorrect < 5:
-            #         printed_incorrect += 1
-            #         print('Example of INcorrect generative prediction: ', s.tolist(), y_pred.tolist())
-
-            # n_ones += y_pred[s==2].sum()
-            # n_masks += (s==2).float().sum()
-            # cs.append(y_pred.sum().to('cpu'))
-
-        # plt.hist(cs, bins=model.l, range = [0, model.l])
-        # plt.xticks(range(0, model.l + 1))
-        # plt.savefig(f'./{figure_path}eval_mode_uniform_masking_inference_epoch{epoch}')
-
-        print(f'Evaluation from generation satisfies rule #1: {rule1}/{total} ({rule1/total})')
-        print(f'Evaluation from generation satisfies rule #2: {rule2}/{total} ({rule2/total})')
-        print(f'Evaluation from generation satisfies btoh rules: {bothrules}/{total} ({bothrules/total})')
-        
-        return rule1, rule2, bothrules, total
-        # print(f'Number of masks unmasked as 1s {n_ones} ({n_ones/n_masks})')
+    return stats / total
+  
