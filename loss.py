@@ -6,7 +6,10 @@ class rblb(nn.Module):
     def __init__(self):
         super().__init__()
         
-        self.loss_fn = nn.CrossEntropyLoss(reduction='none')
+        class_weight = torch.tensor([1.0] * 5)
+        class_weight[EOS_token] = 10.0
+        
+        self.loss_fn = nn.CrossEntropyLoss(reduction='none', weight=class_weight)
         
     def forward(self, X, logits, y_true, timestep): 
         timestep = torch.clamp(timestep, min=0.01, max=1.0)  # No t < 0.01

@@ -1,0 +1,36 @@
+    model = TransformerClassifier(max_len=l+2, vocab_size=6, n_head=4, n_layers=4, embed_dim=128, dim_feedforward=128, dropout=0.1)
+
+Graphs show evaluation on 80% masked samples from the training data
+Stats below show evaluation on autoregressive prompts
+
+10k epochs: 
+Evaluation from generation satisfies rule #1: 168/256 (0.65625)
+Evaluation from generation satisfies rule #2: 224/256 (0.875)
+Evaluation from generation satisfies both rules: 166/256 (0.6484375)
+Evaluation from generation satisfies satisfies format: 201/256 (0.78515625)
+
+25k
+Evaluation from generation satisfies rule #1: 172/256 (0.671875)
+Evaluation from generation satisfies rule #2: 226/256 (0.8828125)
+Evaluation from generation satisfies both rules: 172/256 (0.671875)
+Evaluation from generation satisfies satisfies format: 188/256 (0.734375)
+
+5k
+Evaluation from generation satisfies rule #1: 81/256 (0.31640625)
+Evaluation from generation satisfies rule #2: 225/256 (0.87890625)
+Evaluation from generation satisfies both rules: 77/256 (0.30078125)
+Evaluation from generation satisfies satisfies format: 186/256 (0.7265625)
+
+15k
+Evaluation from generation satisfies rule #1: 164/256 (0.640625)
+Evaluation from generation satisfies rule #2: 212/256 (0.828125)
+Evaluation from generation satisfies both rules: 161/256 (0.62890625)
+Evaluation from generation satisfies satisfies format: 186/256 (0.7265625)
+
+15k & T=500 for unmasking
+Evaluation from generation satisfies rule #1: 202/256 (0.7890625)
+Evaluation from generation satisfies rule #2: 235/256 (0.91796875)
+Evaluation from generation satisfies both rules: 202/256 (0.7890625)
+Evaluation from generation satisfies satisfies format: 225/256 (0.87890625)
+
+Increasing the number of denoising steps increases accuracy by 0.16!

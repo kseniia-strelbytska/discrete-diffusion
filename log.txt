@@ -10,3 +10,10 @@ Accuracy on fully masked sequences:
 Evaluation from generation satisfies rule #1: 859/1000 (0.859)
 Evaluation from generation satisfies rule #2: 863/1000 (0.863)
 Evaluation from generation satisfies btoh rules: 747/1000 (0.747)
+
+I fixed the anbn diffusion, and I ran an experiment after 15000 epochs of training. 
+I test accuracy on the following data: 100 random samples of strings seen in training data 
+(even length from 2 to 256 with equal number of 0s (rule 1) and ones and with 0s preceeding 1s (rule 2); strings have format  SOS0000...00111...11EOSPADPADPAD... and padded to each have length 258 (256 + 2 SOS/EOS)). Evaluation from generation satisfies rule #1: 32/100 (0.32)
+Evaluation from generation satisfies rule #2: 95/100 (0.95)
+Evaluation from generation satisfies both rules: 32/100 (0.32)
+This is quite bad! But I looked into the generated samples: almost all meet the said format (diffusion learned that SOS goes before 0s before 1s before EOS before PAD). This is amazing since SOS/EOS are quite rare in data (2/258 tokens), and loss doesn't weigh them differently, and results are still high! However, the model still struggles with counting: most generated examples generate 1-2 more tokens '1' or '0' than needed. 

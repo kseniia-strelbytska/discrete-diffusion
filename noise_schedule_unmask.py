@@ -16,7 +16,7 @@ class ScheduledUnmasker(nn.Module):
         
         self.model.eval()
         with torch.no_grad():
-            T = 100
+            T = 500
             
             while timestep > 0.00 and (X == MASK_token).sum() > 0:
                 t = timestep

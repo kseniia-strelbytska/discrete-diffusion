@@ -67,7 +67,7 @@ def train(model, dataloader, epochs=5, lr=1e-3, dict_path='models/', figure_path
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
     loss_fn = rblb()
     
-    stats = [[], [], [], []] #r1, r2, both, epochsteps
+    stats = [[], [], [], [], []] # r1, r2, both, format, epochsteps
     
     model.train()
     for epoch in range(epochs):
@@ -86,20 +86,21 @@ def train(model, dataloader, epochs=5, lr=1e-3, dict_path='models/', figure_path
         avg_loss = total_loss / len(dataloader)
         print(f"Epoch {epoch+1}/{epochs}, Loss: {avg_loss:.4f}")
         
-        if (epoch + 1) % 40 == 0:
+        if epoch == 0 or (epoch + 1) % 20 == 0:
             new_stats = evaluation_from_generation(model, grammar, data=test_data, samples_type='full', n_samples=100)
             for i in range(3):
                 stats[i].append(new_stats[i]) 
-            stats[3].append(epoch + 1)
+            stats[-1].append(25800 + epoch + 1)
             
-            plt.plot(stats[3], stats[0])
-            plt.plot(stats[3], stats[1])
-            plt.plot(stats[3], stats[2])
-            plt.legend(["Rule 1", "Rule 2", "Both Rules"], loc="lower right")
+            plt.plot(stats[-1], stats[0])
+            plt.plot(stats[-1], stats[1])
+            plt.plot(stats[-1], stats[2])
+            plt.plot(stats[-1], stats[3])
+            plt.legend(["Rule 1", "Rule 2", "Both Rules", "Format"], loc="lower right")
             plt.savefig('./plot')
             plt.clf()
             
-            torch.save(model.state_dict(), f'./models/anbn_diffusion/diffusion_epochs={epoch + 1}')
+            torch.save(model.state_dict(), f'./models/anbn_diffusion_v3/diffusion_epochs={25800 + epoch + 1}')
         
     return model
 
@@ -118,15 +119,17 @@ if __name__ == '__main__':
     test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=32, shuffle=True)
     
     test_data = torch.stack([test_dataset[i][0] for i in range(len(test_dataset))]) 
-    hardcore_data = grammar.data.clone()
+    sparse_data = grammar.data.clone()
     p = 0.8 + 0.2 * torch.rand((grammar.data.shape[0], 1))
-    mask = torch.rand_like(hardcore_data, dtype=torch.float) < p
-    hardcore_data[mask] = MASK_token
+    mask = torch.rand_like(sparse_data, dtype=torch.float) < p
+    sparse_data[mask] = MASK_token
     
-    model = TransformerClassifier(max_len=l+2, vocab_size=6, n_head=4, n_layers=4, embed_dim=16, dim_feedforward=128, dropout=0.1)
-    # model.load_state_dict(torch.load('./models/anbn_diffusion/diffusion_epochs=40'))
-    model = train(model=model, dataloader=train_dataloader, epochs=15000, lr=1e-3, dict_path='models/test/', figure_path='figures/test/', test_data=hardcore_data)
-    # torch.save(model.state_dict(), f'./models/anbn_diffusion/diffusion_epochs=5000')
+    model = TransformerClassifier(max_len=l+2, vocab_size=6, n_head=4, n_layers=4, embed_dim=128, dim_feedforward=128, dropout=0.1)
+    model.load_state_dict(torch.load('./models/anbn_diffusion_v3/diffusion_epochs=15000'))
+    # model = train(model=model, dataloader=train_dataloader, epochs=15000, lr=1e-3, dict_path='models/test/', figure_path='figures/test/', test_data=sparse_data)
+    # torch.save(model.state_dict(), f'./models/anbn_diffusion_v3/diffusion_epochs=5000')
     
     # evaluation_from_generation(model, l, 1000, data=torch.full((1000, l), torch.tensor(2)))
-    evaluation_from_generation(model, grammar, data=test_data, samples_type='full', n_samples=100)
+    evaluation_from_generation(model, grammar, data=sparse_data, eval_type='autoregressive', samples_type='full', n_samples=100)
+
+# 10800/15000

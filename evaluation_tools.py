@@ -28,36 +28,55 @@ def evaluation_loss(model, dataloader):
             
     print(f'Evaluation, Loss: {total_loss/len(dataloader)}')
 
-# eval_type: next_token or prefix
+# eval_type: diffusion or autoregressive
 # samples_type for anbn: random or full
-def evaluation_from_generation(model, grammar, data=None, samples_type='random', n_samples=100):
+def evaluation_from_generation(model, grammar, data=None, eval_type='diffusion', samples_type='random', n_samples=100):
+    if data != None:
+        data = data.clone()
+    
     # prefixes = select_rule_2(generate_seq(max(1, round(l * 0.5))))
     # prefixes = select_rule_2(generate_seq(max(1, round(l * 0.75))))
     
-    stats = np.array([0, 0, 0])
+    # r1, r2, both, format
+    stats = np.array([0, 0, 0, 0])
     total = 0
     
-    if data == None:
-        noise_level = 0.8
+    if eval_type == 'diffusion':
+        if data == None:
+            noise_level = 0.8
+            data = grammar.data.clone()
+            data[torch.rand_like(data, dtype=torch.float) < noise_level] = MASK_token
+    else: 
+        # test on prompts '000...0' and '000...01'
         data = grammar.data.clone()
-        data[torch.rand_like(data, dtype=torch.float) < noise_level] = MASK_token
-    
-    data = data[torch.randperm(data.shape[0])]
-    data = data[:n_samples]
         
+        for l in range(1, grammar.l // 2 + 1):
+            data[l - 1, l+2:] = MASK_token
+            seq = data[l - 1].clone().unsqueeze(0)
+            seq[:, l + 1] = MASK_token 
+            data = torch.cat([data, seq], dim=0)
+                    
+    if samples_type == 'random':  
+        data = data[torch.randperm(data.shape[0])]
+        data = data[:n_samples]
+                
+    print(f'Evaluation on data, shape: f{data.shape}')                
     unmaskModel = ScheduledUnmasker(model)
-
     model.eval()
     with torch.no_grad():
-        for s in data:
+        for s in tqdm(data):
             total += 1
             y_pred = unmaskModel(s, ((s == MASK_token).sum() / torch.numel(s))) # no batch dimension
             y_pred_stats = grammar.evaluate(y_pred)
             stats += y_pred_stats
-              
+            
+            print(y_pred.tolist())
+            print(y_pred_stats)
+            
     print(f'Evaluation from generation satisfies rule #1: {stats[0]}/{total} ({stats[0]/total})')
     print(f'Evaluation from generation satisfies rule #2: {stats[1]}/{total} ({stats[1]/total})')
     print(f'Evaluation from generation satisfies both rules: {stats[2]}/{total} ({stats[2]/total})')
+    print(f'Evaluation from generation satisfies satisfies format: {stats[3]}/{total} ({stats[3]/total})')
     
     return stats / total
   
