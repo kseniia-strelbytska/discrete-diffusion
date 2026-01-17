@@ -11,7 +11,7 @@ from initialgrammar import initialGrammar
 from constants import EOS_token, SOS_token, PAD_token, MASK_token
 
 class TransformerClassifier(torch.nn.Module):
-    def __init__(self, max_len=16, vocab_size=3, n_head=4, n_layers=2, embed_dim=128, dim_feedforward=1024, dropout=0.1):
+    def __init__(self, max_len=16, vocab_size=6, n_head=4, n_layers=2, embed_dim=128, dim_feedforward=1024, dropout=0.1):
         super().__init__()
 
         self.l = max_len
@@ -86,11 +86,11 @@ def train(model, dataloader, epochs=5, lr=1e-3, dict_path='models/', figure_path
         avg_loss = total_loss / len(dataloader)
         print(f"Epoch {epoch+1}/{epochs}, Loss: {avg_loss:.4f}")
         
-        if epoch == 0 or (epoch + 1) % 20 == 0:
-            new_stats = evaluation_from_generation(model, grammar, data=test_data, samples_type='full', n_samples=100)
-            for i in range(3):
+        if (epoch + 1) % 1000 == 0:
+            new_stats = evaluation_from_generation(model, grammar, data=test_data, eval_type='autoregressive', samples_type='random', n_samples=100)
+            for i in range(4):
                 stats[i].append(new_stats[i]) 
-            stats[-1].append(25800 + epoch + 1)
+            stats[-1].append(epoch + 1)
             
             plt.plot(stats[-1], stats[0])
             plt.plot(stats[-1], stats[1])
@@ -100,7 +100,7 @@ def train(model, dataloader, epochs=5, lr=1e-3, dict_path='models/', figure_path
             plt.savefig('./plot')
             plt.clf()
             
-            torch.save(model.state_dict(), f'./models/anbn_diffusion_v3/diffusion_epochs={25800 + epoch + 1}')
+            torch.save(model.state_dict(), f'./models/anbn_diffusion_v8/diffusion_epochs={epoch + 1}')
         
     return model
 
@@ -125,11 +125,12 @@ if __name__ == '__main__':
     sparse_data[mask] = MASK_token
     
     model = TransformerClassifier(max_len=l+2, vocab_size=6, n_head=4, n_layers=4, embed_dim=128, dim_feedforward=128, dropout=0.1)
-    model.load_state_dict(torch.load('./models/anbn_diffusion_v3/diffusion_epochs=15000'))
-    # model = train(model=model, dataloader=train_dataloader, epochs=15000, lr=1e-3, dict_path='models/test/', figure_path='figures/test/', test_data=sparse_data)
-    # torch.save(model.state_dict(), f'./models/anbn_diffusion_v3/diffusion_epochs=5000')
+    # model.load_state_dict(torch.load('./models/anbn_diffusion_v3/diffusion_epochs=25860'))
+    model = train(model=model, dataloader=train_dataloader, epochs=30000, lr=1e-3, dict_path='models/test/', figure_path='figures/test/', test_data=sparse_data)
+    # torch.save(model.state_dict(), f'./models/anbn_diffusion_v5/diffusion_epochs=5000')
     
     # evaluation_from_generation(model, l, 1000, data=torch.full((1000, l), torch.tensor(2)))
-    evaluation_from_generation(model, grammar, data=sparse_data, eval_type='autoregressive', samples_type='full', n_samples=100)
+    # evaluation_from_generation(model, grammar, data=None, eval_type='autoregressive', samples_type='full')
+    evaluation_from_generation(model, grammar, data=sparse_data, eval_type='autoregressive', samples_type='random', n_samples=100)
 
 # 10800/15000

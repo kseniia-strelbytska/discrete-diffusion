@@ -70,9 +70,6 @@ def evaluation_from_generation(model, grammar, data=None, eval_type='diffusion',
             y_pred_stats = grammar.evaluate(y_pred)
             stats += y_pred_stats
             
-            print(y_pred.tolist())
-            print(y_pred_stats)
-            
     print(f'Evaluation from generation satisfies rule #1: {stats[0]}/{total} ({stats[0]/total})')
     print(f'Evaluation from generation satisfies rule #2: {stats[1]}/{total} ({stats[1]/total})')
     print(f'Evaluation from generation satisfies both rules: {stats[2]}/{total} ({stats[2]/total})')

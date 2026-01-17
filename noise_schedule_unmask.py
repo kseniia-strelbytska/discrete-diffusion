@@ -13,7 +13,7 @@ class ScheduledUnmasker(nn.Module):
     def forward(self, init_X, timestep):
         X = init_X.clone().long()
         L = X.shape[0]
-        
+                
         self.model.eval()
         with torch.no_grad():
             T = 500
@@ -36,10 +36,10 @@ class ScheduledUnmasker(nn.Module):
                 
                 probs[:, :5] *= (alpha_s - alpha_t) / (1 - alpha_t)
                 probs[:, 5] = (1 - alpha_s) / (1 - alpha_t)
-                                
+                                                
                 # sampled_X = torch.multinomial(probs, 1, replacement=True).squeeze(-1)
                 sampled_X = torch.distributions.categorical.Categorical(probs=probs).sample()
                 
                 X[X == MASK_token] = sampled_X[X == MASK_token]
-                
+ 
             return X 

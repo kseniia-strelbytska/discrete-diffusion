@@ -1,0 +1,1 @@
+Diffusion accuracy 128 & 6 layers
