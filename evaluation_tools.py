@@ -59,7 +59,10 @@ def evaluation_from_generation(model, grammar, data=None, eval_type='diffusion',
     if samples_type == 'random':  
         data = data[torch.randperm(data.shape[0])]
         data = data[:n_samples]
-                
+    
+    with open('./n_layers=6_outputs_ARprompts.txt', 'w') as f:
+        f.write('')
+    
     print(f'Evaluation on data, shape: f{data.shape}')                
     unmaskModel = ScheduledUnmasker(model)
     model.eval()
@@ -69,6 +72,17 @@ def evaluation_from_generation(model, grammar, data=None, eval_type='diffusion',
             y_pred = unmaskModel(s, ((s == MASK_token).sum() / torch.numel(s))) # no batch dimension
             y_pred_stats = grammar.evaluate(y_pred)
             stats += y_pred_stats
+            
+            with open('./n_layers=6_outputs_ARprompts.txt', 'a') as f:
+                f.write(''.join([str(i) for i in y_pred.tolist()]))
+                
+                is_format_ok = ('True' if y_pred_stats[-1] == 1 else 'False')
+                cnt_zeros, cnt_ones = (y_pred==0).sum(), (y_pred==1).sum()
+                
+                f.write(f' zeros={cnt_zeros}, ones={cnt_ones}, format={is_format_ok} \n')
+                
+            print(y_pred.tolist())
+            print(y_pred_stats)
             
     print(f'Evaluation from generation satisfies rule #1: {stats[0]}/{total} ({stats[0]/total})')
     print(f'Evaluation from generation satisfies rule #2: {stats[1]}/{total} ({stats[1]/total})')

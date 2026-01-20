@@ -34,6 +34,9 @@ def evaluation_from_generation(model, grammar, data=None, eval_type='next_token'
     # prefixes = select_rule_2(generate_seq(max(1, round(l * 0.5))))
     # prefixes = select_rule_2(generate_seq(max(1, round(l * 0.75))))
     
+    with open('./outputs.txt', 'w') as f:
+        f.write('')
+    
     stats = np.array([0, 0, 0])
     total = 0
     if eval_type=='prefix': # used for initial grammar only; fixed length generation
@@ -70,6 +73,13 @@ def evaluation_from_generation(model, grammar, data=None, eval_type='next_token'
                         get_prediction(model, torch.cat([seq, torch.ones((1,)).long()], dim=-1), grammar.l + 2)] # +2 SOS/EOS    
                 
                 total += len(y_preds)
+                
+                with open('./outputs.txt', 'a') as f:
+                    for y_pred_instance in y_preds:
+                        res = grammar.evaluate(y_pred_instance)
+                        y_pred_instance = y_pred_instance.tolist()
+                        f.write(''.join(str(i) for i in y_pred_instance) + '\n')
+                        # f.write(''.join([str(i) for i in res]) + '\n')
                 
                 for y_pred in y_preds:
                     y_pred_stats = grammar.evaluate(y_pred)

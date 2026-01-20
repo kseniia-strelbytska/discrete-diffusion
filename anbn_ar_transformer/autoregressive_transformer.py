@@ -83,7 +83,7 @@ def train(model, dataloader, epochs=10, lr=1e-3):
             plt.plot(stats[3], stats[1])
             plt.plot(stats[3], stats[2])
             plt.legend(["Rule 1", "Rule 2", "Both Rules"], loc="lower right")
-            plt.savefig('./plot')
+            plt.savefig('./plot2')
             plt.clf()
             
             torch.save(model.state_dict(), f'./models/initialgrammar_autoregressive_transformer_epochs={epoch + 1}')
@@ -112,10 +112,10 @@ if __name__ == '__main__':
     full_dataloader = torch.utils.data.DataLoader(dataset, batch_size=32, shuffle=True)
 
     model = Model(max_len=l+2, vocab_size=6, n_head=4, n_layers=2, embed_dim=128, dim_feedforward=1024, dropout=0.1) # +2 SOS/EOS token
-    model.load_state_dict(torch.load('./models/anbn_trained_models/rule2_autoregressive_transformer_epochs=1500'))
-    # model = train(model, full_dataloader, epochs=2000, lr=1e-3)
+    # model.load_state_dict(torch.load('./models/anbn_trained_models/rule2_autoregressive_transformer_epochs=1500'))
+    model = train(model, full_dataloader, epochs=1, lr=1e-3)
     # torch.save(model.state_dict(), f'./rule2_autoregressive_transformer_500')
                 
     # evaluation_loss(model, test_dataloader)
-    evaluation_from_generation(model, grammar, data=None, eval_type='next_token', samples_type='full', n_samples=20)
+    new_stats = evaluation_from_generation(model, grammar, data=None, eval_type=grammar.default_eval_type, samples_type='full', n_samples=100)
     

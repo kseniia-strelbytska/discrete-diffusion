@@ -63,11 +63,14 @@ class Dataset(torch.utils.data.Dataset):
         
         return X_sample, y_sample, prob
 
-def train(model, dataloader, epochs=5, lr=1e-3, dict_path='models/', figure_path='figures/', test_data = None):
+def train(model, dataloader, epochs=5, lr=1e-3, dict_path='models/', figure_path='figures/', test_data=None, val_dataset=None):
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
     loss_fn = rblb()
     
     stats = [[], [], [], [], []] # r1, r2, both, format, epochsteps
+    
+    with open(f'{dict_path}loss_log.txt', 'w') as f:
+        f.write('')
     
     model.train()
     for epoch in range(epochs):
@@ -85,8 +88,10 @@ def train(model, dataloader, epochs=5, lr=1e-3, dict_path='models/', figure_path
         
         avg_loss = total_loss / len(dataloader)
         print(f"Epoch {epoch+1}/{epochs}, Loss: {avg_loss:.4f}")
+        with open(f'{dict_path}loss_log.txt', 'a') as f:
+            f.write(f"Epoch {epoch+1}/{epochs}, Loss: {avg_loss:.4f}\n")
         
-        if (epoch + 1) % 1000 == 0:
+        if (epoch + 1) % 500 == 0:
             new_stats = evaluation_from_generation(model, grammar, data=test_data, eval_type='autoregressive', samples_type='random', n_samples=100)
             for i in range(4):
                 stats[i].append(new_stats[i]) 
@@ -100,7 +105,19 @@ def train(model, dataloader, epochs=5, lr=1e-3, dict_path='models/', figure_path
             plt.savefig('./plot')
             plt.clf()
             
-            torch.save(model.state_dict(), f'./models/anbn_diffusion_v8/diffusion_epochs={epoch + 1}')
+            torch.save(model.state_dict(), f'{dict_path}diffusion_epochs={epoch + 1}')
+        
+        model.train()
+        val_loss = 0
+        for X_batch, y_batch, timestep in val_dataset:
+            logits = model(X_batch)
+            loss = loss_fn(X_batch, logits, y_batch, timestep)
+            val_loss += loss.item()
+            
+        avg_val_loss = val_loss / len(val_dataset)
+        print(f"Epoch {epoch+1}/{epochs}, Average Validation Loss: {avg_val_loss:.4f}")
+        with open(f'{dict_path}loss_log.txt', 'a') as f:
+            f.write(f"Epoch {epoch+1}/{epochs}, Average Validation Loss: {avg_val_loss:.4f}\n")
         
     return model
 
@@ -124,13 +141,25 @@ if __name__ == '__main__':
     mask = torch.rand_like(sparse_data, dtype=torch.float) < p
     sparse_data[mask] = MASK_token
     
-    model = TransformerClassifier(max_len=l+2, vocab_size=6, n_head=4, n_layers=4, embed_dim=128, dim_feedforward=128, dropout=0.1)
-    # model.load_state_dict(torch.load('./models/anbn_diffusion_v3/diffusion_epochs=25860'))
-    model = train(model=model, dataloader=train_dataloader, epochs=30000, lr=1e-3, dict_path='models/test/', figure_path='figures/test/', test_data=sparse_data)
+    val_dataset = []
+    batch_size = 32
+    for idx in range(len(grammar.data)):
+        X, y, timestep = dataset.__getitem__(idx)
+        
+        if not val_dataset or val_dataset[-1][0].shape[0] == batch_size:
+            val_dataset.append((X.unsqueeze(0), y.unsqueeze(0), timestep.unsqueeze(0)))
+        else:
+            val_dataset[-1] = (torch.cat([val_dataset[-1][0], X.unsqueeze(0)], dim=0), 
+                               torch.cat([val_dataset[-1][1], y.unsqueeze(0)], dim=0), 
+                               torch.cat([val_dataset[-1][2], timestep.unsqueeze(0)], dim=0))
+
+    model = TransformerClassifier(max_len=l+2, vocab_size=6, n_head=4, n_layers=6, embed_dim=12, dim_feedforward=1024, dropout=0.1)
+    # model.load_state_dict(torch.load('./models/anbn_diffusion_v8/diffusion_epochs=1'))
+    model = train(model=model, dataloader=train_dataloader, epochs=60000, lr=1e-3, dict_path='models/anbn_diffusion_v10/', figure_path='figures/test/', test_data=sparse_data, val_dataset=val_dataset)
     # torch.save(model.state_dict(), f'./models/anbn_diffusion_v5/diffusion_epochs=5000')
     
     # evaluation_from_generation(model, l, 1000, data=torch.full((1000, l), torch.tensor(2)))
     # evaluation_from_generation(model, grammar, data=None, eval_type='autoregressive', samples_type='full')
-    evaluation_from_generation(model, grammar, data=sparse_data, eval_type='autoregressive', samples_type='random', n_samples=100)
+    evaluation_from_generation(model, grammar, data=sparse_data, eval_type='autoregressixve', samples_type='full', n_samples=100)
 
 # 10800/15000
