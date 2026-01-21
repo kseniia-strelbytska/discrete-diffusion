@@ -3,13 +3,13 @@ import torch.nn as nn
 from tqdm import tqdm
 import numpy as np
 import matplotlib.pyplot as plt
+from datetime import datetime
 from loss import rblb
 from noise_schedule_unmask import ScheduledUnmasker
 from evaluation_tools import evaluation_loss, evaluation_from_generation
 from anbn import anbnGrammar
 from initialgrammar import initialGrammar
 from constants import EOS_token, SOS_token, PAD_token, MASK_token
-
 
 class TransformerClassifier(torch.nn.Module):
     def __init__(self, max_len=16, vocab_size=6, n_head=4, n_layers=2, embed_dim=128, dim_feedforward=1024, dropout=0.1):
@@ -65,14 +65,14 @@ class Dataset(torch.utils.data.Dataset):
         
         return X_sample, y_sample, prob
 
-def train(model, dataloader, epochs=5, lr=1e-3, dict_path='models/', figure_path='figures/', test_data=None, val_dataset=None, device='cpu'):
+def train(model, dataloader, epochs=5, lr=1e-3, dict_path='models/', figure_path='figures/', test_dataset=None, device='cpu'):
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
     loss_fn = rblb(device=device)
     
     stats = [[], [], [], [], []] # r1, r2, both, format, epochsteps
     
-    with open(f'{dict_path}loss_log.txt', 'w') as f:
-        f.write('')
+    with open(f'{dict_path}loss_log.txt', 'a') as f:
+        f.write('-'*20 + datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     
     model.train()
     for epoch in range(epochs):
@@ -99,7 +99,7 @@ def train(model, dataloader, epochs=5, lr=1e-3, dict_path='models/', figure_path
             f.write(f"Epoch {epoch+1}/{epochs}, Loss: {avg_loss:.4f}\n")
         
         if (epoch + 1) % 500 == 0:
-            new_stats = evaluation_from_generation(model, grammar, data=test_data, eval_type='autoregressive', samples_type='random', n_samples=100, device=device)
+            new_stats = evaluation_from_generation(model, grammar, eval_type='autoregressive', samples_type='random', n_samples=100, device=device)
             for i in range(4):
                 stats[i].append(new_stats[i]) 
             stats[-1].append(epoch + 1)
@@ -114,19 +114,37 @@ def train(model, dataloader, epochs=5, lr=1e-3, dict_path='models/', figure_path
             
             torch.save(model.state_dict(), f'{dict_path}diffusion_epochs={epoch + 1}')
         
-        model.train()
-        val_loss = 0
-        for X_batch, y_batch, timestep in val_dataset:
+        model.eval()
+        test_loss = 0
+        for X_batch, y_batch, timestep in test_dataset:
             logits = model(X_batch)
             loss = loss_fn(X_batch, logits, y_batch, timestep)
-            val_loss += loss.item()
+            test_loss += loss.item()
             
-        avg_val_loss = val_loss / len(val_dataset)
-        print(f"Epoch {epoch+1}/{epochs}, Average Validation Loss: {avg_val_loss:.4f}")
+        avg_test_loss = test_loss / len(test_dataset)
+        print(f"Epoch {epoch+1}/{epochs}, Average Test Loss: {avg_test_loss:.4f}")
         with open(f'{dict_path}loss_log.txt', 'a') as f:
-            f.write(f"Epoch {epoch+1}/{epochs}, Average Validation Loss: {avg_val_loss:.4f}\n")
+            f.write(f"Epoch {epoch+1}/{epochs}, Average Test Loss: {avg_test_loss:.4f}\n")
         
     return model
+
+def get_fixed_dataset(dataset):
+    fixed_dataset = []
+    batch_size = 32
+    for idx in range(len(dataset)):
+        X, y, timestep = dataset.__getitem__(idx)
+        X = X.to(device)
+        y = y.to(device)
+        timestep = timestep.to(device)
+        
+        if not fixed_dataset or fixed_dataset[-1][0].shape[0] == batch_size:
+            fixed_dataset.append((X.unsqueeze(0), y.unsqueeze(0), timestep.unsqueeze(0)))
+        else:
+            fixed_dataset[-1] = (torch.cat([fixed_dataset[-1][0], X.unsqueeze(0)], dim=0), 
+                               torch.cat([fixed_dataset[-1][1], y.unsqueeze(0)], dim=0), 
+                               torch.cat([fixed_dataset[-1][2], timestep.unsqueeze(0)], dim=0))
+            
+    return fixed_dataset
 
 if __name__ == '__main__':
     # Device configuration
@@ -138,44 +156,25 @@ if __name__ == '__main__':
     
     grammar = anbnGrammar(l)
     grammar.data = grammar.generate_seq()
-    
    
     dataset = Dataset(grammar.data, device=device)        
     train_dataset, test_dataset = torch.utils.data.random_split(dataset, [0.9, 0.1])
     print(f'Dataset len: {len(dataset)}')
 
     train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=32, shuffle=True)
-    test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=32, shuffle=True)
+    test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=32, shuffle=False)
     
-    test_data = torch.stack([test_dataset[i][0] for i in range(len(test_dataset))]).to(device)
+    # test_data = torch.stack([test_dataset[i][0] for i in range(len(test_dataset))]).to(device)
     sparse_data = grammar.data.clone().to(device)
     p = 0.8 + 0.2 * torch.rand((grammar.data.shape[0], 1), device=device)
     mask = torch.rand_like(sparse_data, dtype=torch.float, device=device) < p
     sparse_data[mask] = MASK_token
     
-    val_dataset = []
-    batch_size = 32
-    for idx in range(len(grammar.data)):
-        X, y, timestep = dataset.__getitem__(idx)
-        X = X.to(device)
-        y = y.to(device)
-        timestep = timestep.to(device)
-        
-        if not val_dataset or val_dataset[-1][0].shape[0] == batch_size:
-            val_dataset.append((X.unsqueeze(0), y.unsqueeze(0), timestep.unsqueeze(0)))
-        else:
-            val_dataset[-1] = (torch.cat([val_dataset[-1][0], X.unsqueeze(0)], dim=0), 
-                               torch.cat([val_dataset[-1][1], y.unsqueeze(0)], dim=0), 
-                               torch.cat([val_dataset[-1][2], timestep.unsqueeze(0)], dim=0))
+    # fixed test dataset
+    fixed_test_dataset = get_fixed_dataset(test_dataset)
 
     model = TransformerClassifier(max_len=l+2, vocab_size=6, n_head=4, n_layers=6, embed_dim=12, dim_feedforward=1024, dropout=0.1)
     model = model.to(device)
     # model.load_state_dict(torch.load('./models/anbn_diffusion_v8/diffusion_epochs=1'))
-    model = train(model=model, dataloader=train_dataloader, epochs=60000, lr=1e-3, dict_path='models/anbn_diffusion_v10/', figure_path='figures/test/', test_data=sparse_data, val_dataset=val_dataset, device=device)
+    model = train(model=model, dataloader=train_dataloader, epochs=60000, lr=1e-3, dict_path='models/anbn_diffusion_v10/', figure_path='figures/test/', test_dataset=fixed_test_dataset, device=device)
     # torch.save(model.state_dict(), f'./models/anbn_diffusion_v5/diffusion_epochs=5000')
-    
-    # evaluation_from_generation(model, l, 1000, data=torch.full((1000, l), torch.tensor(2)))
-    # evaluation_from_generation(model, grammar, data=None, eval_type='autoregressive', samples_type='full')
-    evaluation_from_generation(model, grammar, data=sparse_data, eval_type='autoregressixve', samples_type='full', n_samples=100)
-
-# 10800/15000
