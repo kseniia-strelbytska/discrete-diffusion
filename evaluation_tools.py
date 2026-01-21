@@ -5,14 +5,16 @@ from tqdm import tqdm
 from noise_schedule_unmask import ScheduledUnmasker
 from constants import EOS_token, SOS_token, PAD_token, MASK_token
 
-def evaluation_loss(model, dataloader):
-    loss_fn = nn.CrossEntropyLoss(reduction='none', ignore_index=PAD_token)
+def evaluation_loss(model, dataloader, device='cpu'):
+    loss_fn = nn.CrossEntropyLoss(reduction='none', ignore_index=PAD_token).to(device)
     
     model.eval()
     total_loss = 0
     
     with torch.no_grad():
         for X_batch, y_batch in dataloader:
+            X_batch = X_batch.to(device)
+            y_batch = y_batch.to(device)
             B, L = X_batch.shape
             with torch.no_grad():
                 logits = model(X_batch)
@@ -30,7 +32,7 @@ def evaluation_loss(model, dataloader):
 
 # eval_type: diffusion or autoregressive
 # samples_type for anbn: random or full
-def evaluation_from_generation(model, grammar, data=None, eval_type='diffusion', samples_type='random', n_samples=100):
+def evaluation_from_generation(model, grammar, data=None, eval_type='diffusion', samples_type='random', n_samples=100, device='cpu'):
     if data != None:
         data = data.clone()
     
@@ -59,12 +61,15 @@ def evaluation_from_generation(model, grammar, data=None, eval_type='diffusion',
     if samples_type == 'random':  
         data = data[torch.randperm(data.shape[0])]
         data = data[:n_samples]
+
+    data = data.to(device)
+                
     
     with open('./n_layers=6_outputs_ARprompts.txt', 'w') as f:
         f.write('')
     
     print(f'Evaluation on data, shape: f{data.shape}')                
-    unmaskModel = ScheduledUnmasker(model)
+    unmaskModel = ScheduledUnmasker(model, device=device)
     model.eval()
     with torch.no_grad():
         for s in tqdm(data):
@@ -81,8 +86,6 @@ def evaluation_from_generation(model, grammar, data=None, eval_type='diffusion',
                 
                 f.write(f' zeros={cnt_zeros}, ones={cnt_ones}, format={is_format_ok} \n')
                 
-            print(y_pred.tolist())
-            print(y_pred_stats)
             
     print(f'Evaluation from generation satisfies rule #1: {stats[0]}/{total} ({stats[0]/total})')
     print(f'Evaluation from generation satisfies rule #2: {stats[1]}/{total} ({stats[1]/total})')

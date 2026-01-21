@@ -5,13 +5,14 @@ from constants import EOS_token, SOS_token, PAD_token, MASK_token
 
 # Producing sampled tokens using vectorization
 class ScheduledUnmasker(nn.Module):
-    def __init__(self, model):
+    def __init__(self, model, device='cpu'):
         super().__init__()
         self.model = model
+        self.device = device
 
     # fraction (0 <= fr <= 1) specifies the next step 
     def forward(self, init_X, timestep):
-        X = init_X.clone().long()
+        X = init_X.clone().long().to(self.device)
         L = X.shape[0]
                 
         self.model.eval()
@@ -32,7 +33,7 @@ class ScheduledUnmasker(nn.Module):
                 
                 # Convert to probabilities (x_θ in the paper)
                 probs = torch.softmax(logits, dim=-1)  # (L, 5)
-                probs = torch.cat([probs, torch.full((L,1), torch.tensor(1))], dim=-1)
+                probs = torch.cat([probs, torch.full((L,1), torch.tensor(1), device=X.device)], dim=-1)
                 
                 probs[:, :5] *= (alpha_s - alpha_t) / (1 - alpha_t)
                 probs[:, 5] = (1 - alpha_s) / (1 - alpha_t)

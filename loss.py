@@ -3,13 +3,14 @@ import torch.nn as nn
 from constants import EOS_token, SOS_token, PAD_token, MASK_token
 
 class rblb(nn.Module):
-    def __init__(self):
+    def __init__(self, device='cpu'):
         super().__init__()
         
         class_weight = torch.tensor([1.0] * 5)
         class_weight[EOS_token] = 10.0
-        
+
         self.loss_fn = nn.CrossEntropyLoss(reduction='none', weight=class_weight)
+        self.loss_fn = self.loss_fn.to(device)
         
     def forward(self, X, logits, y_true, timestep): 
         timestep = torch.clamp(timestep, min=0.01, max=1.0)  # No t < 0.01
@@ -28,5 +29,6 @@ class rblb(nn.Module):
         loss = loss.reshape((B, L))
         loss = 1.0/(timestep.unsqueeze(-1) + 1e-5) * loss
         loss = loss.sum() / B
+
 
         return loss

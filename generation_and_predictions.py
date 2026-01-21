@@ -4,8 +4,8 @@ import itertools
 from constants import EOS_token, SOS_token, PAD_token, MASK_token
 
 # greedy decoding (greedily select position with the most confidence to unmask)
-def get_prediction_masked(model, input):
-    seq = input.clone()
+def get_prediction_masked(model, input, device='cpu'):
+    seq = input.clone().to(device)
     
     model.eval()
     with torch.no_grad():
