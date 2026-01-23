@@ -2,7 +2,6 @@ seed: 1
 device: auto
 data:
   l: 256
-  vocab_size: 6
   train_split: 0.9
   batch_size: 32
   grammar: anbn
@@ -28,3 +27,4 @@ paths:
   models_dir: models
   figures_dir: figures
   experiment_name: embed_dim=128_mock_test
+notes: "running embed 128 vs 256 comparison"
