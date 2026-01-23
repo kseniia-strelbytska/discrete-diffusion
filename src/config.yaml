@@ -1,0 +1,22 @@
+seed: 1
+device: auto 
+data:
+  l: 256
+  vocab_size: 6
+  train_split: 0.9
+  batch_size: 32
+model:
+  max_len: 258       
+  vocab_size: 6
+  n_head: 4
+  n_layers: 6
+  embed_dim: 12
+  dim_feedforward: 1024
+  dropout: 0.1
+  T: 500
+training:
+  epochs: 60000
+  learning_rate: 0.001
+  eval_every: 500
+paths:
+  experiment_name: trial

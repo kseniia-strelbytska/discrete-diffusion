@@ -1,0 +1,100 @@
+Epoch 1/50, Loss: 29624.4419
+Epoch 1/50, Average Validation Loss: 26369.6685
+Epoch 2/50, Loss: 14033.4636
+Epoch 2/50, Average Validation Loss: 23600.3369
+Epoch 3/50, Loss: 20910.2183
+Epoch 3/50, Average Validation Loss: 20847.4783
+Epoch 4/50, Loss: 10449.3335
+Epoch 4/50, Average Validation Loss: 17350.7314
+Epoch 5/50, Loss: 18025.5717
+Epoch 5/50, Average Validation Loss: 13114.9365
+Epoch 6/50, Loss: 13298.9448
+Epoch 6/50, Average Validation Loss: 11972.4713
+Epoch 7/50, Loss: 11355.8326
+Epoch 7/50, Average Validation Loss: 10020.7332
+Epoch 8/50, Loss: 10161.5144
+Epoch 8/50, Average Validation Loss: 10084.6901
+Epoch 9/50, Loss: 8900.8223
+Epoch 9/50, Average Validation Loss: 12036.3403
+Epoch 10/50, Loss: 9896.3824
+Epoch 10/50, Average Validation Loss: 8687.7316
+Epoch 11/50, Loss: 4431.0300
+Epoch 11/50, Average Validation Loss: 7852.5464
+Epoch 12/50, Loss: 4979.5786
+Epoch 12/50, Average Validation Loss: 8347.8815
+Epoch 13/50, Loss: 5628.2034
+Epoch 13/50, Average Validation Loss: 8246.9943
+Epoch 14/50, Loss: 5685.0342
+Epoch 14/50, Average Validation Loss: 8598.9800
+Epoch 15/50, Loss: 6163.7249
+Epoch 15/50, Average Validation Loss: 7213.2196
+Epoch 16/50, Loss: 6518.3604
+Epoch 16/50, Average Validation Loss: 7661.7162
+Epoch 17/50, Loss: 5088.4980
+Epoch 17/50, Average Validation Loss: 7316.2139
+Epoch 18/50, Loss: 8116.5986
+Epoch 18/50, Average Validation Loss: 6698.1994
+Epoch 19/50, Loss: 7658.1014
+Epoch 19/50, Average Validation Loss: 7633.2911
+Epoch 20/50, Loss: 4527.0068
+Epoch 20/50, Average Validation Loss: 6611.8318
+Epoch 21/50, Loss: 4399.7991
+Epoch 21/50, Average Validation Loss: 6636.6244
+Epoch 22/50, Loss: 3585.4475
+Epoch 22/50, Average Validation Loss: 6720.0742
+Epoch 23/50, Loss: 3804.1476
+Epoch 23/50, Average Validation Loss: 6571.6583
+Epoch 24/50, Loss: 5644.6423
+Epoch 24/50, Average Validation Loss: 6107.2654
+Epoch 25/50, Loss: 3699.4684
+Epoch 25/50, Average Validation Loss: 6174.2787
+Epoch 26/50, Loss: 4731.1047
+Epoch 26/50, Average Validation Loss: 6556.2362
+Epoch 27/50, Loss: 5085.0753
+Epoch 27/50, Average Validation Loss: 5916.7018
+Epoch 28/50, Loss: 5121.3854
+Epoch 28/50, Average Validation Loss: 6546.4801
+Epoch 29/50, Loss: 4193.1711
+Epoch 29/50, Average Validation Loss: 6076.2289
+Epoch 30/50, Loss: 4033.7200
+Epoch 30/50, Average Validation Loss: 5711.0474
+Epoch 31/50, Loss: 3975.5963
+Epoch 31/50, Average Validation Loss: 5632.4886
+Epoch 32/50, Loss: 4964.8706
+Epoch 32/50, Average Validation Loss: 6753.9759
+Epoch 33/50, Loss: 3655.0308
+Epoch 33/50, Average Validation Loss: 5714.2722
+Epoch 34/50, Loss: 3352.5418
+Epoch 34/50, Average Validation Loss: 5431.5471
+Epoch 35/50, Loss: 4151.1346
+Epoch 35/50, Average Validation Loss: 5636.9959
+Epoch 36/50, Loss: 4411.2118
+Epoch 36/50, Average Validation Loss: 7368.4402
+Epoch 37/50, Loss: 8227.2548
+Epoch 37/50, Average Validation Loss: 9406.9229
+Epoch 38/50, Loss: 6026.2147
+Epoch 38/50, Average Validation Loss: 6875.7273
+Epoch 39/50, Loss: 5139.7009
+Epoch 39/50, Average Validation Loss: 6343.2571
+Epoch 40/50, Loss: 6237.9709
+Epoch 40/50, Average Validation Loss: 6180.2103
+Epoch 41/50, Loss: 5638.7970
+Epoch 41/50, Average Validation Loss: 5520.7766
+Epoch 42/50, Loss: 5411.3644
+Epoch 42/50, Average Validation Loss: 5521.4290
+Epoch 43/50, Loss: 4207.5214
+Epoch 43/50, Average Validation Loss: 6351.0712
+Epoch 44/50, Loss: 3445.7701
+Epoch 44/50, Average Validation Loss: 5336.3215
+Epoch 45/50, Loss: 4645.9865
+Epoch 45/50, Average Validation Loss: 4961.4268
+Epoch 46/50, Loss: 3177.2009
+Epoch 46/50, Average Validation Loss: 4989.0221
+Epoch 47/50, Loss: 4567.8956
+Epoch 47/50, Average Validation Loss: 5356.8420
+Epoch 48/50, Loss: 3763.7820
+Epoch 48/50, Average Validation Loss: 5467.0182
+Epoch 49/50, Loss: 3056.4727
+Epoch 49/50, Average Validation Loss: 5568.4770
+Epoch 50/50, Loss: 4201.7000
+Epoch 50/50, Average Validation Loss: 5160.9069

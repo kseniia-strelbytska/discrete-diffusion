@@ -1,0 +1,4 @@
+dim_embed=256, n_layers=4, ff = 128
+
+Epoch 13698/60000, Loss: 1863.1227
+Took 9h 13m 

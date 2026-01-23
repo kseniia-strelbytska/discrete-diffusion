@@ -1,0 +1,14 @@
+Epoch 1/60000, Loss: 23721.6602
+Epoch 1/60000, Average Test Loss: 5405.4922
+Epoch 2/60000, Loss: 25490.4319
+Epoch 2/60000, Average Test Loss: 5390.3794
+Epoch 3/60000, Loss: 38143.6060
+Epoch 3/60000, Average Test Loss: 5053.1997
+Epoch 4/60000, Loss: 27355.1594
+Epoch 4/60000, Average Test Loss: 4543.9375
+--------------------2026-01-21 18:06:48Epoch 1/60000, Loss: 23721.6602
+Epoch 1/60000, Average Test Loss: 5405.4922
+Epoch 2/60000, Loss: 25490.4319
+Epoch 2/60000, Average Test Loss: 5390.3794
+Epoch 3/60000, Loss: 38143.6060
+Epoch 3/60000, Average Test Loss: 5053.1997
