@@ -15,7 +15,7 @@ model:
   dim_feedforward: 1024
   dropout: 0.1
   T: 500
-  eos_weight: 10.0
+  eos_weigh: 10.0
 training:
   epochs: 60000
   learning_rate: 0.001

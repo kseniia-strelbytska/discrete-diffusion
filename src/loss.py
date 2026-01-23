@@ -3,11 +3,11 @@ import torch.nn as nn
 from constants import EOS_token, SOS_token, PAD_token, MASK_token
 
 class rblb(nn.Module):
-    def __init__(self, device='cpu'):
+    def __init__(self, eos_weight=10.0, device='cpu'):
         super().__init__()
         
         class_weight = torch.tensor([1.0] * 5)
-        class_weight[EOS_token] = 10.0
+        class_weight[EOS_token] = eos_weight
 
         self.loss_fn = nn.CrossEntropyLoss(reduction='none', weight=class_weight)
         self.loss_fn = self.loss_fn.to(device)

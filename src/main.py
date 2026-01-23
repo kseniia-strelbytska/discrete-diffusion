@@ -3,7 +3,9 @@ import torch.nn as nn
 from tqdm import tqdm
 import os
 import numpy as np
+import random
 import matplotlib.pyplot as plt
+import shutil
 from pathlib import Path
 import yaml
 from types import SimpleNamespace
@@ -26,6 +28,29 @@ def load_config(path="config.yaml"):
         cfg = yaml.safe_load(f)
     return dict_to_ns(cfg)
 
+def setup_experiment_dirs(experiment_path='new_diffusion/'):
+    model_path = MODELS_DIR / experiment_path
+    figure_path = FIGURES_DIR / experiment_path
+    loss_log_path = figure_path / 'loss_log.txt'
+    output_path = figure_path / 'outputs.txt'
+    
+    model_path.mkdir(parents=True, exist_ok=False)
+    figure_path.mkdir(parents=True, exist_ok=False)
+    
+    config_src = PROJECT_ROOT / "src" / "config.yaml"
+    config_dst = model_path / "config.yaml"
+    shutil.copy2(config_src, config_dst)
+    
+    print(f'Setup finished: directory {experiment_path}')
+    
+    dirs = SimpleNamespace(
+    model_path=model_path,
+    figure_path=figure_path,
+    loss_log_path=loss_log_path,
+    output_path=output_path)
+    
+    return dirs
+
 class TransformerClassifier(torch.nn.Module):
     def __init__(self, max_len=16, vocab_size=6, n_head=4, n_layers=2, embed_dim=128, dim_feedforward=1024, dropout=0.1):
         super().__init__()
@@ -39,7 +64,7 @@ class TransformerClassifier(torch.nn.Module):
         self.transformer_encoder = nn.TransformerEncoder(self.layer, num_layers=n_layers)
 
         # Predictor head: a simple linear layer
-        self.fc = nn.Linear(embed_dim, 5) # do not allow mask (5) prediction 
+        self.fc = nn.Linear(embed_dim, vocab_size - 1) # do not allow mask (5) prediction 
         
         PE = torch.zeros((max_len, embed_dim))
         pos = torch.arange(max_len).unsqueeze(-1)
@@ -80,24 +105,32 @@ class Dataset(torch.utils.data.Dataset):
         
         return X_sample, y_sample, prob
 
+def get_fixed_dataset(dataset, batch_size=32):
+    fixed_dataset = []
+    batch_size = 32
+    for idx in range(len(dataset)):
+        X, y, timestep = dataset.__getitem__(idx)
+        X = X.to(device)
+        y = y.to(device)
+        timestep = timestep.to(device)
+        
+        if not fixed_dataset or fixed_dataset[-1][0].shape[0] == batch_size:
+            fixed_dataset.append((X.unsqueeze(0), y.unsqueeze(0), timestep.unsqueeze(0)))
+        else:
+            fixed_dataset[-1] = (torch.cat([fixed_dataset[-1][0], X.unsqueeze(0)], dim=0), 
+                               torch.cat([fixed_dataset[-1][1], y.unsqueeze(0)], dim=0), 
+                               torch.cat([fixed_dataset[-1][2], timestep.unsqueeze(0)], dim=0))
+            
+    return fixed_dataset
+
 # noise_resolution -- T in the scheduled unmasker
-def train(model, noise_resolution=500, epochs=5, lr=1e-3, train_dataloader=None, test_dataset=None, device='cpu', experiment_path='new_diffusion/'):
+def train(model, T=500, eos_weight=1.0, dirs=None, evaluation_config = None, epochs=5, lr=1e-3, train_dataloader=None, test_dataset=None, device='cpu'):
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
-    loss_fn = rblb(device=device)
+    loss_fn = rblb(eos_weight=eos_weight, device=device)
     
     stats = [[], [], [], [], []] # r1, r2, both, format, epochsteps
-    
-    model_path = MODELS_DIR / experiment_path
-    figure_path = FIGURES_DIR / experiment_path
-    loss_log_path = figure_path / 'loss_log.txt'
-    output_path = figure_path / 'outputs.txt'
-    
-    model_path.mkdir(parents=True, exist_ok=False)
-    figure_path.mkdir(parents=True, exist_ok=False)
-    
-    print(model_path, figure_path, loss_log_path)
-    
-    with open(loss_log_path, 'a') as f:
+        
+    with open(dirs.loss_log_path, 'a') as f:
         f.write('-'*20 + datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     
     model.train()
@@ -121,7 +154,7 @@ def train(model, noise_resolution=500, epochs=5, lr=1e-3, train_dataloader=None,
         
         avg_loss = total_loss / len(train_dataloader)
         print(f"Epoch {epoch+1}/{epochs}, Loss: {avg_loss:.4f}")
-        with open(loss_log_path, 'a') as f:
+        with open(dirs.loss_log_path, 'a') as f:
             f.write(f"Epoch {epoch+1}/{epochs}, Loss: {avg_loss:.4f}\n")
         
         model.eval()
@@ -132,20 +165,20 @@ def train(model, noise_resolution=500, epochs=5, lr=1e-3, train_dataloader=None,
             test_loss += loss.item()
         avg_test_loss = test_loss / len(test_dataset)
         print(f"Epoch {epoch+1}/{epochs}, Average Test Loss: {avg_test_loss:.4f}")
-        with open(loss_log_path, 'a') as f:
+        with open(dirs.loss_log_path, 'a') as f:
             f.write(f"Epoch {epoch+1}/{epochs}, Average Test Loss: {avg_test_loss:.4f}\n")
             
-        if (epoch + 1) % 2 == 0:
+        if (epoch + 1) % evaluation_config.eval_every == 0:
             new_stats = evaluation_from_generation(model, 
                                                    grammar, 
                                                    data=None, 
-                                                   T=noise_resolution, 
-                                                   eval_type='autoregressive', 
-                                                   samples_type='random', 
-                                                   n_samples=1, 
+                                                   T=T, 
+                                                   eval_type=evaluation_config.eval_type, 
+                                                   samples_type=evaluation_config.samples_type, 
+                                                   n_samples=evaluation_config.n_samples, 
                                                    device=device, 
-                                                   loss_log_path=loss_log_path,
-                                                   output_path=output_path)
+                                                   loss_log_path=dirs.loss_log_path,
+                                                   output_path=dirs.output_path)
             for i in range(4):
                 stats[i].append(new_stats[i]) 
             stats[-1].append(epoch + 1)
@@ -155,37 +188,25 @@ def train(model, noise_resolution=500, epochs=5, lr=1e-3, train_dataloader=None,
             plt.plot(stats[-1], stats[2])
             plt.plot(stats[-1], stats[3])
             plt.legend(["Rule 1", "Rule 2", "Both Rules", "Format"], loc="lower right")
-            plt.savefig(figure_path / 'plot')
+            plt.savefig(dirs.figure_path / 'plot.png', dpi=150)
             plt.clf()
             
-            torch.save(model.state_dict(), model_path / f'diffusion_epochs={epoch + 1}')
+            torch.save(model.state_dict(), dirs.model_path / f'diffusion_epochs={epoch + 1}')
         
     return model
 
-def get_fixed_dataset(dataset):
-    fixed_dataset = []
-    batch_size = 32
-    for idx in range(len(dataset)):
-        X, y, timestep = dataset.__getitem__(idx)
-        X = X.to(device)
-        y = y.to(device)
-        timestep = timestep.to(device)
-        
-        if not fixed_dataset or fixed_dataset[-1][0].shape[0] == batch_size:
-            fixed_dataset.append((X.unsqueeze(0), y.unsqueeze(0), timestep.unsqueeze(0)))
-        else:
-            fixed_dataset[-1] = (torch.cat([fixed_dataset[-1][0], X.unsqueeze(0)], dim=0), 
-                               torch.cat([fixed_dataset[-1][1], y.unsqueeze(0)], dim=0), 
-                               torch.cat([fixed_dataset[-1][2], timestep.unsqueeze(0)], dim=0))
-            
-    return fixed_dataset
-
 if __name__ == '__main__':
-    PROJECT_ROOT = Path(__file__).resolve().parents[1]
-    MODELS_DIR = PROJECT_ROOT / "models"
-    FIGURES_DIR = PROJECT_ROOT / "figures"
-    
     cfg = load_config('./config.yaml')
+    PROJECT_ROOT = Path(__file__).resolve().parents[1]
+    MODELS_DIR = PROJECT_ROOT / cfg.paths.models_dir
+    FIGURES_DIR = PROJECT_ROOT / cfg.paths.figures_dir
+    experiment_name = cfg.paths.experiment_name
+    experiment_path_dated = experiment_name + f'_{datetime.now().strftime("%d%m%Y_%H%M%S")}/'
+    dirs = setup_experiment_dirs(experiment_path_dated)
+        
+    torch.manual_seed(cfg.seed)
+    random.seed(cfg.seed)
+    np.random.seed(cfg.seed)
     
     # Device configuration
     if cfg.device == 'auto':
@@ -194,12 +215,11 @@ if __name__ == '__main__':
         device = torch.device(cfg.device)
     print(f'Using device: {device}')
     
-    experiment_name = cfg.paths.experiment_name
-    experiment_path_dated = experiment_name + f'_{datetime.now().strftime("%d%m%Y_%H%M%S")}/'
+    if cfg.data.grammar == 'anbn':
+        grammar = anbnGrammar(cfg.data.l)
+    else:
+        grammar = initialGrammar(cfg.data.l)
     
-    torch.manual_seed(cfg.seed)
-    
-    grammar = anbnGrammar(cfg.data.l)
     grammar.data = grammar.generate_seq()
     dataset = Dataset(grammar.data, device=device)        
     train_dataset, test_dataset = torch.utils.data.random_split(dataset, [cfg.data.train_split, 1 - cfg.data.train_split])
@@ -208,7 +228,7 @@ if __name__ == '__main__':
     test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=cfg.data.batch_size, shuffle=False)
     
     # fixed test dataset
-    fixed_test_dataset = get_fixed_dataset(test_dataset)
+    fixed_test_dataset = get_fixed_dataset(test_dataset, batch_size=cfg.data.batch_size)
 
     model = TransformerClassifier(
         max_len=cfg.model.max_len,
@@ -222,12 +242,14 @@ if __name__ == '__main__':
     model = model.to(device)
     # model.load_state_dict(torch.load('./models/anbn_diffusion_v8/diffusion_epochs=1'))
     model = train(model=model, 
-                  noise_resolution=cfg.model.T,
+                  T=cfg.model.T,
+                  eos_weight=cfg.model.eos_weight,
+                  dirs=dirs,
+                  evaluation_config=cfg.evaluation,
                   epochs=cfg.training.epochs, 
                   lr=cfg.training.learning_rate,
                   train_dataloader=train_dataloader, 
                   test_dataset=fixed_test_dataset,
-                  device=device,
-                  experiment_path=experiment_path_dated 
+                  device=device
                   )
     # torch.save(model.state_dict(), f'./models/anbn_diffusion_v5/diffusion_epochs=5000')
