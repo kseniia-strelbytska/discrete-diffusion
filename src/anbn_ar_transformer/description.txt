@@ -1,0 +1,16 @@
+This is an autoregressive transformer supporting two grammars:
+1) aNbN grammar
+	Rule 1: the number of 0s and 1s match
+	Rule 2: 0s precede 1s
+2) 'initial' grammar
+	Rule 1: the number of 0s and 1s match
+	Rule 2: string does not contain "010" or "101" as substring
+After 1740 training epochs on aNbN grammar (sequences up to l=256), the model plateaus with accuracy of 0.99 (experiments etc detailed in /models/anbn_trained_models/README.md
+
+For AR transformer, tokens are:
+0/1 for the binary string 
+EOS_token = 2
+SOS_token = 3
+PAD_token = 4
+MASK_token = 5
+
