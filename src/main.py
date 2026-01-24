@@ -124,11 +124,13 @@ def get_fixed_dataset(dataset, batch_size=32):
     return fixed_dataset
 
 # noise_resolution -- T in the scheduled unmasker
-def train(model, T=500, eos_weight=1.0, dirs=None, evaluation_config = None, epochs=5, lr=1e-3, train_dataloader=None, test_dataset=None, device='cpu'):
-    optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
+def train(model, T=500, eos_weight=1.0, dirs=None, evaluation_config = None, epochs=5, lr=1e-3, weight_decay=0.01, train_dataloader=None, test_dataset=None, device='cpu'):
+    optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
     loss_fn = rblb(eos_weight=eos_weight, device=device)
     
     stats = [[], [], [], [], []] # r1, r2, both, format, epochsteps
+    test_loss_stats = []
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
         
     with open(dirs.loss_log_path, 'a') as f:
         f.write('-'*20 + datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
@@ -168,9 +170,18 @@ def train(model, T=500, eos_weight=1.0, dirs=None, evaluation_config = None, epo
         with open(dirs.loss_log_path, 'a') as f:
             f.write(f"Epoch {epoch+1}/{epochs}, Average Test Loss: {avg_test_loss:.4f}\n")
             
+        test_loss_stats.append(avg_test_loss)
+        ax1.clear()
+        ax1.plot(np.arange(1, epoch+2), test_loss_stats)
+        ax1.set_xlabel('Epoch')
+        ax1.set_ylabel('Test Loss (fixed dataset)')
+        ax1.set_title('Test Loss vs Epoch')
+        ax1.grid(True)
+            
         if (epoch + 1) % evaluation_config.eval_every == 0:
             new_stats = evaluation_from_generation(model, 
                                                    grammar, 
+           
                                                    data=None, 
                                                    T=T, 
                                                    eval_type=evaluation_config.eval_type, 
@@ -183,15 +194,18 @@ def train(model, T=500, eos_weight=1.0, dirs=None, evaluation_config = None, epo
                 stats[i].append(new_stats[i]) 
             stats[-1].append(epoch + 1)
             
-            plt.plot(stats[-1], stats[0])
-            plt.plot(stats[-1], stats[1])
-            plt.plot(stats[-1], stats[2])
-            plt.plot(stats[-1], stats[3])
-            plt.legend(["Rule 1", "Rule 2", "Both Rules", "Format"], loc="lower right")
-            plt.savefig(dirs.figure_path / 'plot.png', dpi=150)
-            plt.clf()
+            ax2.clear()
+            ax2.plot(stats[-1], stats[0])
+            ax2.plot(stats[-1], stats[1])
+            ax2.plot(stats[-1], stats[2])
+            ax2.plot(stats[-1], stats[3])
+            ax2.set_xlabel('Epoch')
+            ax2.set_ylabel('Accuracy')
+            ax2.legend(["Rule 1", "Rule 2", "Both Rules", "Format"], loc="lower right")
+            torch.save(model.state_dict(), dirs.model_path / f'model_epochs={epoch + 1}')
             
-            torch.save(model.state_dict(), dirs.model_path / f'diffusion_epochs={epoch + 1}')
+        plt.tight_layout()
+        plt.savefig(dirs.figure_path / 'plot.png', dpi=150)
         
     return model
 
@@ -210,7 +224,8 @@ if __name__ == '__main__':
     
     # Device configuration
     if cfg.device == 'auto':
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        device = torch.device('mps' if torch.backends.mps.is_available() else 'cpu')
+        device = torch.device('cuda' if torch.cuda.is_available() else device)
     else:
         device = torch.device(cfg.device)
     print(f'Using device: {device}')
@@ -248,6 +263,7 @@ if __name__ == '__main__':
                   evaluation_config=cfg.evaluation,
                   epochs=cfg.training.epochs, 
                   lr=cfg.training.learning_rate,
+                  weight_decay=cfg.training.weight_decay,
                   train_dataloader=train_dataloader, 
                   test_dataset=fixed_test_dataset,
                   device=device

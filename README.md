@@ -52,7 +52,7 @@ Change src/config.yaml to specify parameters of your experiment. An example conf
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `seed` | int | Random seed for reproducibility |
-| `device` | `auto` \| `cpu` \| `gpu` | Device to run training on |
+| `device` | `auto` \| `cpu` \| `gpu` \| `mps` | Device to run training on |
 | **data** |  |  |
 | `data.l` | int | Max length of the data |
 | `data.train_split` | float | Fraction of data samples that go to training data |
