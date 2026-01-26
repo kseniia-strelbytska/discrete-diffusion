@@ -253,19 +253,53 @@ if __name__ == '__main__':
         embed_dim=cfg.model.embed_dim,
         dim_feedforward=cfg.model.dim_feedforward,
         dropout=cfg.model.dropout)
-    
     model = model.to(device)
+    
+    stats = [[], [], [], [], []] # r1, r2, both, format, epochsteps
+
+    for i in range(15, 21):
+        epochs = i * 500
+        model.load_state_dict(torch.load(MODELS_DIR / f'anbn_diffusion_v10/diffusion_epochs={epochs}'))
+
+        new_stats = evaluation_from_generation(model, 
+                                                grammar, 
+        
+                                                data=None, 
+                                                T=500, 
+                                                eval_type='autoregressive', 
+                                                samples_type='random', 
+                                                n_samples=100, 
+                                                device=device, 
+                                                loss_log_path=dirs.loss_log_path,
+                                                output_path=dirs.output_path)
+        for i in range(4):
+            stats[i].append(new_stats[i]) 
+        stats[-1].append(epochs)
+    
+    plt.clf()
+    fig, ax = plt.subplots()             
+    ax.plot(stats[-1], stats[0])
+    ax.plot(stats[-1], stats[1])
+    ax.plot(stats[-1], stats[2])
+    ax.plot(stats[-1], stats[3])
+    ax.set_xlabel('Epoch')
+    ax.set_ylabel('Accuracy')
+    ax.legend(["Rule 1", "Rule 2", "Both Rules", "Format"], loc="lower right")
+    plt.tight_layout()
+    plt.savefig(FIGURES_DIR / 'nlayers=6_plot.png', dpi=150)
+    
+    exit(0)
     # model.load_state_dict(torch.load('./models/anbn_diffusion_v8/diffusion_epochs=1'))
-    model = train(model=model, 
-                  T=cfg.model.T,
-                  eos_weight=cfg.model.eos_weight,
-                  dirs=dirs,
-                  evaluation_config=cfg.evaluation,
-                  epochs=cfg.training.epochs, 
-                  lr=cfg.training.learning_rate,
-                  weight_decay=cfg.training.weight_decay,
-                  train_dataloader=train_dataloader, 
-                  test_dataset=fixed_test_dataset,
-                  device=device
-                  )
+    # model = train(model=model, 
+    #               T=cfg.model.T,
+    #               eos_weight=cfg.model.eos_weight,
+    #               dirs=dirs,
+    #               evaluation_config=cfg.evaluation,
+    #               epochs=cfg.training.epochs, 
+    #               lr=cfg.training.learning_rate,
+    #               weight_decay=cfg.training.weight_decay,
+    #               train_dataloader=train_dataloader, 
+    #               test_dataset=fixed_test_dataset,
+    #               device=device
+    #               )
     # torch.save(model.state_dict(), f'./models/anbn_diffusion_v5/diffusion_epochs=5000')
