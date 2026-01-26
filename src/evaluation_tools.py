@@ -32,7 +32,7 @@ def evaluation_loss(model, dataloader, device='cpu'):
 
 # eval_type: diffusion or autoregressive
 # samples_type for anbn: random or full
-def evaluation_from_generation(model, grammar, data=None, T=500, eval_type='diffusion', samples_type='random', n_samples=100, device='cpu', loss_log_path=None, output_path=None):
+def evaluation_from_generation(model, grammar, data=None, T=500, eval_type='diffusion', samples_type='random', n_samples=100, write_steps=False, device='cpu', loss_log_path=None, output_path=None):
     if data != None:
         data = data.clone()
 
@@ -69,19 +69,32 @@ def evaluation_from_generation(model, grammar, data=None, T=500, eval_type='diff
     
     model.eval()
     with torch.no_grad():
-        for s in tqdm(data):
+        for idx, s in enumerate(tqdm(data)):
             total += 1
-            y_pred = unmaskModel(s, ((s == MASK_token).sum() / torch.numel(s))) # no batch dimension
+            if write_steps == False:
+                y_pred = unmaskModel(s, ((s == MASK_token).sum() / torch.numel(s))) # no batch dimension
+            else:
+                y_pred, steps = unmaskModel(s, ((s == MASK_token).sum() / torch.numel(s)), return_steps=True)
             y_pred_stats = grammar.evaluate(y_pred)
             stats += y_pred_stats
             
             with open(output_path, 'a') as f:
-                f.write(''.join([str(i) for i in y_pred.tolist()]))
-                
+                f.write("IDX " + str(idx) + " " + ''.join([str(i) for i in y_pred.tolist()]))
                 is_format_ok = ('True' if y_pred_stats[-1] == 1 else 'False')
                 cnt_zeros, cnt_ones = (y_pred==0).sum(), (y_pred==1).sum()
-                
                 f.write(f' zeros={cnt_zeros}, ones={cnt_ones}, format={is_format_ok} \n')
+                
+                if write_steps == True:
+                    f.write('Full denoising log: \n')
+                    prev = torch.tensor([0])
+                    for step in steps:
+                        if step.tolist() != prev.tolist():
+                            f.write(''.join([str(i) for i in step.tolist()]) + '\n')
+                            cnt_zeros, cnt_ones, masks = (step==0).sum(), (step==1).sum(), (step==MASK_token).sum()
+                            f.write(f' zeros={cnt_zeros}, ones={cnt_ones}, masks={masks} \n')
+                            prev = step
+                        
+                    f.write('-' * 30 + '\n')
     
     evaluation_log = f"""
     Evaluation from generation satisfies rule #1: {stats[0]}/{total} ({stats[0]/total})

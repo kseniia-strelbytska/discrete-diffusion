@@ -12,9 +12,11 @@ class ScheduledUnmasker(nn.Module):
         self.T = T
 
     # fraction (0 <= fr <= 1) specifies the next step 
-    def forward(self, init_X, timestep):
+    def forward(self, init_X, timestep, return_steps=False):
         X = init_X.clone().long().to(self.device)
         L = X.shape[0]
+        
+        steps = [X.clone()]
                 
         self.model.eval()
         with torch.no_grad():            
@@ -41,5 +43,8 @@ class ScheduledUnmasker(nn.Module):
                 sampled_X = torch.distributions.categorical.Categorical(probs=probs).sample()
                 
                 X[X == MASK_token] = sampled_X[X == MASK_token]
- 
+                steps.append(X.clone())
+
+            if return_steps == True:
+                return X, steps
             return X 

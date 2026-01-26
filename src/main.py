@@ -255,11 +255,26 @@ if __name__ == '__main__':
         dropout=cfg.model.dropout)
     model = model.to(device)
     
+    model.load_state_dict(torch.load(MODELS_DIR / f'anbn_diffusion_v8/diffusion_epochs={32500}'))
+    new_stats = evaluation_from_generation(model, 
+                                                grammar, 
+                                                data=None, 
+                                                T=1500, 
+                                                eval_type='autoregressive', 
+                                                samples_type='full', 
+                                                n_samples=-1, 
+                                                write_steps=True,
+                                                device=device, 
+                                                loss_log_path=dirs.loss_log_path,
+                                                output_path=dirs.output_path)
+    
+    exit(0)
+    
     stats = [[], [], [], [], []] # r1, r2, both, format, epochsteps
 
-    for i in range(15, 21):
-        epochs = i * 500
-        model.load_state_dict(torch.load(MODELS_DIR / f'anbn_diffusion_v10/diffusion_epochs={epochs}'))
+    for i in range(27, 28):
+        epochs = 32500
+        model.load_state_dict(torch.load(MODELS_DIR / f'anbn_diffusion_v8/diffusion_epochs={epochs}'))
 
         new_stats = evaluation_from_generation(model, 
                                                 grammar, 
@@ -267,7 +282,7 @@ if __name__ == '__main__':
                                                 data=None, 
                                                 T=500, 
                                                 eval_type='autoregressive', 
-                                                samples_type='random', 
+                                                samples_type='full', 
                                                 n_samples=100, 
                                                 device=device, 
                                                 loss_log_path=dirs.loss_log_path,
@@ -286,7 +301,7 @@ if __name__ == '__main__':
     ax.set_ylabel('Accuracy')
     ax.legend(["Rule 1", "Rule 2", "Both Rules", "Format"], loc="lower right")
     plt.tight_layout()
-    plt.savefig(FIGURES_DIR / 'nlayers=6_plot.png', dpi=150)
+    plt.savefig(FIGURES_DIR / 'v8_32500epochs_test_run.png', dpi=150)
     
     exit(0)
     # model.load_state_dict(torch.load('./models/anbn_diffusion_v8/diffusion_epochs=1'))
