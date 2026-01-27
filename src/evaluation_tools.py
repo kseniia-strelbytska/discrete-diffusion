@@ -126,7 +126,6 @@ def evaluation_from_generation(model, grammar, data=None, T=500, eval_type='diff
                 with open(figures_path / f'IDX={idx}.txt', 'a') as f:
                     ans, output_str = get_timeline(max_len=grammar.l+2, steps=steps, idx=idx)  
                     f.write(output_str)
-                    
     
     evaluation_log = f"""
     Evaluation from generation satisfies rule #1: {stats[0]}/{total} ({stats[0]/total})

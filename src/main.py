@@ -1,21 +1,24 @@
+import os
+import random
+import shutil
+from datetime import datetime
+from pathlib import Path
+from types import SimpleNamespace
+
+import argparse
+import matplotlib.pyplot as plt
+import numpy as np
 import torch
 import torch.nn as nn
-from tqdm import tqdm
-import os
-import numpy as np
-import random
-import matplotlib.pyplot as plt
-import shutil
-from pathlib import Path
 import yaml
-from types import SimpleNamespace
-from datetime import datetime
+from tqdm import tqdm
+
+from anbn import anbnGrammar
+from constants import EOS_token, SOS_token, PAD_token, MASK_token
+from evaluation_tools import evaluation_loss, evaluation_from_generation, get_timeline
+from initialgrammar import initialGrammar
 from loss import rblb
 from noise_schedule_unmask import ScheduledUnmasker
-from evaluation_tools import evaluation_loss, evaluation_from_generation, get_timeline
-from anbn import anbnGrammar
-from initialgrammar import initialGrammar
-from constants import EOS_token, SOS_token, PAD_token, MASK_token
 
 def dict_to_ns(d):
     return SimpleNamespace(**{
@@ -124,7 +127,7 @@ def get_fixed_dataset(dataset, batch_size=32):
     return fixed_dataset
 
 # noise_resolution -- T in the scheduled unmasker
-def train(model, T=500, eos_weight=1.0, dirs=None, evaluation_config = None, epochs=5, lr=1e-3, weight_decay=0.01, train_dataloader=None, test_dataset=None, device='cpu'):
+def train(model, T=500, eos_weight=1.0, dirs=None, evaluation_config = None, epochs=5, lr=1e-3, weight_decay=0.01, train_dataloader=None, test_dataset=None, device='cpu', verbose=False):
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
     loss_fn = rblb(eos_weight=eos_weight, device=device)
     
@@ -136,10 +139,11 @@ def train(model, T=500, eos_weight=1.0, dirs=None, evaluation_config = None, epo
         f.write('-'*20 + datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     
     model.train()
-    for epoch in range(epochs):
+    
+    epochs_iter = tqdm(range(epochs), desc="Training Epochs") if verbose else range(epochs)
+    for epoch in epochs_iter:
         total_loss = 0
-        #cs = []
-        
+
         model.train()
         for X_batch, y_batch, timestep in train_dataloader:
             # Ensure batches are on the correct device
@@ -155,7 +159,8 @@ def train(model, T=500, eos_weight=1.0, dirs=None, evaluation_config = None, epo
             total_loss += loss.item()
         
         avg_loss = total_loss / len(train_dataloader)
-        print(f"Epoch {epoch+1}/{epochs}, Loss: {avg_loss:.4f}")
+        if verbose:
+            epochs_iter.set_postfix({'Avg Loss': f'{avg_loss:.4f}'})
         with open(dirs.loss_log_path, 'a') as f:
             f.write(f"Epoch {epoch+1}/{epochs}, Loss: {avg_loss:.4f}\n")
         
@@ -166,7 +171,10 @@ def train(model, T=500, eos_weight=1.0, dirs=None, evaluation_config = None, epo
             loss = loss_fn(X_batch, logits, y_batch, timestep)
             test_loss += loss.item()
         avg_test_loss = test_loss / len(test_dataset)
-        print(f"Epoch {epoch+1}/{epochs}, Average Test Loss: {avg_test_loss:.4f}")
+
+        if verbose
+            print(f"Epoch {epoch+1}/{epochs}, Average Test Loss: {avg_test_loss:.4f}")
+    
         with open(dirs.loss_log_path, 'a') as f:
             f.write(f"Epoch {epoch+1}/{epochs}, Average Test Loss: {avg_test_loss:.4f}\n")
             
@@ -209,8 +217,15 @@ def train(model, T=500, eos_weight=1.0, dirs=None, evaluation_config = None, epo
         
     return model
 
-if __name__ == '__main__':
-    cfg = load_config('./config.yaml')
+def parse_args():
+    parser = argparse.ArgumentParser(description="discrete diffusion training and evaluation")
+    parser.add_argument('--config', type=str, default='./config.yaml', help='Path to the configuration file.')
+    parser.add_argument('--verbose', action='store_true', help='Enable verbose output.')
+    return parser.parse_args()
+
+def main():
+    args = parse_args()
+    cfg = load_config(args.config)
     PROJECT_ROOT = Path(__file__).resolve().parents[1]
     MODELS_DIR = PROJECT_ROOT / cfg.paths.models_dir
     FIGURES_DIR = PROJECT_ROOT / cfg.paths.figures_dir
@@ -223,9 +238,14 @@ if __name__ == '__main__':
     np.random.seed(cfg.seed)
     
     # Device configuration
+    device = None
     if cfg.device == 'auto':
-        device = torch.device('mps' if torch.backends.mps.is_available() else 'cpu')
-        device = torch.device('cuda' if torch.cuda.is_available() else device)
+        if torch.backends.mps.is_available():
+            device = torch.device('mps')
+        elif torch.cuda.is_available():
+            device = torch.device('cuda')
+        else:
+            device = torch.device('cpu')
     else:
         device = torch.device(cfg.device)
     print(f'Using device: {device}')
@@ -280,7 +300,7 @@ if __name__ == '__main__':
                                                     eval_type='autoregressive', 
                                                     samples_type='full', 
                                                     n_samples=-1, 
-                                                    write_steps=True,
+                                                    write_steps=False,
                                                     device=device, 
                                                     figures_path=dirs.figure_path,
                                                     loss_log_path=dirs.loss_log_path,
@@ -333,6 +353,10 @@ if __name__ == '__main__':
     #               weight_decay=cfg.training.weight_decay,
     #               train_dataloader=train_dataloader, 
     #               test_dataset=fixed_test_dataset,
-    #               device=device
+    #               device=device,
+    #               verbose=args.verbose
     #               )
     # torch.save(model.state_dict(), f'./models/anbn_diffusion_v5/diffusion_epochs=5000')
+
+if __name__ == '__main__':
+    main()
