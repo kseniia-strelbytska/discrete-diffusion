@@ -126,7 +126,7 @@ def get_fixed_dataset(dataset, batch_size=32, device='cpu'):
     return fixed_dataset
 
 # noise_resolution -- T in the scheduled unmasker
-def train(model, T=500, eos_weight=1.0, dirs=None, evaluation_config = None, epochs=5, lr=1e-3, weight_decay=0.01, train_dataloader=None, test_dataset=None, device='cpu', verbose=False):
+def train(model, grammar, T=500, eos_weight=1.0, dirs=None, evaluation_config = None, epochs=5, lr=1e-3, weight_decay=0.01, train_dataloader=None, test_dataset=None, device='cpu', verbose=False):
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
     loss_fn = rblb(eos_weight=eos_weight, device=device)
     
@@ -139,7 +139,7 @@ def train(model, T=500, eos_weight=1.0, dirs=None, evaluation_config = None, epo
     
     model.train()
     
-    epochs_iter = tqdm(range(epochs), desc="Training Epochs") if verbose else range(epochs)
+    epochs_iter = range(epochs) if verbose else tqdm(range(epochs), desc="Training Epochs")
     for epoch in epochs_iter:
         total_loss = 0
 
@@ -159,7 +159,7 @@ def train(model, T=500, eos_weight=1.0, dirs=None, evaluation_config = None, epo
         
         avg_loss = total_loss / len(train_dataloader)
         if verbose:
-            epochs_iter.set_postfix({'Avg Loss': f'{avg_loss:.4f}'})
+            print(f"Epoch {epoch+1}/{epochs}, Loss: {avg_loss:.4f}\n")
         with open(dirs.loss_log_path, 'a') as f:
             f.write(f"Epoch {epoch+1}/{epochs}, Loss: {avg_loss:.4f}\n")
         
@@ -219,6 +219,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="discrete diffusion training and evaluation")
     parser.add_argument('--config', type=str, default='./config.yaml', help='Path to the configuration file.')
     parser.add_argument('--verbose', action='store_true', help='Enable verbose output.')
+    parser.add_argument('--mode', type=str, default='train', choices=['train', 'eval'], help='Mode: train or eval.')
     return parser.parse_args()
 
 def main():
@@ -273,88 +274,90 @@ def main():
         dropout=cfg.model.dropout)
     model = model.to(device)
     
-    model.load_state_dict(torch.load(MODELS_DIR / f'anbn_diffusion_v8/diffusion_epochs={32500}'))
-    # unmask = ScheduledUnmasker(model, T=1500, device=device)
-    # l = 59
-    # input_X = grammar.data[l-1].clone()
-    # input_X[l+2:] = MASK_token 
-    # output_X, steps = unmask(input_X, ((input_X == MASK_token).sum() / torch.numel(input_X)), return_steps=True)
-    # line, output_str = get_timeline(max_len=grammar.l+2, steps=steps)
+    if args.mode == 'train':
+        model = train(model, 
+                    grammar,
+                    T=cfg.model.T,
+                    eos_weight=cfg.model.eos_weight,
+                    dirs=dirs,
+                    evaluation_config=cfg.evaluation,
+                    epochs=cfg.training.epochs, 
+                    lr=cfg.training.learning_rate,
+                    weight_decay=cfg.training.weight_decay,
+                    train_dataloader=train_dataloader, 
+                    test_dataset=fixed_test_dataset,
+                    device=device,
+                    verbose=args.verbose
+                    )
+    else:    
+        # model.load_state_dict(torch.load(MODELS_DIR / f'anbn_diffusion_v8/diffusion_epochs={32500}'))
+        # unmask = ScheduledUnmasker(model, T=1500, device=device)
+        # l = 59
+        # input_X = grammar.data[l-1].clone()
+        # input_X[l+2:] = MASK_token 
+        # output_X, steps = unmask(input_X, ((input_X == MASK_token).sum() / torch.numel(input_X)), return_steps=True)
+        # line, output_str = get_timeline(max_len=grammar.l+2, steps=steps)
 
-    seeds = [i for i in range(1, 11)]
-    
-    for chosen_seed in seeds:
-        torch.manual_seed(chosen_seed)
-        random.seed(chosen_seed)
-        np.random.seed(chosen_seed)
+        # seeds = [i for i in range(1, 11)]
         
-        experiment_path_dated = f'{experiment_name}_seed={chosen_seed}_{datetime.now().strftime("%d%m%Y_%H%M%S")}/'
-        dirs = setup_experiment_dirs(PROJECT_ROOT, MODELS_DIR, FIGURES_DIR, args.config, experiment_path_dated)
+        # for chosen_seed in seeds:
+        #     torch.manual_seed(chosen_seed)
+        #     random.seed(chosen_seed)
+        #     np.random.seed(chosen_seed)
+            
+        #     experiment_path_dated = f'{experiment_name}_seed={chosen_seed}_{datetime.now().strftime("%d%m%Y_%H%M%S")}/'
+        #     dirs = setup_experiment_dirs(PROJECT_ROOT, MODELS_DIR, FIGURES_DIR, args.config, experiment_path_dated)
+            
+        #     new_stats = evaluation_from_generation(model, 
+        #                                                 grammar, 
+        #                                                 data=None, 
+        #                                                 T=cfg.model.T, 
+        #                                                 eval_type='autoregressive', 
+        #                                                 samples_type='full', 
+        #                                                 n_samples=-1, 
+        #                                                 write_steps=False,
+        #                                                 device=device, 
+        #                                                 figures_path=dirs.figure_path,
+        #                                                 loss_log_path=dirs.loss_log_path,
+        #                                                 output_path=dirs.output_path)
         
-        new_stats = evaluation_from_generation(model, 
+        # exit(0)
+        
+        stats = [[], [], [], [], []] # r1, r2, both, format, epochsteps
+
+        for i in range(27, 28):
+            epochs = 32500
+            model.load_state_dict(torch.load(MODELS_DIR / f'anbn_diffusion_v8/diffusion_epochs={epochs}'))
+
+            new_stats = evaluation_from_generation(model, 
                                                     grammar, 
+            
                                                     data=None, 
-                                                    T=cfg.model.T, 
+                                                    T=500, 
                                                     eval_type='autoregressive', 
                                                     samples_type='full', 
-                                                    n_samples=-1, 
-                                                    write_steps=False,
+                                                    n_samples=100, 
                                                     device=device, 
-                                                    figures_path=dirs.figure_path,
                                                     loss_log_path=dirs.loss_log_path,
                                                     output_path=dirs.output_path)
-    
-    exit(0)
-    
-    stats = [[], [], [], [], []] # r1, r2, both, format, epochsteps
-
-    for i in range(27, 28):
-        epochs = 32500
-        model.load_state_dict(torch.load(MODELS_DIR / f'anbn_diffusion_v8/diffusion_epochs={epochs}'))
-
-        new_stats = evaluation_from_generation(model, 
-                                                grammar, 
+            for i in range(4):
+                stats[i].append(new_stats[i]) 
+            stats[-1].append(epochs)
         
-                                                data=None, 
-                                                T=500, 
-                                                eval_type='autoregressive', 
-                                                samples_type='full', 
-                                                n_samples=100, 
-                                                device=device, 
-                                                loss_log_path=dirs.loss_log_path,
-                                                output_path=dirs.output_path)
-        for i in range(4):
-            stats[i].append(new_stats[i]) 
-        stats[-1].append(epochs)
+        plt.clf()
+        fig, ax = plt.subplots()             
+        ax.plot(stats[-1], stats[0])
+        ax.plot(stats[-1], stats[1])
+        ax.plot(stats[-1], stats[2])
+        ax.plot(stats[-1], stats[3])
+        ax.set_xlabel('Epoch')
+        ax.set_ylabel('Accuracy')
+        ax.legend(["Rule 1", "Rule 2", "Both Rules", "Format"], loc="lower right")
+        plt.tight_layout()
+        plt.savefig(FIGURES_DIR / 'v8_32500epochs_test_run.png', dpi=150)
+        
+        exit(0)
     
-    plt.clf()
-    fig, ax = plt.subplots()             
-    ax.plot(stats[-1], stats[0])
-    ax.plot(stats[-1], stats[1])
-    ax.plot(stats[-1], stats[2])
-    ax.plot(stats[-1], stats[3])
-    ax.set_xlabel('Epoch')
-    ax.set_ylabel('Accuracy')
-    ax.legend(["Rule 1", "Rule 2", "Both Rules", "Format"], loc="lower right")
-    plt.tight_layout()
-    plt.savefig(FIGURES_DIR / 'v8_32500epochs_test_run.png', dpi=150)
-    
-    exit(0)
-    # model.load_state_dict(torch.load('./models/anbn_diffusion_v8/diffusion_epochs=1'))
-    # model = train(model=model, 
-    #               T=cfg.model.T,
-    #               eos_weight=cfg.model.eos_weight,
-    #               dirs=dirs,
-    #               evaluation_config=cfg.evaluation,
-    #               epochs=cfg.training.epochs, 
-    #               lr=cfg.training.learning_rate,
-    #               weight_decay=cfg.training.weight_decay,
-    #               train_dataloader=train_dataloader, 
-    #               test_dataset=fixed_test_dataset,
-    #               device=device,
-    #               verbose=args.verbose
-    #               )
-    # torch.save(model.state_dict(), f'./models/anbn_diffusion_v5/diffusion_epochs=5000')
 
 if __name__ == '__main__':
     main()

@@ -1,5 +1,5 @@
-seed: 41
-device: cuda
+seed: 1
+device: auto
 data:
   l: 256
   train_split: 0.9
@@ -11,21 +11,21 @@ model:
   n_head: 4
   n_layers: 4
   embed_dim: 128
-  dim_feedforward: 128
+  dim_feedforward: 1024
   dropout: 0.1
-  T: 1500
+  T: 500
   eos_weight: 10.0
 training:
-  epochs: 30000
+  epochs: 100000
   learning_rate: 0.001
   weight_decay: 0.0
 evaluation:
   eval_every: 500
-  n_samples: 100
+  n_samples: 200
   samples_type: random
   eval_type: autoregressive
 paths:
   models_dir: models
   figures_dir: figures
-  experiment_name: full_denoising_output_log_t=1500_variable_seeds
-notes: "Investigating seed effect on evaluation (pre-trained model remains the same)"
+  experiment_name: n_embed=128_ff=1024_drop=0.1
+notes: "Investigating embed_dim=128 & dim_feedforward=1024, dropout=0.1, weight_decay=0"
