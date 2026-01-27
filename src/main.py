@@ -31,7 +31,7 @@ def load_config(path="config.yaml"):
         cfg = yaml.safe_load(f)
     return dict_to_ns(cfg)
 
-def setup_experiment_dirs(experiment_path='new_diffusion/'):
+def setup_experiment_dirs(PROJECT_ROOT, MODELS_DIR, FIGURES_DIR, config_path, experiment_path='new_diffusion/'):
     model_path = MODELS_DIR / experiment_path
     figure_path = FIGURES_DIR / experiment_path
     loss_log_path = figure_path / 'loss_log.txt'
@@ -40,9 +40,8 @@ def setup_experiment_dirs(experiment_path='new_diffusion/'):
     model_path.mkdir(parents=True, exist_ok=False)
     figure_path.mkdir(parents=True, exist_ok=False)
     
-    config_src = PROJECT_ROOT / "src" / "config.yaml"
     config_dst = model_path / "config.yaml"
-    shutil.copy2(config_src, config_dst)
+    shutil.copy2(config_path, config_dst)
     
     print(f'Setup finished: directory {experiment_path}')
     
@@ -108,7 +107,7 @@ class Dataset(torch.utils.data.Dataset):
         
         return X_sample, y_sample, prob
 
-def get_fixed_dataset(dataset, batch_size=32):
+def get_fixed_dataset(dataset, batch_size=32, device='cpu'):
     fixed_dataset = []
     batch_size = 32
     for idx in range(len(dataset)):
@@ -230,7 +229,7 @@ def main():
     FIGURES_DIR = PROJECT_ROOT / cfg.paths.figures_dir
     experiment_name = cfg.paths.experiment_name
     experiment_path_dated = experiment_name + f'_{datetime.now().strftime("%d%m%Y_%H%M%S")}/'
-    dirs = setup_experiment_dirs(experiment_path_dated)
+    dirs = setup_experiment_dirs(PROJECT_ROOT, MODELS_DIR, FIGURES_DIR, args.config, experiment_path_dated)
         
     torch.manual_seed(cfg.seed)
     random.seed(cfg.seed)
@@ -262,7 +261,7 @@ def main():
     test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=cfg.data.batch_size, shuffle=False)
     
     # fixed test dataset
-    fixed_test_dataset = get_fixed_dataset(test_dataset, batch_size=cfg.data.batch_size)
+    fixed_test_dataset = get_fixed_dataset(test_dataset, batch_size=cfg.data.batch_size, device=device)
 
     model = TransformerClassifier(
         max_len=cfg.model.max_len,
@@ -290,7 +289,7 @@ def main():
         np.random.seed(chosen_seed)
         
         experiment_path_dated = f'{experiment_name}_seed={chosen_seed}_{datetime.now().strftime("%d%m%Y_%H%M%S")}/'
-        dirs = setup_experiment_dirs(experiment_path_dated)
+        dirs = setup_experiment_dirs(PROJECT_ROOT, MODELS_DIR, FIGURES_DIR, args.config, experiment_path_dated)
         
         new_stats = evaluation_from_generation(model, 
                                                     grammar, 
