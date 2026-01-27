@@ -12,7 +12,7 @@ from types import SimpleNamespace
 from datetime import datetime
 from loss import rblb
 from noise_schedule_unmask import ScheduledUnmasker
-from evaluation_tools import evaluation_loss, evaluation_from_generation
+from evaluation_tools import evaluation_loss, evaluation_from_generation, get_timeline
 from anbn import anbnGrammar
 from initialgrammar import initialGrammar
 from constants import EOS_token, SOS_token, PAD_token, MASK_token
@@ -256,17 +256,35 @@ if __name__ == '__main__':
     model = model.to(device)
     
     model.load_state_dict(torch.load(MODELS_DIR / f'anbn_diffusion_v8/diffusion_epochs={32500}'))
-    new_stats = evaluation_from_generation(model, 
-                                                grammar, 
-                                                data=None, 
-                                                T=1500, 
-                                                eval_type='autoregressive', 
-                                                samples_type='full', 
-                                                n_samples=-1, 
-                                                write_steps=True,
-                                                device=device, 
-                                                loss_log_path=dirs.loss_log_path,
-                                                output_path=dirs.output_path)
+    # unmask = ScheduledUnmasker(model, T=1500, device=device)
+    # l = 59
+    # input_X = grammar.data[l-1].clone()
+    # input_X[l+2:] = MASK_token 
+    # output_X, steps = unmask(input_X, ((input_X == MASK_token).sum() / torch.numel(input_X)), return_steps=True)
+    # line, output_str = get_timeline(max_len=grammar.l+2, steps=steps)
+
+    seeds = [i for i in range(1, 11)]
+    
+    for chosen_seed in seeds:
+        torch.manual_seed(chosen_seed)
+        random.seed(chosen_seed)
+        np.random.seed(chosen_seed)
+        
+        experiment_path_dated = f'{experiment_name}_seed={chosen_seed}_{datetime.now().strftime("%d%m%Y_%H%M%S")}/'
+        dirs = setup_experiment_dirs(experiment_path_dated)
+        
+        new_stats = evaluation_from_generation(model, 
+                                                    grammar, 
+                                                    data=None, 
+                                                    T=cfg.model.T, 
+                                                    eval_type='autoregressive', 
+                                                    samples_type='full', 
+                                                    n_samples=-1, 
+                                                    write_steps=True,
+                                                    device=device, 
+                                                    figures_path=dirs.figure_path,
+                                                    loss_log_path=dirs.loss_log_path,
+                                                    output_path=dirs.output_path)
     
     exit(0)
     

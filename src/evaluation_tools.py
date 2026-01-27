@@ -30,9 +30,35 @@ def evaluation_loss(model, dataloader, device='cpu'):
             
     print(f'Evaluation, Loss: {total_loss/len(dataloader)}')
 
+def get_timeline(max_len=258, steps=None, idx=-1):
+    ans = [(-1, -1)] * max_len 
+    
+    for t, step in enumerate(steps):
+        for idx, val in enumerate(step):
+            if val != 5:
+                if ans[idx] == (-1, -1):
+                    ans[idx] = (t, val.item())
+    
+    y_pred = steps[-1].clone()
+    s, mid_start, pad_start = '', False, False
+    s += "IDX " + str(idx) + " " + ''.join([str(i) for i in y_pred.tolist()]) + '\n'
+    cnt_zeros, cnt_ones = (y_pred==0).sum(), (y_pred==1).sum()
+    s += f' zeros={cnt_zeros}, ones={cnt_ones} \n'
+    
+    for idx, i in enumerate(ans):
+        s += f'{idx:>4}: {i[1]:<20} set at {i[0]:>10}\n'
+        if idx + 1 < len(ans) and ans[idx + 1][1] == 1 and mid_start == False:
+            s += '------MIDDLE------\n'
+            mid_start = True
+        elif idx + 1 < len(ans) and ans[idx + 1][1] == PAD_token and pad_start == False:
+            s += '------START_OF_PADDING------\n'
+            pad_start = True
+    
+    return ans, s
+
 # eval_type: diffusion or autoregressive
 # samples_type for anbn: random or full
-def evaluation_from_generation(model, grammar, data=None, T=500, eval_type='diffusion', samples_type='random', n_samples=100, write_steps=False, device='cpu', loss_log_path=None, output_path=None):
+def evaluation_from_generation(model, grammar, data=None, T=500, eval_type='diffusion', samples_type='random', n_samples=100, write_steps=False, device='cpu', figures_path=None, loss_log_path=None, output_path=None):
     if data != None:
         data = data.clone()
 
@@ -95,6 +121,12 @@ def evaluation_from_generation(model, grammar, data=None, T=500, eval_type='diff
                             prev = step
                         
                     f.write('-' * 30 + '\n')
+                    
+            if write_steps == True:
+                with open(figures_path / f'IDX={idx}.txt', 'a') as f:
+                    ans, output_str = get_timeline(max_len=grammar.l+2, steps=steps, idx=idx)  
+                    f.write(output_str)
+                    
     
     evaluation_log = f"""
     Evaluation from generation satisfies rule #1: {stats[0]}/{total} ({stats[0]/total})

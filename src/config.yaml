@@ -1,5 +1,5 @@
-seed: 42
-device: auto
+seed: 41
+device: cpu
 data:
   l: 256
   train_split: 0.9
@@ -9,14 +9,14 @@ model:
   max_len: 258       
   vocab_size: 6
   n_head: 4
-  n_layers: 6
-  embed_dim: 12
-  dim_feedforward: 1024
+  n_layers: 4
+  embed_dim: 128
+  dim_feedforward: 128
   dropout: 0.1
-  T: 500
+  T: 1500
   eos_weight: 10.0
 training:
-  epochs: 5000
+  epochs: 30000
   learning_rate: 0.001
   weight_decay: 0.0
 evaluation:
@@ -27,5 +27,5 @@ evaluation:
 paths:
   models_dir: models
   figures_dir: figures
-  experiment_name: dropout=0_embed_dim=128
-notes: "Dropout 0, 1024 feedforward, 128 embed_dim (note the seed value)"
+  experiment_name: full_denoising_output_log_t=1500_variable_seeds
+notes: "Investigating seed effect on evaluation (pre-trained model remains the same)"
