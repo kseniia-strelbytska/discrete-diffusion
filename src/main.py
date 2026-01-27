@@ -172,7 +172,7 @@ def train(model, T=500, eos_weight=1.0, dirs=None, evaluation_config = None, epo
             test_loss += loss.item()
         avg_test_loss = test_loss / len(test_dataset)
 
-        if verbose
+        if verbose:
             print(f"Epoch {epoch+1}/{epochs}, Average Test Loss: {avg_test_loss:.4f}")
     
         with open(dirs.loss_log_path, 'a') as f:
@@ -189,7 +189,6 @@ def train(model, T=500, eos_weight=1.0, dirs=None, evaluation_config = None, epo
         if (epoch + 1) % evaluation_config.eval_every == 0:
             new_stats = evaluation_from_generation(model, 
                                                    grammar, 
-           
                                                    data=None, 
                                                    T=T, 
                                                    eval_type=evaluation_config.eval_type, 

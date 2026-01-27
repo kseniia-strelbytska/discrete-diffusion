@@ -8280,3 +8280,769 @@ Epoch 4116/60000, Loss: 3200.4255
 Epoch 4116/60000, Average Test Loss: 2208.5051
 Epoch 4117/60000, Loss: 2086.1412
 Epoch 4117/60000, Average Test Loss: 2179.4314
+Epoch 4118/60000, Loss: 1374.5770
+Epoch 4118/60000, Average Test Loss: 2117.7451
+Epoch 4119/60000, Loss: 2783.0474
+Epoch 4119/60000, Average Test Loss: 2057.9822
+Epoch 4120/60000, Loss: 2148.5130
+Epoch 4120/60000, Average Test Loss: 2005.7098
+Epoch 4121/60000, Loss: 1886.8538
+Epoch 4121/60000, Average Test Loss: 1960.5951
+Epoch 4122/60000, Loss: 2049.4344
+Epoch 4122/60000, Average Test Loss: 1929.1080
+Epoch 4123/60000, Loss: 2254.6919
+Epoch 4123/60000, Average Test Loss: 1935.3296
+Epoch 4124/60000, Loss: 2355.7089
+Epoch 4124/60000, Average Test Loss: 1931.1514
+Epoch 4125/60000, Loss: 2783.7599
+Epoch 4125/60000, Average Test Loss: 1914.0387
+Epoch 4126/60000, Loss: 970.6845
+Epoch 4126/60000, Average Test Loss: 1911.8549
+Epoch 4127/60000, Loss: 1646.8782
+Epoch 4127/60000, Average Test Loss: 1882.3950
+Epoch 4128/60000, Loss: 1414.5338
+Epoch 4128/60000, Average Test Loss: 1862.2549
+Epoch 4129/60000, Loss: 1003.3337
+Epoch 4129/60000, Average Test Loss: 1861.7513
+Epoch 4130/60000, Loss: 5317.3418
+Epoch 4130/60000, Average Test Loss: 1842.3392
+Epoch 4131/60000, Loss: 1424.7827
+Epoch 4131/60000, Average Test Loss: 1895.8724
+Epoch 4132/60000, Loss: 1677.2125
+Epoch 4132/60000, Average Test Loss: 1977.2303
+Epoch 4133/60000, Loss: 1304.9442
+Epoch 4133/60000, Average Test Loss: 2057.0894
+Epoch 4134/60000, Loss: 1986.2987
+Epoch 4134/60000, Average Test Loss: 2085.1208
+Epoch 4135/60000, Loss: 2297.3444
+Epoch 4135/60000, Average Test Loss: 2025.3236
+Epoch 4136/60000, Loss: 1642.6572
+Epoch 4136/60000, Average Test Loss: 1968.2061
+Epoch 4137/60000, Loss: 1770.0117
+Epoch 4137/60000, Average Test Loss: 1972.3033
+Epoch 4138/60000, Loss: 2448.9572
+Epoch 4138/60000, Average Test Loss: 2001.6383
+Epoch 4139/60000, Loss: 3250.5508
+Epoch 4139/60000, Average Test Loss: 2033.3060
+Epoch 4140/60000, Loss: 4397.9850
+Epoch 4140/60000, Average Test Loss: 2105.5266
+Epoch 4141/60000, Loss: 2146.0994
+Epoch 4141/60000, Average Test Loss: 2156.7109
+Epoch 4142/60000, Loss: 2411.6420
+Epoch 4142/60000, Average Test Loss: 2220.3850
+Epoch 4143/60000, Loss: 2045.1523
+Epoch 4143/60000, Average Test Loss: 2300.4443
+Epoch 4144/60000, Loss: 3796.2378
+Epoch 4144/60000, Average Test Loss: 2373.3015
+Epoch 4145/60000, Loss: 2451.8964
+Epoch 4145/60000, Average Test Loss: 2398.1394
+Epoch 4146/60000, Loss: 2794.1859
+Epoch 4146/60000, Average Test Loss: 2417.0583
+Epoch 4147/60000, Loss: 1447.5398
+Epoch 4147/60000, Average Test Loss: 2426.5879
+Epoch 4148/60000, Loss: 3949.8932
+Epoch 4148/60000, Average Test Loss: 2459.0867
+Epoch 4149/60000, Loss: 1804.9013
+Epoch 4149/60000, Average Test Loss: 2478.8301
+Epoch 4150/60000, Loss: 3000.2761
+Epoch 4150/60000, Average Test Loss: 2367.8901
+Epoch 4151/60000, Loss: 2636.9608
+Epoch 4151/60000, Average Test Loss: 2272.3491
+Epoch 4152/60000, Loss: 1706.1243
+Epoch 4152/60000, Average Test Loss: 2185.5540
+Epoch 4153/60000, Loss: 1880.0513
+Epoch 4153/60000, Average Test Loss: 2194.9211
+Epoch 4154/60000, Loss: 1447.2236
+Epoch 4154/60000, Average Test Loss: 2229.3042
+Epoch 4155/60000, Loss: 3030.0299
+Epoch 4155/60000, Average Test Loss: 2263.4583
+Epoch 4156/60000, Loss: 1031.9389
+Epoch 4156/60000, Average Test Loss: 2277.8113
+Epoch 4157/60000, Loss: 3009.0337
+Epoch 4157/60000, Average Test Loss: 2283.4402
+Epoch 4158/60000, Loss: 2048.2234
+Epoch 4158/60000, Average Test Loss: 2261.9714
+Epoch 4159/60000, Loss: 3846.2684
+Epoch 4159/60000, Average Test Loss: 2267.8345
+Epoch 4160/60000, Loss: 1557.1359
+Epoch 4160/60000, Average Test Loss: 2295.8914
+Epoch 4161/60000, Loss: 2162.2230
+Epoch 4161/60000, Average Test Loss: 2229.7034
+Epoch 4162/60000, Loss: 1548.2438
+Epoch 4162/60000, Average Test Loss: 2065.9170
+Epoch 4163/60000, Loss: 2407.0114
+Epoch 4163/60000, Average Test Loss: 1961.3246
+Epoch 4164/60000, Loss: 3327.7930
+Epoch 4164/60000, Average Test Loss: 1854.6708
+Epoch 4165/60000, Loss: 1600.6746
+Epoch 4165/60000, Average Test Loss: 1859.9078
+Epoch 4166/60000, Loss: 3722.8647
+Epoch 4166/60000, Average Test Loss: 1927.8896
+Epoch 4167/60000, Loss: 1376.2839
+Epoch 4167/60000, Average Test Loss: 1998.9352
+Epoch 4168/60000, Loss: 2210.7057
+Epoch 4168/60000, Average Test Loss: 2090.9475
+Epoch 4169/60000, Loss: 2115.6048
+Epoch 4169/60000, Average Test Loss: 2147.7937
+Epoch 4170/60000, Loss: 1357.8275
+Epoch 4170/60000, Average Test Loss: 2126.3875
+Epoch 4171/60000, Loss: 1097.3932
+Epoch 4171/60000, Average Test Loss: 2110.3098
+Epoch 4172/60000, Loss: 2038.8702
+Epoch 4172/60000, Average Test Loss: 2055.2810
+Epoch 4173/60000, Loss: 1145.3532
+Epoch 4173/60000, Average Test Loss: 2074.0000
+Epoch 4174/60000, Loss: 2155.3822
+Epoch 4174/60000, Average Test Loss: 2100.0852
+Epoch 4175/60000, Loss: 3178.1685
+Epoch 4175/60000, Average Test Loss: 2101.8557
+Epoch 4176/60000, Loss: 1504.9008
+Epoch 4176/60000, Average Test Loss: 2104.0225
+Epoch 4177/60000, Loss: 1770.3773
+Epoch 4177/60000, Average Test Loss: 2105.2502
+Epoch 4178/60000, Loss: 2210.5250
+Epoch 4178/60000, Average Test Loss: 2107.0774
+Epoch 4179/60000, Loss: 2932.4393
+Epoch 4179/60000, Average Test Loss: 2082.8298
+Epoch 4180/60000, Loss: 2007.7068
+Epoch 4180/60000, Average Test Loss: 2051.4895
+Epoch 4181/60000, Loss: 2595.4467
+Epoch 4181/60000, Average Test Loss: 2027.2396
+Epoch 4182/60000, Loss: 1905.2633
+Epoch 4182/60000, Average Test Loss: 2038.4073
+Epoch 4183/60000, Loss: 1953.6688
+Epoch 4183/60000, Average Test Loss: 2093.7141
+Epoch 4184/60000, Loss: 2563.5250
+Epoch 4184/60000, Average Test Loss: 2094.9216
+Epoch 4185/60000, Loss: 3489.8202
+Epoch 4185/60000, Average Test Loss: 2008.9847
+Epoch 4186/60000, Loss: 1291.1803
+Epoch 4186/60000, Average Test Loss: 1953.8644
+Epoch 4187/60000, Loss: 1759.7814
+Epoch 4187/60000, Average Test Loss: 1913.1732
+Epoch 4188/60000, Loss: 2586.3486
+Epoch 4188/60000, Average Test Loss: 1893.5697
+Epoch 4189/60000, Loss: 1138.8718
+Epoch 4189/60000, Average Test Loss: 1884.2743
+Epoch 4190/60000, Loss: 1565.9787
+Epoch 4190/60000, Average Test Loss: 1908.4149
+Epoch 4191/60000, Loss: 2489.4177
+Epoch 4191/60000, Average Test Loss: 1934.0035
+Epoch 4192/60000, Loss: 3608.4920
+Epoch 4192/60000, Average Test Loss: 1959.4066
+Epoch 4193/60000, Loss: 2160.1966
+Epoch 4193/60000, Average Test Loss: 1981.1393
+Epoch 4194/60000, Loss: 2335.9453
+Epoch 4194/60000, Average Test Loss: 1982.4115
+Epoch 4195/60000, Loss: 2524.4437
+Epoch 4195/60000, Average Test Loss: 1971.2213
+Epoch 4196/60000, Loss: 2349.8167
+Epoch 4196/60000, Average Test Loss: 2058.6238
+Epoch 4197/60000, Loss: 3099.0826
+Epoch 4197/60000, Average Test Loss: 2117.8127
+Epoch 4198/60000, Loss: 1516.6438
+Epoch 4198/60000, Average Test Loss: 2123.6946
+Epoch 4199/60000, Loss: 2443.3779
+Epoch 4199/60000, Average Test Loss: 2117.8743
+Epoch 4200/60000, Loss: 1958.2607
+Epoch 4200/60000, Average Test Loss: 2116.4158
+Epoch 4201/60000, Loss: 3116.7118
+Epoch 4201/60000, Average Test Loss: 2159.7327
+Epoch 4202/60000, Loss: 2744.5540
+Epoch 4202/60000, Average Test Loss: 2266.9338
+Epoch 4203/60000, Loss: 1662.6849
+Epoch 4203/60000, Average Test Loss: 2324.2839
+Epoch 4204/60000, Loss: 1813.9388
+Epoch 4204/60000, Average Test Loss: 2373.6399
+Epoch 4205/60000, Loss: 2383.4435
+Epoch 4205/60000, Average Test Loss: 2437.8647
+Epoch 4206/60000, Loss: 1392.8986
+Epoch 4206/60000, Average Test Loss: 2503.1770
+Epoch 4207/60000, Loss: 1942.6348
+Epoch 4207/60000, Average Test Loss: 2538.2722
+Epoch 4208/60000, Loss: 2425.3650
+Epoch 4208/60000, Average Test Loss: 2491.7078
+Epoch 4209/60000, Loss: 1237.8614
+Epoch 4209/60000, Average Test Loss: 2443.2012
+Epoch 4210/60000, Loss: 2838.9533
+Epoch 4210/60000, Average Test Loss: 2387.1765
+Epoch 4211/60000, Loss: 3115.2111
+Epoch 4211/60000, Average Test Loss: 2393.4646
+Epoch 4212/60000, Loss: 2258.4392
+Epoch 4212/60000, Average Test Loss: 2404.5906
+Epoch 4213/60000, Loss: 3821.5338
+Epoch 4213/60000, Average Test Loss: 2404.4004
+Epoch 4214/60000, Loss: 1135.8543
+Epoch 4214/60000, Average Test Loss: 2381.0793
+Epoch 4215/60000, Loss: 1616.7984
+Epoch 4215/60000, Average Test Loss: 2352.6292
+Epoch 4216/60000, Loss: 2276.4474
+Epoch 4216/60000, Average Test Loss: 2291.2537
+Epoch 4217/60000, Loss: 2164.8371
+Epoch 4217/60000, Average Test Loss: 2306.6531
+Epoch 4218/60000, Loss: 2192.3383
+Epoch 4218/60000, Average Test Loss: 2363.7810
+Epoch 4219/60000, Loss: 2905.8478
+Epoch 4219/60000, Average Test Loss: 2286.7524
+Epoch 4220/60000, Loss: 2440.1379
+Epoch 4220/60000, Average Test Loss: 2285.5569
+Epoch 4221/60000, Loss: 1811.2273
+Epoch 4221/60000, Average Test Loss: 2255.7236
+Epoch 4222/60000, Loss: 1671.8482
+Epoch 4222/60000, Average Test Loss: 2224.5947
+Epoch 4223/60000, Loss: 3130.5811
+Epoch 4223/60000, Average Test Loss: 2186.5549
+Epoch 4224/60000, Loss: 3379.5683
+Epoch 4224/60000, Average Test Loss: 2131.0798
+Epoch 4225/60000, Loss: 1980.5388
+Epoch 4225/60000, Average Test Loss: 2044.2113
+Epoch 4226/60000, Loss: 3842.2443
+Epoch 4226/60000, Average Test Loss: 1974.4189
+Epoch 4227/60000, Loss: 2361.7952
+Epoch 4227/60000, Average Test Loss: 2006.7357
+Epoch 4228/60000, Loss: 1638.3958
+Epoch 4228/60000, Average Test Loss: 2094.6824
+Epoch 4229/60000, Loss: 2791.8576
+Epoch 4229/60000, Average Test Loss: 2173.9763
+Epoch 4230/60000, Loss: 1416.1064
+Epoch 4230/60000, Average Test Loss: 2242.8987
+Epoch 4231/60000, Loss: 2763.8060
+Epoch 4231/60000, Average Test Loss: 2230.0537
+Epoch 4232/60000, Loss: 2072.0751
+Epoch 4232/60000, Average Test Loss: 2287.1116
+Epoch 4233/60000, Loss: 3207.6553
+Epoch 4233/60000, Average Test Loss: 2290.6638
+Epoch 4234/60000, Loss: 1716.0236
+Epoch 4234/60000, Average Test Loss: 2279.4004
+Epoch 4235/60000, Loss: 2571.7697
+Epoch 4235/60000, Average Test Loss: 2254.1016
+Epoch 4236/60000, Loss: 3206.8499
+Epoch 4236/60000, Average Test Loss: 2218.8311
+Epoch 4237/60000, Loss: 4451.2231
+Epoch 4237/60000, Average Test Loss: 2167.2849
+Epoch 4238/60000, Loss: 1616.8461
+Epoch 4238/60000, Average Test Loss: 2115.3613
+Epoch 4239/60000, Loss: 2311.2834
+Epoch 4239/60000, Average Test Loss: 2067.0217
+Epoch 4240/60000, Loss: 2900.0321
+Epoch 4240/60000, Average Test Loss: 2044.2676
+Epoch 4241/60000, Loss: 1659.9555
+Epoch 4241/60000, Average Test Loss: 2058.2019
+Epoch 4242/60000, Loss: 1762.9681
+Epoch 4242/60000, Average Test Loss: 2057.6978
+Epoch 4243/60000, Loss: 1282.7058
+Epoch 4243/60000, Average Test Loss: 2038.2197
+Epoch 4244/60000, Loss: 2091.9002
+Epoch 4244/60000, Average Test Loss: 2027.0439
+Epoch 4245/60000, Loss: 3632.6605
+Epoch 4245/60000, Average Test Loss: 2257.1785
+Epoch 4246/60000, Loss: 1709.4398
+Epoch 4246/60000, Average Test Loss: 2881.0115
+Epoch 4247/60000, Loss: 2211.6663
+Epoch 4247/60000, Average Test Loss: 3471.6973
+Epoch 4248/60000, Loss: 1513.6014
+Epoch 4248/60000, Average Test Loss: 4006.8127
+Epoch 4249/60000, Loss: 4542.4343
+Epoch 4249/60000, Average Test Loss: 2154.3552
+Epoch 4250/60000, Loss: 3233.7959
+Epoch 4250/60000, Average Test Loss: 2073.4255
+Epoch 4251/60000, Loss: 3702.0281
+Epoch 4251/60000, Average Test Loss: 2006.0146
+Epoch 4252/60000, Loss: 1862.2408
+Epoch 4252/60000, Average Test Loss: 1991.0758
+Epoch 4253/60000, Loss: 3654.1864
+Epoch 4253/60000, Average Test Loss: 2031.2448
+Epoch 4254/60000, Loss: 1823.7714
+Epoch 4254/60000, Average Test Loss: 2026.3617
+Epoch 4255/60000, Loss: 3866.4061
+Epoch 4255/60000, Average Test Loss: 2028.0863
+Epoch 4256/60000, Loss: 2207.0819
+Epoch 4256/60000, Average Test Loss: 2054.0471
+Epoch 4257/60000, Loss: 2105.8682
+Epoch 4257/60000, Average Test Loss: 2111.7908
+Epoch 4258/60000, Loss: 2245.4696
+Epoch 4258/60000, Average Test Loss: 2164.4971
+Epoch 4259/60000, Loss: 2863.8071
+Epoch 4259/60000, Average Test Loss: 2202.5500
+Epoch 4260/60000, Loss: 4533.2204
+Epoch 4260/60000, Average Test Loss: 2223.6824
+Epoch 4261/60000, Loss: 1388.7118
+Epoch 4261/60000, Average Test Loss: 2224.8320
+Epoch 4262/60000, Loss: 2160.1195
+Epoch 4262/60000, Average Test Loss: 2252.9834
+Epoch 4263/60000, Loss: 2791.2150
+Epoch 4263/60000, Average Test Loss: 2215.3894
+Epoch 4264/60000, Loss: 3694.8888
+Epoch 4264/60000, Average Test Loss: 2144.9255
+Epoch 4265/60000, Loss: 1813.5270
+Epoch 4265/60000, Average Test Loss: 2143.7703
+Epoch 4266/60000, Loss: 4150.9441
+Epoch 4266/60000, Average Test Loss: 2126.7412
+Epoch 4267/60000, Loss: 1771.3574
+Epoch 4267/60000, Average Test Loss: 2169.8967
+Epoch 4268/60000, Loss: 2316.3727
+Epoch 4268/60000, Average Test Loss: 2186.9180
+Epoch 4269/60000, Loss: 1749.0615
+Epoch 4269/60000, Average Test Loss: 2172.5681
+Epoch 4270/60000, Loss: 1851.0400
+Epoch 4270/60000, Average Test Loss: 2160.3494
+Epoch 4271/60000, Loss: 2842.8407
+Epoch 4271/60000, Average Test Loss: 2193.8943
+Epoch 4272/60000, Loss: 1463.3016
+Epoch 4272/60000, Average Test Loss: 2243.5471
+Epoch 4273/60000, Loss: 1283.2723
+Epoch 4273/60000, Average Test Loss: 2287.7913
+Epoch 4274/60000, Loss: 1730.1407
+Epoch 4274/60000, Average Test Loss: 2305.8635
+Epoch 4275/60000, Loss: 3709.3064
+Epoch 4275/60000, Average Test Loss: 2273.8418
+Epoch 4276/60000, Loss: 2530.5542
+Epoch 4276/60000, Average Test Loss: 2237.2698
+Epoch 4277/60000, Loss: 2500.1171
+Epoch 4277/60000, Average Test Loss: 2272.6475
+Epoch 4278/60000, Loss: 3445.7494
+Epoch 4278/60000, Average Test Loss: 2287.9480
+Epoch 4279/60000, Loss: 2260.2828
+Epoch 4279/60000, Average Test Loss: 2283.0520
+Epoch 4280/60000, Loss: 3757.3378
+Epoch 4280/60000, Average Test Loss: 2335.0681
+Epoch 4281/60000, Loss: 2165.2437
+Epoch 4281/60000, Average Test Loss: 2341.8562
+Epoch 4282/60000, Loss: 2923.9337
+Epoch 4282/60000, Average Test Loss: 2363.7676
+Epoch 4283/60000, Loss: 3732.0707
+Epoch 4283/60000, Average Test Loss: 2377.6792
+Epoch 4284/60000, Loss: 4575.5911
+Epoch 4284/60000, Average Test Loss: 2386.9023
+Epoch 4285/60000, Loss: 2486.6138
+Epoch 4285/60000, Average Test Loss: 2304.7622
+Epoch 4286/60000, Loss: 2773.2653
+Epoch 4286/60000, Average Test Loss: 2229.6016
+Epoch 4287/60000, Loss: 2575.8645
+Epoch 4287/60000, Average Test Loss: 2199.8022
+Epoch 4288/60000, Loss: 1697.7330
+Epoch 4288/60000, Average Test Loss: 2202.4495
+Epoch 4289/60000, Loss: 2361.0610
+Epoch 4289/60000, Average Test Loss: 2180.4543
+Epoch 4290/60000, Loss: 2233.4906
+Epoch 4290/60000, Average Test Loss: 2143.0195
+Epoch 4291/60000, Loss: 2881.2917
+Epoch 4291/60000, Average Test Loss: 2090.1509
+Epoch 4292/60000, Loss: 2201.8772
+Epoch 4292/60000, Average Test Loss: 2071.7332
+Epoch 4293/60000, Loss: 3943.8625
+Epoch 4293/60000, Average Test Loss: 2045.0840
+Epoch 4294/60000, Loss: 1750.0130
+Epoch 4294/60000, Average Test Loss: 2068.4993
+Epoch 4295/60000, Loss: 2793.8274
+Epoch 4295/60000, Average Test Loss: 2025.1949
+Epoch 4296/60000, Loss: 1337.8128
+Epoch 4296/60000, Average Test Loss: 2010.8846
+Epoch 4297/60000, Loss: 3828.2463
+Epoch 4297/60000, Average Test Loss: 2043.2242
+Epoch 4298/60000, Loss: 1004.1531
+Epoch 4298/60000, Average Test Loss: 2097.0339
+Epoch 4299/60000, Loss: 2407.0264
+Epoch 4299/60000, Average Test Loss: 2145.7605
+Epoch 4300/60000, Loss: 1723.5367
+Epoch 4300/60000, Average Test Loss: 2176.7639
+Epoch 4301/60000, Loss: 1986.3945
+Epoch 4301/60000, Average Test Loss: 2202.5449
+Epoch 4302/60000, Loss: 1874.6284
+Epoch 4302/60000, Average Test Loss: 2241.9585
+Epoch 4303/60000, Loss: 2170.7767
+Epoch 4303/60000, Average Test Loss: 2237.8572
+Epoch 4304/60000, Loss: 1485.8792
+Epoch 4304/60000, Average Test Loss: 2238.0989
+Epoch 4305/60000, Loss: 1485.2179
+Epoch 4305/60000, Average Test Loss: 2262.2566
+Epoch 4306/60000, Loss: 1659.9643
+Epoch 4306/60000, Average Test Loss: 2291.1846
+Epoch 4307/60000, Loss: 2486.6862
+Epoch 4307/60000, Average Test Loss: 2320.0479
+Epoch 4308/60000, Loss: 3115.9825
+Epoch 4308/60000, Average Test Loss: 2250.7844
+Epoch 4309/60000, Loss: 2487.1522
+Epoch 4309/60000, Average Test Loss: 2176.0332
+Epoch 4310/60000, Loss: 3407.2305
+Epoch 4310/60000, Average Test Loss: 2094.8721
+Epoch 4311/60000, Loss: 1720.7307
+Epoch 4311/60000, Average Test Loss: 2071.0906
+Epoch 4312/60000, Loss: 2033.6373
+Epoch 4312/60000, Average Test Loss: 2053.7073
+Epoch 4313/60000, Loss: 1523.6899
+Epoch 4313/60000, Average Test Loss: 2041.0656
+Epoch 4314/60000, Loss: 4594.6877
+Epoch 4314/60000, Average Test Loss: 2047.5201
+Epoch 4315/60000, Loss: 1789.1878
+Epoch 4315/60000, Average Test Loss: 2082.5039
+Epoch 4316/60000, Loss: 1014.4907
+Epoch 4316/60000, Average Test Loss: 2090.2068
+Epoch 4317/60000, Loss: 1553.7936
+Epoch 4317/60000, Average Test Loss: 2086.3994
+Epoch 4318/60000, Loss: 1854.6679
+Epoch 4318/60000, Average Test Loss: 2095.9421
+Epoch 4319/60000, Loss: 1311.9119
+Epoch 4319/60000, Average Test Loss: 2108.2268
+Epoch 4320/60000, Loss: 1938.7301
+Epoch 4320/60000, Average Test Loss: 2114.3704
+Epoch 4321/60000, Loss: 1738.4841
+Epoch 4321/60000, Average Test Loss: 2119.7039
+Epoch 4322/60000, Loss: 2916.3716
+Epoch 4322/60000, Average Test Loss: 2139.1389
+Epoch 4323/60000, Loss: 4157.8802
+Epoch 4323/60000, Average Test Loss: 2149.0466
+Epoch 4324/60000, Loss: 2143.9849
+Epoch 4324/60000, Average Test Loss: 2143.2112
+Epoch 4325/60000, Loss: 3594.8730
+Epoch 4325/60000, Average Test Loss: 2088.1506
+Epoch 4326/60000, Loss: 1989.6229
+Epoch 4326/60000, Average Test Loss: 2038.3389
+Epoch 4327/60000, Loss: 2771.7665
+Epoch 4327/60000, Average Test Loss: 2020.6665
+Epoch 4328/60000, Loss: 1754.2768
+Epoch 4328/60000, Average Test Loss: 2036.7074
+Epoch 4329/60000, Loss: 2264.4264
+Epoch 4329/60000, Average Test Loss: 2034.1927
+Epoch 4330/60000, Loss: 2299.5687
+Epoch 4330/60000, Average Test Loss: 2019.9203
+Epoch 4331/60000, Loss: 1176.9244
+Epoch 4331/60000, Average Test Loss: 1988.5177
+Epoch 4332/60000, Loss: 4106.9858
+Epoch 4332/60000, Average Test Loss: 2052.5796
+Epoch 4333/60000, Loss: 3173.7439
+Epoch 4333/60000, Average Test Loss: 2127.3669
+Epoch 4334/60000, Loss: 2494.1420
+Epoch 4334/60000, Average Test Loss: 2143.6370
+Epoch 4335/60000, Loss: 6094.2734
+Epoch 4335/60000, Average Test Loss: 2128.5374
+Epoch 4336/60000, Loss: 3405.5961
+Epoch 4336/60000, Average Test Loss: 2122.3103
+Epoch 4337/60000, Loss: 3572.5542
+Epoch 4337/60000, Average Test Loss: 2152.5923
+Epoch 4338/60000, Loss: 2122.7964
+Epoch 4338/60000, Average Test Loss: 2205.9397
+Epoch 4339/60000, Loss: 1266.9421
+Epoch 4339/60000, Average Test Loss: 2254.7170
+Epoch 4340/60000, Loss: 3509.0389
+Epoch 4340/60000, Average Test Loss: 2324.2861
+Epoch 4341/60000, Loss: 1789.2775
+Epoch 4341/60000, Average Test Loss: 2354.7068
+Epoch 4342/60000, Loss: 4667.8680
+Epoch 4342/60000, Average Test Loss: 2303.4648
+Epoch 4343/60000, Loss: 2295.5545
+Epoch 4343/60000, Average Test Loss: 2231.3945
+Epoch 4344/60000, Loss: 1623.7847
+Epoch 4344/60000, Average Test Loss: 2177.7832
+Epoch 4345/60000, Loss: 1316.4606
+Epoch 4345/60000, Average Test Loss: 2135.6917
+Epoch 4346/60000, Loss: 2012.1378
+Epoch 4346/60000, Average Test Loss: 2114.0198
+Epoch 4347/60000, Loss: 4629.1907
+Epoch 4347/60000, Average Test Loss: 2140.0183
+Epoch 4348/60000, Loss: 2767.8488
+Epoch 4348/60000, Average Test Loss: 2135.1633
+Epoch 4349/60000, Loss: 2326.7204
+Epoch 4349/60000, Average Test Loss: 2170.1941
+Epoch 4350/60000, Loss: 2872.4440
+Epoch 4350/60000, Average Test Loss: 2218.1079
+Epoch 4351/60000, Loss: 1248.6570
+Epoch 4351/60000, Average Test Loss: 2267.3411
+Epoch 4352/60000, Loss: 2264.0425
+Epoch 4352/60000, Average Test Loss: 2257.3481
+Epoch 4353/60000, Loss: 1903.0837
+Epoch 4353/60000, Average Test Loss: 2271.8813
+Epoch 4354/60000, Loss: 1811.9211
+Epoch 4354/60000, Average Test Loss: 2280.0261
+Epoch 4355/60000, Loss: 1352.1517
+Epoch 4355/60000, Average Test Loss: 2280.1875
+Epoch 4356/60000, Loss: 1863.1268
+Epoch 4356/60000, Average Test Loss: 2276.1973
+Epoch 4357/60000, Loss: 1819.2773
+Epoch 4357/60000, Average Test Loss: 2267.6633
+Epoch 4358/60000, Loss: 3083.2796
+Epoch 4358/60000, Average Test Loss: 2262.7617
+Epoch 4359/60000, Loss: 2326.5840
+Epoch 4359/60000, Average Test Loss: 2257.2559
+Epoch 4360/60000, Loss: 2324.4617
+Epoch 4360/60000, Average Test Loss: 2294.2766
+Epoch 4361/60000, Loss: 2448.9324
+Epoch 4361/60000, Average Test Loss: 2308.5566
+Epoch 4362/60000, Loss: 2023.3231
+Epoch 4362/60000, Average Test Loss: 2320.8167
+Epoch 4363/60000, Loss: 1516.0519
+Epoch 4363/60000, Average Test Loss: 2331.9583
+Epoch 4364/60000, Loss: 1990.5386
+Epoch 4364/60000, Average Test Loss: 2299.4656
+Epoch 4365/60000, Loss: 1235.4861
+Epoch 4365/60000, Average Test Loss: 2278.9275
+Epoch 4366/60000, Loss: 2144.0760
+Epoch 4366/60000, Average Test Loss: 2272.7307
+Epoch 4367/60000, Loss: 2827.6902
+Epoch 4367/60000, Average Test Loss: 2177.6511
+Epoch 4368/60000, Loss: 1847.9184
+Epoch 4368/60000, Average Test Loss: 2207.2825
+Epoch 4369/60000, Loss: 2688.9714
+Epoch 4369/60000, Average Test Loss: 2167.2969
+Epoch 4370/60000, Loss: 1383.2976
+Epoch 4370/60000, Average Test Loss: 2142.4583
+Epoch 4371/60000, Loss: 1352.5397
+Epoch 4371/60000, Average Test Loss: 2123.1746
+Epoch 4372/60000, Loss: 2612.9915
+Epoch 4372/60000, Average Test Loss: 2096.5647
+Epoch 4373/60000, Loss: 1772.9305
+Epoch 4373/60000, Average Test Loss: 2103.2720
+Epoch 4374/60000, Loss: 2017.6826
+Epoch 4374/60000, Average Test Loss: 2122.2959
+Epoch 4375/60000, Loss: 2696.1716
+Epoch 4375/60000, Average Test Loss: 2103.0886
+Epoch 4376/60000, Loss: 2080.4601
+Epoch 4376/60000, Average Test Loss: 2044.9708
+Epoch 4377/60000, Loss: 3104.0797
+Epoch 4377/60000, Average Test Loss: 2050.5862
+Epoch 4378/60000, Loss: 2777.9891
+Epoch 4378/60000, Average Test Loss: 2099.4778
+Epoch 4379/60000, Loss: 1721.6555
+Epoch 4379/60000, Average Test Loss: 2137.1531
+Epoch 4380/60000, Loss: 815.7884
+Epoch 4380/60000, Average Test Loss: 2164.2078
+Epoch 4381/60000, Loss: 1892.8258
+Epoch 4381/60000, Average Test Loss: 2179.1292
+Epoch 4382/60000, Loss: 1770.1375
+Epoch 4382/60000, Average Test Loss: 2166.5471
+Epoch 4383/60000, Loss: 1724.4347
+Epoch 4383/60000, Average Test Loss: 2152.3499
+Epoch 4384/60000, Loss: 5236.3688
+Epoch 4384/60000, Average Test Loss: 2115.8186
+Epoch 4385/60000, Loss: 5717.5540
+Epoch 4385/60000, Average Test Loss: 2083.5652
+Epoch 4386/60000, Loss: 1309.8377
+Epoch 4386/60000, Average Test Loss: 2080.9343
+Epoch 4387/60000, Loss: 2102.3334
+Epoch 4387/60000, Average Test Loss: 2104.3232
+Epoch 4388/60000, Loss: 1625.5930
+Epoch 4388/60000, Average Test Loss: 2145.2771
+Epoch 4389/60000, Loss: 1987.6800
+Epoch 4389/60000, Average Test Loss: 2178.7566
+Epoch 4390/60000, Loss: 4318.0410
+Epoch 4390/60000, Average Test Loss: 2169.5776
+Epoch 4391/60000, Loss: 4537.1794
+Epoch 4391/60000, Average Test Loss: 2141.4236
+Epoch 4392/60000, Loss: 1632.1794
+Epoch 4392/60000, Average Test Loss: 2079.4590
+Epoch 4393/60000, Loss: 2073.8839
+Epoch 4393/60000, Average Test Loss: 2039.2715
+Epoch 4394/60000, Loss: 1964.5229
+Epoch 4394/60000, Average Test Loss: 2077.3123
+Epoch 4395/60000, Loss: 2004.3809
+Epoch 4395/60000, Average Test Loss: 2133.6687
+Epoch 4396/60000, Loss: 3119.4592
+Epoch 4396/60000, Average Test Loss: 2150.0532
+Epoch 4397/60000, Loss: 1963.2288
+Epoch 4397/60000, Average Test Loss: 2194.0837
+Epoch 4398/60000, Loss: 1954.1621
+Epoch 4398/60000, Average Test Loss: 2243.7761
+Epoch 4399/60000, Loss: 1814.4346
+Epoch 4399/60000, Average Test Loss: 2299.6570
+Epoch 4400/60000, Loss: 4349.2234
+Epoch 4400/60000, Average Test Loss: 2281.0779
+Epoch 4401/60000, Loss: 3967.4404
+Epoch 4401/60000, Average Test Loss: 2096.2344
+Epoch 4402/60000, Loss: 2236.4863
+Epoch 4402/60000, Average Test Loss: 2020.5096
+Epoch 4403/60000, Loss: 2609.3190
+Epoch 4403/60000, Average Test Loss: 2042.3174
+Epoch 4404/60000, Loss: 3856.0076
+Epoch 4404/60000, Average Test Loss: 2025.2338
+Epoch 4405/60000, Loss: 2756.0355
+Epoch 4405/60000, Average Test Loss: 2052.3262
+Epoch 4406/60000, Loss: 2635.2709
+Epoch 4406/60000, Average Test Loss: 2064.0479
+Epoch 4407/60000, Loss: 1933.9745
+Epoch 4407/60000, Average Test Loss: 2077.9109
+Epoch 4408/60000, Loss: 1781.3224
+Epoch 4408/60000, Average Test Loss: 2003.2535
+Epoch 4409/60000, Loss: 2194.1167
+Epoch 4409/60000, Average Test Loss: 1946.6265
+Epoch 4410/60000, Loss: 2896.7350
+Epoch 4410/60000, Average Test Loss: 1915.2687
+Epoch 4411/60000, Loss: 2028.5139
+Epoch 4411/60000, Average Test Loss: 1869.3306
+Epoch 4412/60000, Loss: 1082.4222
+Epoch 4412/60000, Average Test Loss: 1850.9829
+Epoch 4413/60000, Loss: 2690.6215
+Epoch 4413/60000, Average Test Loss: 1854.3721
+Epoch 4414/60000, Loss: 3212.3904
+Epoch 4414/60000, Average Test Loss: 1829.6182
+Epoch 4415/60000, Loss: 1434.8998
+Epoch 4415/60000, Average Test Loss: 1799.5260
+Epoch 4416/60000, Loss: 1312.2152
+Epoch 4416/60000, Average Test Loss: 1794.2715
+Epoch 4417/60000, Loss: 1474.6939
+Epoch 4417/60000, Average Test Loss: 1821.3447
+Epoch 4418/60000, Loss: 2213.4274
+Epoch 4418/60000, Average Test Loss: 1883.4469
+Epoch 4419/60000, Loss: 3696.1610
+Epoch 4419/60000, Average Test Loss: 1887.7446
+Epoch 4420/60000, Loss: 1575.6340
+Epoch 4420/60000, Average Test Loss: 1817.4409
+Epoch 4421/60000, Loss: 2723.6560
+Epoch 4421/60000, Average Test Loss: 1801.7578
+Epoch 4422/60000, Loss: 3092.0840
+Epoch 4422/60000, Average Test Loss: 1808.9938
+Epoch 4423/60000, Loss: 4877.9778
+Epoch 4423/60000, Average Test Loss: 1885.5063
+Epoch 4424/60000, Loss: 3784.3226
+Epoch 4424/60000, Average Test Loss: 1894.8539
+Epoch 4425/60000, Loss: 2441.4736
+Epoch 4425/60000, Average Test Loss: 1923.9916
+Epoch 4426/60000, Loss: 3409.1471
+Epoch 4426/60000, Average Test Loss: 1983.6289
+Epoch 4427/60000, Loss: 3031.3542
+Epoch 4427/60000, Average Test Loss: 2042.5928
+Epoch 4428/60000, Loss: 2320.7557
+Epoch 4428/60000, Average Test Loss: 2087.8848
+Epoch 4429/60000, Loss: 2488.9440
+Epoch 4429/60000, Average Test Loss: 2154.0330
+Epoch 4430/60000, Loss: 2480.5795
+Epoch 4430/60000, Average Test Loss: 2158.9709
+Epoch 4431/60000, Loss: 1680.8132
+Epoch 4431/60000, Average Test Loss: 2163.2839
+Epoch 4432/60000, Loss: 4297.5055
+Epoch 4432/60000, Average Test Loss: 2041.2582
+Epoch 4433/60000, Loss: 3580.1887
+Epoch 4433/60000, Average Test Loss: 1976.3687
+Epoch 4434/60000, Loss: 1549.7468
+Epoch 4434/60000, Average Test Loss: 1947.1598
+Epoch 4435/60000, Loss: 4038.6595
+Epoch 4435/60000, Average Test Loss: 1955.5905
+Epoch 4436/60000, Loss: 1354.2925
+Epoch 4436/60000, Average Test Loss: 1932.0073
+Epoch 4437/60000, Loss: 1919.4761
+Epoch 4437/60000, Average Test Loss: 2006.7939
+Epoch 4438/60000, Loss: 2979.6881
+Epoch 4438/60000, Average Test Loss: 2084.5593
+Epoch 4439/60000, Loss: 1915.5344
+Epoch 4439/60000, Average Test Loss: 2096.5544
+Epoch 4440/60000, Loss: 2896.4824
+Epoch 4440/60000, Average Test Loss: 2126.9111
+Epoch 4441/60000, Loss: 3270.5902
+Epoch 4441/60000, Average Test Loss: 2134.7019
+Epoch 4442/60000, Loss: 3323.2598
+Epoch 4442/60000, Average Test Loss: 2095.3772
+Epoch 4443/60000, Loss: 2545.2172
+Epoch 4443/60000, Average Test Loss: 2060.3486
+Epoch 4444/60000, Loss: 2603.0646
+Epoch 4444/60000, Average Test Loss: 2041.8383
+Epoch 4445/60000, Loss: 2067.9407
+Epoch 4445/60000, Average Test Loss: 1991.7115
+Epoch 4446/60000, Loss: 1825.4138
+Epoch 4446/60000, Average Test Loss: 1999.2396
+Epoch 4447/60000, Loss: 2890.2322
+Epoch 4447/60000, Average Test Loss: 2085.8945
+Epoch 4448/60000, Loss: 2558.4009
+Epoch 4448/60000, Average Test Loss: 2085.4736
+Epoch 4449/60000, Loss: 2940.9247
+Epoch 4449/60000, Average Test Loss: 2055.5142
+Epoch 4450/60000, Loss: 1938.6581
+Epoch 4450/60000, Average Test Loss: 1931.3887
+Epoch 4451/60000, Loss: 1468.7537
+Epoch 4451/60000, Average Test Loss: 1869.3297
+Epoch 4452/60000, Loss: 1799.2971
+Epoch 4452/60000, Average Test Loss: 1934.6080
+Epoch 4453/60000, Loss: 2657.5416
+Epoch 4453/60000, Average Test Loss: 1945.3311
+Epoch 4454/60000, Loss: 2161.7794
+Epoch 4454/60000, Average Test Loss: 1920.0625
+Epoch 4455/60000, Loss: 2223.6285
+Epoch 4455/60000, Average Test Loss: 1856.5366
+Epoch 4456/60000, Loss: 2970.5966
+Epoch 4456/60000, Average Test Loss: 1837.8926
+Epoch 4457/60000, Loss: 2112.1504
+Epoch 4457/60000, Average Test Loss: 1839.6725
+Epoch 4458/60000, Loss: 2320.6895
+Epoch 4458/60000, Average Test Loss: 1853.5033
+Epoch 4459/60000, Loss: 1309.7311
+Epoch 4459/60000, Average Test Loss: 1809.5068
+Epoch 4460/60000, Loss: 3577.9553
+Epoch 4460/60000, Average Test Loss: 1595.3959
+Epoch 4461/60000, Loss: 1566.0720
+Epoch 4461/60000, Average Test Loss: 1348.9813
+Epoch 4462/60000, Loss: 1651.1393
+Epoch 4462/60000, Average Test Loss: 1322.1993
+Epoch 4463/60000, Loss: 2152.6055
+Epoch 4463/60000, Average Test Loss: 1352.5446
+Epoch 4464/60000, Loss: 1371.9766
+Epoch 4464/60000, Average Test Loss: 1417.7736
+Epoch 4465/60000, Loss: 1766.8610
+Epoch 4465/60000, Average Test Loss: 1466.6641
+Epoch 4466/60000, Loss: 1702.3778
+Epoch 4466/60000, Average Test Loss: 1533.8838
+Epoch 4467/60000, Loss: 1841.6025
+Epoch 4467/60000, Average Test Loss: 1669.7554
+Epoch 4468/60000, Loss: 1324.6853
+Epoch 4468/60000, Average Test Loss: 1784.2242
+Epoch 4469/60000, Loss: 2355.6011
+Epoch 4469/60000, Average Test Loss: 1871.2076
+Epoch 4470/60000, Loss: 3233.5022
+Epoch 4470/60000, Average Test Loss: 1922.5973
+Epoch 4471/60000, Loss: 3040.4739
+Epoch 4471/60000, Average Test Loss: 1934.7939
+Epoch 4472/60000, Loss: 1989.3665
+Epoch 4472/60000, Average Test Loss: 1881.9030
+Epoch 4473/60000, Loss: 2239.2008
+Epoch 4473/60000, Average Test Loss: 1831.3929
+Epoch 4474/60000, Loss: 2471.9086
+Epoch 4474/60000, Average Test Loss: 1832.5875
+Epoch 4475/60000, Loss: 1831.7449
+Epoch 4475/60000, Average Test Loss: 1834.2240
+Epoch 4476/60000, Loss: 4195.0398
+Epoch 4476/60000, Average Test Loss: 1870.3882
+Epoch 4477/60000, Loss: 3053.2815
+Epoch 4477/60000, Average Test Loss: 1929.7622
+Epoch 4478/60000, Loss: 1502.4551
+Epoch 4478/60000, Average Test Loss: 1986.5680
+Epoch 4479/60000, Loss: 2094.8579
+Epoch 4479/60000, Average Test Loss: 2057.8401
+Epoch 4480/60000, Loss: 2236.9644
+Epoch 4480/60000, Average Test Loss: 2155.4324
+Epoch 4481/60000, Loss: 3610.5376
+Epoch 4481/60000, Average Test Loss: 2198.7197
+Epoch 4482/60000, Loss: 2422.1779
+Epoch 4482/60000, Average Test Loss: 2209.7888
+Epoch 4483/60000, Loss: 2524.6883
+Epoch 4483/60000, Average Test Loss: 2239.1768
+Epoch 4484/60000, Loss: 3391.8625
+Epoch 4484/60000, Average Test Loss: 2240.8655
+Epoch 4485/60000, Loss: 2670.5909
+Epoch 4485/60000, Average Test Loss: 2260.0374
+Epoch 4486/60000, Loss: 1922.5068
+Epoch 4486/60000, Average Test Loss: 2207.5276
+Epoch 4487/60000, Loss: 1876.9803
+Epoch 4487/60000, Average Test Loss: 2157.1099
+Epoch 4488/60000, Loss: 2155.3596
+Epoch 4488/60000, Average Test Loss: 2176.3721
+Epoch 4489/60000, Loss: 1875.1978
+Epoch 4489/60000, Average Test Loss: 2145.4473
+Epoch 4490/60000, Loss: 3052.0233
+Epoch 4490/60000, Average Test Loss: 2142.1104
+Epoch 4491/60000, Loss: 1976.5117
+Epoch 4491/60000, Average Test Loss: 2066.1555
+Epoch 4492/60000, Loss: 2258.2227
+Epoch 4492/60000, Average Test Loss: 2086.4277
+Epoch 4493/60000, Loss: 2173.5059
+Epoch 4493/60000, Average Test Loss: 2130.9685
+Epoch 4494/60000, Loss: 3512.8646
+Epoch 4494/60000, Average Test Loss: 2136.7014
+Epoch 4495/60000, Loss: 2048.0048
+Epoch 4495/60000, Average Test Loss: 2158.6663
+Epoch 4496/60000, Loss: 2842.3876
+Epoch 4496/60000, Average Test Loss: 2179.7605
+Epoch 4497/60000, Loss: 2695.7728
+Epoch 4497/60000, Average Test Loss: 2178.5430
+Epoch 4498/60000, Loss: 2492.0662
+Epoch 4498/60000, Average Test Loss: 2194.3240
+Epoch 4499/60000, Loss: 2112.9525
+Epoch 4499/60000, Average Test Loss: 2193.8625
+Epoch 4500/60000, Loss: 2129.3523
+Epoch 4500/60000, Average Test Loss: 2188.6008

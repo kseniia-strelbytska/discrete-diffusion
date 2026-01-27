@@ -1,5 +1,5 @@
 seed: 41
-device: cpu
+device: cuda
 data:
   l: 256
   train_split: 0.9

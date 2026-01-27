@@ -1,5 +1,7 @@
 data/
 .venv/
-models/anbn_diffusion_v2_(full)
-models/anbn_diffusion_v3_(full)
-models/anbn_diffusion_v7_(full)
+models/
+figures/
+venv/
+__pycache__/
+.DS_Store
