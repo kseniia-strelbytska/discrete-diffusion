@@ -2,3 +2,5 @@ torch
 numpy 
 matplotlib
 tqdm
+pyyaml
+transformers
