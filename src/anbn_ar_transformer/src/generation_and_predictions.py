@@ -8,7 +8,7 @@ def get_prediction_fixedlen(model, seq, extra_tokens): # no batch dim
         for token in range(extra_tokens):
             logits = model(seq.unsqueeze(0))[0] # no batch dim
             logits = logits[-1, :]
-            prediction = torch.tensor([torch.argmax(logits, dim=-1)])
+            prediction = torch.argmax(logits, dim=-1).unsqueeze(0)
             seq = torch.cat([seq, prediction], -1)
         return seq
     
@@ -19,7 +19,7 @@ def get_prediction(model, seq, max_tokens): # no batch dim
         while torch.numel(seq) < max_tokens:
             logits = model(seq.unsqueeze(0))[0] # no batch dim
             logits = logits[-1, :]
-            prediction = torch.tensor([torch.argmax(logits, dim=-1)])
+            prediction = torch.argmax(logits, dim=-1).unsqueeze(0)
             seq = torch.cat([seq, prediction], -1)
             
             if prediction.item() == EOS_token:

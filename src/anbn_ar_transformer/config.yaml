@@ -1,0 +1,31 @@
+seed: 1
+device: mps
+data:
+  l: 256
+  train_split: 0.9
+  batch_size: 128
+  grammar: anbn
+model:
+  max_len: 258       
+  vocab_size: 5
+  n_head: 5
+  n_layers: 7
+  embed_dim: 10
+  dim_feedforward: 1024
+  dropout: 0.1
+  eos_weight: 1.0
+training:
+  epochs: 3000
+  learning_rate: 0.002
+  weight_decay: 0.0
+  lr_scheduler: False
+evaluation:
+  eval_every: 100
+  n_samples: 100
+  samples_type: random
+  eval_type: autoregressive
+paths:
+  models_dir: models
+  figures_dir: figures
+  experiment_name: mps_near_paper_params_no_lr_scheduler
+notes: "Moved to device. Except: layer norm"

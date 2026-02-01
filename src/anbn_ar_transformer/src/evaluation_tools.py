@@ -30,14 +30,14 @@ def evaluation_loss(model, dataloader):
 
 # eval_type: next_token or prefix
 # samples_type for anbn: random or full
-def evaluation_from_generation(model, grammar, data=None, eval_type='next_token', samples_type='random', n_samples=100):
+def evaluation_from_generation(model, grammar, data=None, eval_type='next_token', samples_type='random', n_samples=100, device='cpu', loss_log_path=None, output_path=None):
     # prefixes = select_rule_2(generate_seq(max(1, round(l * 0.5))))
     # prefixes = select_rule_2(generate_seq(max(1, round(l * 0.75))))
     
     with open('./outputs.txt', 'w') as f:
         f.write('')
     
-    stats = np.array([0, 0, 0])
+    stats = np.array([0, 0, 0, 0])
     total = 0
     if eval_type=='prefix': # used for initial grammar only; fixed length generation
         prefixes = grammar.data[:, :grammar.l//2]
@@ -45,8 +45,8 @@ def evaluation_from_generation(model, grammar, data=None, eval_type='next_token'
         if data != None:
             prefixes = data[:, 1:grammar.l//2]
         
-        idxs = torch.randint(0, prefixes.shape[0] - 1, (n_samples,))
-        prefixes = prefixes[idxs]
+        idxs = torch.randint(0, prefixes.shape[0] - 1, (n_samples,), device=device)
+        prefixes = prefixes[idxs].to(device)
            
         model.eval()
         with torch.no_grad():
@@ -56,25 +56,24 @@ def evaluation_from_generation(model, grammar, data=None, eval_type='next_token'
                 y_pred_stats = grammar.evaluate(y_pred)
                 stats += y_pred_stats
     else:
-        model.eval()
-        
         if samples_type == 'random':
-            samples = torch.randint(1, grammar.l//2, (n_samples,))
+            samples = torch.randint(1, grammar.l//2, (n_samples,), device=device)
         else:
-            samples = torch.arange(1, grammar.l//2)
-        
+            samples = torch.arange(1, grammar.l//2, device=device)
+            
+        model.eval()
         with torch.no_grad():
             for l in tqdm(samples.tolist()):
-                seq = torch.cat([torch.full((1,), torch.tensor(SOS_token)), 
-                                 torch.zeros((l, )).long()]) # has batch dim
-                                
+                seq = torch.cat([torch.tensor([SOS_token], device=device), 
+                                 torch.zeros((l, ), device=device).long()], dim=-1) # has batch dim
+
                 # test on '000...0' and on '000...01'
                 y_preds = [get_prediction(model, seq, grammar.l + 2), 
-                        get_prediction(model, torch.cat([seq, torch.ones((1,)).long()], dim=-1), grammar.l + 2)] # +2 SOS/EOS    
+                        get_prediction(model, torch.cat([seq, torch.ones((1,), device=device).long()], dim=-1), grammar.l + 2)] # +2 SOS/EOS    
                 
                 total += len(y_preds)
                 
-                with open('./outputs.txt', 'a') as f:
+                with open(output_path, 'a') as f:
                     for y_pred_instance in y_preds:
                         res = grammar.evaluate(y_pred_instance)
                         y_pred_instance = y_pred_instance.tolist()
@@ -85,9 +84,14 @@ def evaluation_from_generation(model, grammar, data=None, eval_type='next_token'
                     y_pred_stats = grammar.evaluate(y_pred)
                     stats += y_pred_stats
                                                     
-    print(f'Evaluation from generation satisfies rule #1: {stats[0]}/{total} ({stats[0]/total})')
-    print(f'Evaluation from generation satisfies rule #2: {stats[1]}/{total} ({stats[1]/total})')
-    print(f'Evaluation from generation satisfies both rules: {stats[2]}/{total} ({stats[2]/total})')
+    evaluation_log = f"""
+    Evaluation from generation satisfies rule #1: {stats[0]}/{total} ({stats[0]/total})
+    Evaluation from generation satisfies rule #2: {stats[1]}/{total} ({stats[1]/total})
+    Evaluation from generation satisfies both rules: {stats[2]}/{total} ({stats[2]/total})
+    Evaluation from generation satisfies satisfies format: {stats[3]}/{total} ({stats[3]/total})
+    """
+    with open(loss_log_path, 'a') as f:
+        f.write(evaluation_log+'\n')            
     
     return stats / total
   

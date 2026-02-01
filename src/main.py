@@ -12,6 +12,7 @@ import torch
 import torch.nn as nn
 import yaml
 from tqdm import tqdm
+from transformers.optimization import get_inverse_sqrt_schedule
 
 from anbn import anbnGrammar
 from constants import EOS_token, SOS_token, PAD_token, MASK_token
@@ -126,16 +127,16 @@ def get_fixed_dataset(dataset, batch_size=32, device='cpu'):
     return fixed_dataset
 
 # noise_resolution -- T in the scheduled unmasker
-def train(model, grammar, T=500, eos_weight=1.0, dirs=None, evaluation_config = None, epochs=5, lr=1e-3, weight_decay=0.01, train_dataloader=None, test_dataset=None, device='cpu', verbose=False):
+def train(model, grammar, T=500, eos_weight=1.0, dirs=None, evaluation_config=None, epochs=5, lr=1e-3, weight_decay=0.01, train_dataloader=None, test_dataset=None, device='cpu', verbose=False):
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
     loss_fn = rblb(eos_weight=eos_weight, device=device)
     
     stats = [[], [], [], [], []] # r1, r2, both, format, epochsteps
-    test_loss_stats = []
+    test_loss_stats, train_loss_stats = [], []
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
         
     with open(dirs.loss_log_path, 'a') as f:
-        f.write('-'*20 + datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        f.write('-'*20 + f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}\n')
     
     model.train()
     
@@ -158,10 +159,7 @@ def train(model, grammar, T=500, eos_weight=1.0, dirs=None, evaluation_config = 
             total_loss += loss.item()
         
         avg_loss = total_loss / len(train_dataloader)
-        if verbose:
-            print(f"Epoch {epoch+1}/{epochs}, Loss: {avg_loss:.4f}\n")
-        with open(dirs.loss_log_path, 'a') as f:
-            f.write(f"Epoch {epoch+1}/{epochs}, Loss: {avg_loss:.4f}\n")
+        train_loss_stats.append(avg_loss)
         
         model.eval()
         test_loss = 0
@@ -170,19 +168,20 @@ def train(model, grammar, T=500, eos_weight=1.0, dirs=None, evaluation_config = 
             loss = loss_fn(X_batch, logits, y_batch, timestep)
             test_loss += loss.item()
         avg_test_loss = test_loss / len(test_dataset)
-
-        if verbose:
-            print(f"Epoch {epoch+1}/{epochs}, Average Test Loss: {avg_test_loss:.4f}")
-    
-        with open(dirs.loss_log_path, 'a') as f:
-            f.write(f"Epoch {epoch+1}/{epochs}, Average Test Loss: {avg_test_loss:.4f}\n")
-            
         test_loss_stats.append(avg_test_loss)
+        
+        if verbose:
+            print(f"Epoch {epoch+1}/{epochs}, Train Loss: {avg_loss:.4f}, Test Loss: {avg_test_loss:.4f}")
+        with open(dirs.loss_log_path, 'a') as f:
+            f.write(f"Epoch {epoch+1}/{epochs}, Train Loss: {avg_loss:.4f}, Test Loss: {avg_test_loss:.4f}\n")
+            
         ax1.clear()
+        ax1.plot(np.arange(1, epoch+2), train_loss_stats)
         ax1.plot(np.arange(1, epoch+2), test_loss_stats)
         ax1.set_xlabel('Epoch')
-        ax1.set_ylabel('Test Loss (fixed dataset)')
-        ax1.set_title('Test Loss vs Epoch')
+        ax1.set_ylabel('Loss')
+        ax1.legend(['Train Loss', 'Test Loss (fixed dataset)'], loc="lower right")
+        ax1.set_title('Loss vs Epoch')
         ax1.grid(True)
             
         if (epoch + 1) % evaluation_config.eval_every == 0:
@@ -357,7 +356,6 @@ def main():
         plt.savefig(FIGURES_DIR / 'v8_32500epochs_test_run.png', dpi=150)
         
         exit(0)
-    
 
 if __name__ == '__main__':
     main()

@@ -11,12 +11,12 @@ model:
   n_head: 4
   n_layers: 4
   embed_dim: 128
-  dim_feedforward: 1024
-  dropout: 0.1
+  dim_feedforward: 128
+  dropout: 0.0
   T: 500
   eos_weight: 10.0
 training:
-  epochs: 100000
+  epochs: 10
   learning_rate: 0.001
   weight_decay: 0.0
 evaluation:
@@ -27,5 +27,5 @@ evaluation:
 paths:
   models_dir: models
   figures_dir: figures
-  experiment_name: n_embed=128_ff=1024_drop=0.1
-notes: "Investigating embed_dim=128 & dim_feedforward=1024, dropout=0.1, weight_decay=0"
+  experiment_name: test_train_loss
+notes: "test"
