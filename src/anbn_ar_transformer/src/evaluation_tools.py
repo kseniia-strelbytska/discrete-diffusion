@@ -30,7 +30,7 @@ def evaluation_loss(model, dataloader):
 
 # eval_type: next_token or prefix
 # samples_type for anbn: random or full
-def evaluation_from_generation(model, grammar, data=None, eval_type='next_token', samples_type='random', n_samples=100, device='cpu', loss_log_path=None, output_path=None):
+def evaluation_from_generation(model, grammar, data=None, eval_type='next_token', samples_type='random', n_samples=100, loss_log_path=None, output_path=None):
     # prefixes = select_rule_2(generate_seq(max(1, round(l * 0.5))))
     # prefixes = select_rule_2(generate_seq(max(1, round(l * 0.75))))
     
@@ -45,8 +45,8 @@ def evaluation_from_generation(model, grammar, data=None, eval_type='next_token'
         if data != None:
             prefixes = data[:, 1:grammar.l//2]
         
-        idxs = torch.randint(0, prefixes.shape[0] - 1, (n_samples,), device='cpu').to(device)
-        prefixes = prefixes[idxs].to(device)
+        idxs = torch.randint(0, prefixes.shape[0] - 1, (n_samples,))
+        prefixes = prefixes[idxs]
            
         model.eval()
         with torch.no_grad():
@@ -57,19 +57,19 @@ def evaluation_from_generation(model, grammar, data=None, eval_type='next_token'
                 stats += y_pred_stats
     else:
         if samples_type == 'random':
-            samples = torch.randint(1, grammar.l//2, (n_samples,), device='cpu').to(device)
+            samples = torch.randint(1, grammar.l//2, (n_samples,))
         else:
-            samples = torch.arange(1, grammar.l//2, device=device)
+            samples = torch.arange(1, grammar.l//2)
             
         model.eval()
         with torch.no_grad():
             for l in tqdm(samples.tolist()):
-                seq = torch.cat([torch.tensor([SOS_token], device=device), 
-                                 torch.zeros((l, ), device=device).long()], dim=-1) # has batch dim
+                seq = torch.cat([torch.tensor([SOS_token]), 
+                                 torch.zeros((l, )).long()], dim=-1) # has batch dim
 
                 # test on '000...0' and on '000...01'
                 y_preds = [get_prediction(model, seq, grammar.l + 2), 
-                        get_prediction(model, torch.cat([seq, torch.ones((1,), device=device).long()], dim=-1), grammar.l + 2)] # +2 SOS/EOS    
+                        get_prediction(model, torch.cat([seq, torch.ones((1,)).long()], dim=-1), grammar.l + 2)] # +2 SOS/EOS    
                 
                 total += len(y_preds)
                 

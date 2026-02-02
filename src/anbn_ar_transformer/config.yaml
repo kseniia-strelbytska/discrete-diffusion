@@ -1,5 +1,5 @@
 seed: 1
-device: mps
+device: cpu
 data:
   l: 256
   train_split: 0.9
@@ -15,7 +15,7 @@ model:
   dropout: 0.1
   eos_weight: 1.0
 training:
-  epochs: 3000
+  epochs: 15000
   learning_rate: 0.002
   weight_decay: 0.0
   lr_scheduler: False
@@ -27,5 +27,5 @@ evaluation:
 paths:
   models_dir: models
   figures_dir: figures
-  experiment_name: mps_near_paper_params_no_lr_scheduler
-notes: "Moved to device. Except: layer norm"
+  experiment_name: see_cpu_run
+notes: "Moved to device. Like the paper, except: lr scheduler, layer norm"

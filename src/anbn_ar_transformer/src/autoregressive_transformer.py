@@ -72,10 +72,10 @@ class Model(nn.Module):
 
     def forward(self, X):
         B, L = X.shape 
-        mask = torch.triu(torch.ones(L, L, device=X.device), diagonal=1).bool()
+        mask = torch.triu(torch.ones(L, L), diagonal=1).bool()
         padding_mask = (X == PAD_token)
     
-        positions = self.positional_embedding(torch.arange(0, L, device=X.device).unsqueeze(0)) # (1, L) -> (1, L, E)
+        positions = self.positional_embedding(torch.arange(0, L).unsqueeze(0)) # (1, L) -> (1, L, E)
         X = self.embedding(X) + positions # (B, L, E)
 
         X  = self.transformer_encoder(src=X, mask=mask, is_causal=True) # apply mask to make it a unidirectional block!
@@ -84,12 +84,11 @@ class Model(nn.Module):
         return X
 
 class Dataset(torch.utils.data.Dataset):
-    def __init__(self, X, y, device='cpu'):
+    def __init__(self, X, y):
         super().__init__()
         
-        self.X = X.to(device)
-        self.y = y.to(device)
-        self.device = device
+        self.X = X
+        self.y = y
         
     def __getitem__(self, index):
         return self.X[index], self.y[index]
@@ -99,7 +98,7 @@ class Dataset(torch.utils.data.Dataset):
     
     
 
-def train(model, grammar, eos_weight=1.0, dirs=None, evaluation_config=None, lr_scheduler=False, epochs=5, lr=1e-3, train_dataloader=None, test_dataloader=None, device='cpu', verbose=False):
+def train(model, grammar, eos_weight=1.0, dirs=None, evaluation_config=None, lr_scheduler=False, epochs=5, lr=1e-3, train_dataloader=None, test_dataloader=None, verbose=False):
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
     
     if lr_scheduler:
@@ -108,9 +107,9 @@ def train(model, grammar, eos_weight=1.0, dirs=None, evaluation_config=None, lr_
             num_warmup_steps=1000
         )
     
-    class_weights = torch.ones(model.vocab_size, device=device)
+    class_weights = torch.ones(model.vocab_size)
     class_weights[EOS_token] = eos_weight
-    loss_fn = nn.CrossEntropyLoss(weight=class_weights).to(device)
+    loss_fn = nn.CrossEntropyLoss(weight=class_weights)
     
     stats = [[], [], [], [], []] #r1, r2, both, format, epochsteps
     test_loss_stats, train_loss_stats = [], []
@@ -124,8 +123,8 @@ def train(model, grammar, eos_weight=1.0, dirs=None, evaluation_config=None, lr_
         total_loss = 0
         for X_batch, y_batch in train_dataloader:
             B, L = X_batch.shape
-            X_batch = X_batch.to(device)
-            y_batch = y_batch.to(device)
+            X_batch = X_batch
+            y_batch = y_batch
             
             optimizer.zero_grad()
             logits = model(X_batch)
@@ -147,8 +146,8 @@ def train(model, grammar, eos_weight=1.0, dirs=None, evaluation_config=None, lr_
         test_loss = 0
         for X_batch, y_batch in test_dataloader:
             B, L = X_batch.shape
-            X_batch = X_batch.to(device)
-            y_batch = y_batch.to(device)
+            X_batch = X_batch
+            y_batch = y_batch
             
             logits = model(X_batch)
             loss_raw = loss_fn(logits.view(B*L, -1), y_batch.view(B*L))
@@ -180,7 +179,6 @@ def train(model, grammar, eos_weight=1.0, dirs=None, evaluation_config=None, lr_
                                                    eval_type=grammar.default_eval_type, 
                                                    samples_type=evaluation_config.samples_type, 
                                                    n_samples=evaluation_config.n_samples,
-                                                   device=device,
                                                    loss_log_path=dirs.loss_log_path, 
                                                    output_path=dirs.output_path)
             
@@ -240,21 +238,8 @@ def main():
     experiment_name = cfg.paths.experiment_name
     experiment_path_dated = experiment_name + f'_{datetime.now().strftime("%d%m%Y_%H%M%S")}/'
     dirs = setup_experiment_dirs(PROJECT_ROOT, MODELS_DIR, FIGURES_DIR, args.config, experiment_path_dated)
-    
-    # Device configuration
-    device = None
-    if cfg.device == 'auto':
-        if torch.backends.mps.is_available():
-            device = torch.device('mps')
-        elif torch.cuda.is_available():
-            device = torch.device('cuda')
-        else:
-            device = torch.device('cpu')
-    else:
-        device = torch.device(cfg.device)
         
     torch.cuda.manual_seed_all(cfg.seed)
-    print(f'Using device: {device}')
         
     if cfg.data.grammar == 'anbn':
         grammar = anbnGrammar(cfg.data.l)
@@ -263,10 +248,10 @@ def main():
     
     grammar.data = grammar.generate_seq()
 
-    X = grammar.data.clone()[:, :-1].to(device)
-    y = grammar.data.clone()[:, 1:].to(device)
+    X = grammar.data.clone()[:, :-1]
+    y = grammar.data.clone()[:, 1:]
     
-    dataset = Dataset(X, y, device=device)
+    dataset = Dataset(X, y)
     print(f'Dataset len: {len(dataset)}')
     generator = torch.Generator().manual_seed(cfg.seed)
     train_dataset, test_dataset = torch.utils.data.random_split(
@@ -307,7 +292,7 @@ def main():
         embed_dim=cfg.model.embed_dim,
         dim_feedforward=cfg.model.dim_feedforward,
         dropout=cfg.model.dropout) 
-    model = model.to(device)
+    model = model
     # model.load_state_dict(torch.load('./models/anbn_trained_models/rule2_autoregressive_transformer_epochs=1500'))
     model = train(model=model, 
                   grammar=grammar,
@@ -319,7 +304,6 @@ def main():
                   lr=cfg.training.learning_rate,
                   train_dataloader=train_dataloader,
                   test_dataloader=test_dataloader,
-                  device=device,
                   verbose=args.verbose)
     # torch.save(model.state_dict(), f'./rule2_autoregressive_transformer_500')
                 

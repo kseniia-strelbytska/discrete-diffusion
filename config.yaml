@@ -1,5 +1,5 @@
-seed: 1
-device: auto
+seed: 42
+device: mps
 data:
   l: 256
   train_split: 0.9
@@ -12,11 +12,11 @@ model:
   n_layers: 4
   embed_dim: 128
   dim_feedforward: 128
-  dropout: 0.0
+  dropout: 0.1
   T: 500
   eos_weight: 10.0
 training:
-  epochs: 10000
+  epochs: 30000
   learning_rate: 0.001
   weight_decay: 0.0
 evaluation:
@@ -27,5 +27,5 @@ evaluation:
 paths:
   models_dir: models
   figures_dir: figures
-  experiment_name: test_server
-notes: "testing remote server"
+  experiment_name: train_loss
+notes: "Testing v7, tracking train+test loss"
