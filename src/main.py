@@ -289,6 +289,25 @@ def main():
                     verbose=args.verbose
                     )
     else:    
+        # v8=v7?
+        model.load_state_dict(torch.load(MODELS_DIR / f'anbn_diffusion_v8/diffusion_epochs={32500}'))
+        evals = evaluation_from_generation(model, 
+                                            grammar, 
+                                            data=None, 
+                                            T=cfg.model.T, 
+                                            eval_type='autoregressive', 
+                                            samples_type='full', 
+                                            n_samples=-1, 
+                                            write_steps=True,
+                                            device=device, 
+                                            figures_path=dirs.figure_path,
+                                            loss_log_path=dirs.loss_log_path,
+                                            output_path=dirs.output_path)
+        
+
+        exit(0)
+        
+        # test different seeds
         # model.load_state_dict(torch.load(MODELS_DIR / f'anbn_diffusion_v8/diffusion_epochs={32500}'))
         # unmask = ScheduledUnmasker(model, T=1500, device=device)
         # l = 59
@@ -322,6 +341,7 @@ def main():
         
         # exit(0)
         
+        # re-evaluate and plot accuracies of pre-trained models
         stats = [[], [], [], [], []] # r1, r2, both, format, epochsteps
 
         for i in range(27, 28):

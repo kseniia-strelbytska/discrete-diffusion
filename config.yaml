@@ -1,5 +1,5 @@
-seed: 1
-device: auto
+seed: 42
+device: mps
 data:
   l: 256
   train_split: 0.9
@@ -13,7 +13,7 @@ model:
   embed_dim: 128
   dim_feedforward: 128
   dropout: 0.0
-  T: 500
+  T: 1500
   eos_weight: 10.0
 training:
   epochs: 10
@@ -27,5 +27,5 @@ evaluation:
 paths:
   models_dir: models
   figures_dir: figures
-  experiment_name: test_train_loss
-notes: "test"
+  experiment_name: seed42_current
+notes: "Testing output to see diffusion model denoising process. Testing anbn_diffusion_v8/32500 epochsб "

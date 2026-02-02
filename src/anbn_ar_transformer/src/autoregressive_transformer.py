@@ -96,6 +96,8 @@ class Dataset(torch.utils.data.Dataset):
         
     def __len__(self):
         return self.X.shape[0]
+    
+    
 
 def train(model, grammar, eos_weight=1.0, dirs=None, evaluation_config=None, lr_scheduler=False, epochs=5, lr=1e-3, train_dataloader=None, test_dataloader=None, device='cpu', verbose=False):
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
@@ -208,19 +210,36 @@ def parse_args():
     parser.add_argument('--verbose', action='store_true', help='Enable verbose output.')
     return parser.parse_args()
 
+
+def set_seed(seed):
+    """Comprehensive seed setting for reproducibility"""
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    
+    # Make deterministic
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    
+    # Set environment variables
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    os.environ['CUBLAS_WORKSPACE_CONFIG'] = ':4096:8'
+    
+    # Enable deterministic algorithms (may impact performance)
+    torch.use_deterministic_algorithms(True, warn_only=True)
+    
 def main():
     args = parse_args()
     cfg = load_config(args.config)
+    set_seed(cfg.seed)
+    
     PROJECT_ROOT = Path(__file__).resolve().parents[1]
     MODELS_DIR = PROJECT_ROOT / cfg.paths.models_dir
     FIGURES_DIR = PROJECT_ROOT / cfg.paths.figures_dir
     experiment_name = cfg.paths.experiment_name
     experiment_path_dated = experiment_name + f'_{datetime.now().strftime("%d%m%Y_%H%M%S")}/'
     dirs = setup_experiment_dirs(PROJECT_ROOT, MODELS_DIR, FIGURES_DIR, args.config, experiment_path_dated)
-    
-    torch.manual_seed(cfg.seed)
-    random.seed(cfg.seed)
-    np.random.seed(cfg.seed)
     
     # Device configuration
     device = None
@@ -233,6 +252,8 @@ def main():
             device = torch.device('cpu')
     else:
         device = torch.device(cfg.device)
+        
+    torch.cuda.manual_seed_all(cfg.seed)
     print(f'Using device: {device}')
         
     if cfg.data.grammar == 'anbn':
@@ -247,11 +268,37 @@ def main():
     
     dataset = Dataset(X, y, device=device)
     print(f'Dataset len: {len(dataset)}')
-    train_dataset, test_dataset = torch.utils.data.random_split(dataset, [cfg.data.train_split, 1 - cfg.data.train_split])
-    train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=cfg.data.batch_size, shuffle=True)
-    test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=cfg.data.batch_size, shuffle=False)
+    generator = torch.Generator().manual_seed(cfg.seed)
+    train_dataset, test_dataset = torch.utils.data.random_split(
+        dataset, 
+        [cfg.data.train_split, 1 - cfg.data.train_split],
+        generator=generator
+    )
     
-    full_dataloader = torch.utils.data.DataLoader(dataset, batch_size=32, shuffle=True)
+    def seed_worker(worker_id):
+        worker_seed = torch.initial_seed() % 2**32
+        np.random.seed(worker_seed)
+        random.seed(worker_seed)
+    
+    g = torch.Generator()
+    g.manual_seed(cfg.seed)
+    
+    train_dataloader = torch.utils.data.DataLoader(
+        train_dataset, 
+        batch_size=cfg.data.batch_size, 
+        shuffle=True,
+        generator=g,
+        worker_init_fn=seed_worker,
+        num_workers=0  # Set to 0 for determinism, or keep workers with seed_worker
+    )
+    test_dataloader = torch.utils.data.DataLoader(
+        test_dataset, 
+        batch_size=cfg.data.batch_size, 
+        shuffle=False,
+        num_workers=0
+    )
+    
+    # full_dataloader = torch.utils.data.DataLoader(dataset, batch_size=32, shuffle=True)
 
     model = Model(max_len=cfg.model.max_len,
         vocab_size=cfg.model.vocab_size,

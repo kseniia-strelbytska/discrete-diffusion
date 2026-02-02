@@ -45,7 +45,7 @@ def evaluation_from_generation(model, grammar, data=None, eval_type='next_token'
         if data != None:
             prefixes = data[:, 1:grammar.l//2]
         
-        idxs = torch.randint(0, prefixes.shape[0] - 1, (n_samples,), device=device)
+        idxs = torch.randint(0, prefixes.shape[0] - 1, (n_samples,), device='cpu').to(device)
         prefixes = prefixes[idxs].to(device)
            
         model.eval()
@@ -57,7 +57,7 @@ def evaluation_from_generation(model, grammar, data=None, eval_type='next_token'
                 stats += y_pred_stats
     else:
         if samples_type == 'random':
-            samples = torch.randint(1, grammar.l//2, (n_samples,), device=device)
+            samples = torch.randint(1, grammar.l//2, (n_samples,), device='cpu').to(device)
         else:
             samples = torch.arange(1, grammar.l//2, device=device)
             
