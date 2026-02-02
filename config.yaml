@@ -1,5 +1,5 @@
 seed: 42
-device: mps
+device: auto
 data:
   l: 256
   train_split: 0.9
@@ -11,9 +11,9 @@ model:
   n_head: 4
   n_layers: 4
   embed_dim: 128
-  dim_feedforward: 128
+  dim_feedforward: 1024
   dropout: 0.1
-  T: 500
+  T: 1500
   eos_weight: 10.0
 training:
   epochs: 30000
@@ -22,10 +22,10 @@ training:
 evaluation:
   eval_every: 500
   n_samples: 200
-  samples_type: random
+  samples_type: full
   eval_type: autoregressive
 paths:
   models_dir: models
   figures_dir: figures
-  experiment_name: train_loss
-notes: "Testing v7, tracking train+test loss"
+  experiment_name: running_denoising
+notes: "Running denoising on epoch 96500/100000 from (n_embed=128_ff=1024_drop=0.1_27012026_221030), T=1500"

@@ -289,14 +289,13 @@ def main():
                     verbose=args.verbose
                     )
     else:    
-        # v8=v7?
-        model.load_state_dict(torch.load(MODELS_DIR / f'anbn_diffusion_v8/diffusion_epochs={32500}'))
+        model.load_state_dict(torch.load(MODELS_DIR / 'n_embed=128_ff=1024_drop=0.1_27012026_221030/model_epochs=96500', map_location=torch.device('cpu')))
         evals = evaluation_from_generation(model, 
                                             grammar, 
                                             data=None, 
                                             T=cfg.model.T, 
                                             eval_type='autoregressive', 
-                                            samples_type='full', 
+                                            samples_type=cfg.evaluation.samples_type, 
                                             n_samples=-1, 
                                             write_steps=True,
                                             device=device, 

@@ -84,10 +84,16 @@ Change src/config.yaml to specify parameters of your experiment. An example conf
 
 # Usage
 
-Run with:
+Run example:
 ```bash
-$ python src/main.py
+$ python src/main.py -config ./config.yaml --mode train --verbose
 ```
+
+| Argument    | Type  | Default         | Description                    |
+| ----------- | ----- | --------------- | ------------------------------ |
+| `--config`  | `str` | `./config.yaml` | Path to the configuration file |
+| `--mode`    | `str` | `train`         | Run mode: `train` or `eval`    |
+| `--verbose` | flag  | `False`         | Enable verbose output          |
 
 ## Expected Results
 ```
