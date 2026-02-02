@@ -55,7 +55,7 @@ def setup_experiment_dirs(PROJECT_ROOT, MODELS_DIR, FIGURES_DIR, config_path, ex
     return dirs
 
 class TransformerClassifier(torch.nn.Module):
-    def __init__(self, max_len=16, vocab_size=6, n_head=4, n_layers=2, embed_dim=128, dim_feedforward=1024, dropout=0.1):
+    def __init__(self, max_len=16, vocab_size=6, n_head=4, n_layers=2, embed_dim=128, dim_feedforward=1024, dropout=0.1, layer_norm_eps=2e-4):
         super().__init__()
 
         self.l = max_len
@@ -63,7 +63,12 @@ class TransformerClassifier(torch.nn.Module):
         self.embedding = nn.Embedding(vocab_size, embed_dim)
         
          # Transformer/encoder layer
-        self.layer = nn.TransformerEncoderLayer(d_model=embed_dim, nhead=n_head, dim_feedforward=dim_feedforward, dropout=dropout, batch_first=True)
+        self.layer = nn.TransformerEncoderLayer(d_model=embed_dim, 
+                                                nhead=n_head, 
+                                                dim_feedforward=dim_feedforward, 
+                                                dropout=dropout,
+                                                layer_norm_eps=layer_norm_eps, 
+                                                batch_first=True)
         self.transformer_encoder = nn.TransformerEncoder(self.layer, num_layers=n_layers)
 
         # Predictor head: a simple linear layer
@@ -270,7 +275,8 @@ def main():
         n_layers=cfg.model.n_layers,
         embed_dim=cfg.model.embed_dim,
         dim_feedforward=cfg.model.dim_feedforward,
-        dropout=cfg.model.dropout)
+        dropout=cfg.model.dropout,
+        layer_norm_eps=cfg.model.layer_norm_eps)
     model = model.to(device)
     
     if args.mode == 'train':
@@ -330,7 +336,7 @@ def main():
         #                                                 data=None, 
         #                                                 T=cfg.model.T, 
         #                                                 eval_type='autoregressive', 
-        #                                                 samples_type='full', 
+        #                                                 samples_type=cfg.evaluation.samples, 
         #                                                 n_samples=-1, 
         #                                                 write_steps=False,
         #                                                 device=device, 

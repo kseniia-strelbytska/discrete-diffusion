@@ -13,7 +13,8 @@ model:
   embed_dim: 128
   dim_feedforward: 1024
   dropout: 0.1
-  T: 1500
+  layer_norm_eps: 0.0002
+  T: 500
   eos_weight: 10.0
 training:
   epochs: 30000
