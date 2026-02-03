@@ -5,6 +5,74 @@ from tqdm import tqdm
 from noise_schedule_unmask import ScheduledUnmasker
 from constants import EOS_token, SOS_token, PAD_token, MASK_token
 
+class EvaluationDataset():
+    '''
+    Expected init parameters:
+        l: Length of strings (excluding SOS/EOS)
+        eval_dataset: Type of dataset (see below)
+        eval_type: Eval type is either 'full' or 'random'
+        n_samples: number of samples to take if eval_type='random'
+        
+    The class holds:
+        self.full_data: full dataset of eval_dataset type 
+        self.sampled_data: n_samples random samples (without repetition) from full_data
+        self.data: data to use, self.full_data if eval_type if full, otherwise is self.sampled_data
+    
+    Three types of datasets are available.
+    All prompts are autoregressive prompts, prepened with SOS 
+    -- limited:
+        Contains l samples. l is the maximum string length (exlusing SOS/EOS) seen during training. 
+        Consider 1 <= l0 <= l / 2. For each, add inputs:
+        000...0 (l0 zeros) and 
+        000...01 (l0 zeros and one '1')
+    -- randomised
+        Contains 100 samples.
+        Consider 8 <= l0 <= 32. For each, make 4 samples of l1, s.t. 1 <= l1 <= l0:
+        000...011..1 (l0 zeros and l1 ones)
+    -- complete
+        All sequences of length 64 that can be completed according to the grammar
+    '''
+    
+    def __init__(self, l, eval_dataset, eval_type='full', n_samples=100):
+        self.l = l
+        self.eval_dataset = eval_dataset
+        self.eval_type = eval_type
+        self.n_samples = n_samples
+        
+        self.full_data = []
+        if eval_dataset == 'limited':
+            self._init_limited()
+        elif eval_dataset == 'randomised':
+            self._init_randomised()
+        elif eval_dataset == 'complete':
+            self._init_complete()
+        
+        self.sampled_data = self.full_data.clone()[torch.randperm(self.full_data.shape[0])][:n_samples]
+        self.data = self.full_data.clone() if eval_type == 'full' else self.sampled_data
+        
+    def _init_limited(self):
+        for l0 in range(1, self.l // 2 + 1):
+            self.full_data.append(torch.tensor([SOS_token] + [0]*l0 + [MASK_token]*(self.l + 1 - l0)).unsqueeze(0))
+            self.full_data.append(torch.tensor([SOS_token] + [0]*l0 + [1] + [MASK_token]*(self.l - l0)).unsqueeze(0))
+        
+        self.full_data = torch.cat(self.full_data, dim=0)
+        
+    def _init_randomised(self):
+        for l0 in range(8, 33):
+            # range [1, l0]
+            sampled_l1 = torch.randperm(l0)[:4] + 1 
+            for l1 in sampled_l1:
+                self.full_data.append(torch.tensor([SOS_token] + [0]*l0 + [1]*l1 + [MASK_token] * (self.l + 1 - l0 - l1)).unsqueeze(0))
+                
+        self.full_data = torch.cat(self.full_data, dim=0)
+        
+    def _init_complete(self):
+        for l0 in range(32, 65):
+            for l1 in range(0, 64-l0+1):
+                self.full_data.append(torch.tensor([SOS_token] + [0]*l0 + [1]*l1 + [MASK_token] * (self.l + 1 - l0 - l1)).unsqueeze(0))
+        
+        self.full_data = torch.cat(self.full_data, dim=0)
+
 def evaluation_loss(model, dataloader, device='cpu'):
     loss_fn = nn.CrossEntropyLoss(reduction='none', ignore_index=PAD_token).to(device)
     
@@ -58,44 +126,20 @@ def get_timeline(max_len=258, steps=None, idx=-1):
 
 # eval_type: diffusion or autoregressive
 # samples_type for anbn: random or full
-def evaluation_from_generation(model, grammar, data=None, T=500, eval_type='diffusion', samples_type='random', n_samples=100, write_steps=False, device='cpu', figures_path=None, loss_log_path=None, output_path=None):
-    if data != None:
-        data = data.clone()
-
+def evaluation_from_generation(model, grammar, evaluation_dataset=None, T=500, write_steps=False, device='cpu', figures_path=None, loss_log_path=None, output_path=None):
     # r1, r2, both, format
     stats = np.array([0, 0, 0, 0])
     total = 0
     
-    if eval_type == 'diffusion':
-        if data == None:
-            noise_level = 0.8
-            data = grammar.data.clone()
-            data[torch.rand_like(data, dtype=torch.float) < noise_level] = MASK_token
-    else: 
-        # test on prompts '000...0' and '000...01'
-        data = grammar.data.clone()
-        
-        for l in range(1, grammar.l // 2 + 1):
-            data[l - 1, l+2:] = MASK_token
-            seq = data[l - 1].clone().unsqueeze(0)
-            seq[:, l + 1] = MASK_token 
-            data = torch.cat([data, seq], dim=0)
-                    
-    if samples_type == 'random':  
-        data = data[torch.randperm(data.shape[0])]
-        data = data[:n_samples]
-
-    data = data.to(device)
-    
     with open(output_path, 'w') as f:
         f.write('')
     
-    print(f'Evaluation on data, shape: f{data.shape}')                
+    print(f'Evaluation on data, shape: f{evaluation_dataset.data.shape}')                
     unmaskModel = ScheduledUnmasker(model, T=T, device=device)
     
     model.eval()
     with torch.no_grad():
-        for idx, s in enumerate(tqdm(data)):
+        for idx, s in enumerate(tqdm(evaluation_dataset.data)):
             total += 1
             if write_steps == False:
                 y_pred = unmaskModel(s, ((s == MASK_token).sum() / torch.numel(s))) # no batch dimension

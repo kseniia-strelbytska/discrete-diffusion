@@ -1,5 +1,5 @@
 seed: 42
-device: auto
+device: cpu
 data:
   l: 256
   train_split: 0.9
@@ -23,10 +23,10 @@ training:
 evaluation:
   eval_every: 500
   n_samples: 200
-  samples_type: full
-  eval_type: autoregressive
+  eval_dataset: complete
+  eval_type: full
 paths:
   models_dir: models
   figures_dir: figures
-  experiment_name: running_denoising
-notes: "Running denoising on epoch 96500/100000 from (n_embed=128_ff=1024_drop=0.1_27012026_221030), T=1500"
+  experiment_name: testing_evaluation_dataset
+notes: "Tests run on n_embed=128_ff=1024_drop=0.1_27012026_221030/model_epochs=96500"

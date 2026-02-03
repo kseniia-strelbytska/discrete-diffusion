@@ -16,7 +16,7 @@ from transformers.optimization import get_inverse_sqrt_schedule
 
 from anbn import anbnGrammar
 from constants import EOS_token, SOS_token, PAD_token, MASK_token
-from evaluation_tools import evaluation_loss, evaluation_from_generation, get_timeline
+from evaluation_tools import EvaluationDataset, evaluation_from_generation
 from initialgrammar import initialGrammar
 from loss import rblb
 from noise_schedule_unmask import ScheduledUnmasker
@@ -132,7 +132,7 @@ def get_fixed_dataset(dataset, batch_size=32, device='cpu'):
     return fixed_dataset
 
 # noise_resolution -- T in the scheduled unmasker
-def train(model, grammar, T=500, eos_weight=1.0, dirs=None, evaluation_config=None, epochs=5, lr=1e-3, weight_decay=0.01, train_dataloader=None, test_dataset=None, device='cpu', verbose=False):
+def train(model, grammar, T=500, eos_weight=1.0, dirs=None, evaluation_config=None, epochs=5, lr=1e-3, weight_decay=0.01, train_dataloader=None, test_dataset=None, evaluation_dataset=None, device='cpu', verbose=False):
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
     loss_fn = rblb(eos_weight=eos_weight, device=device)
     
@@ -192,11 +192,8 @@ def train(model, grammar, T=500, eos_weight=1.0, dirs=None, evaluation_config=No
         if (epoch + 1) % evaluation_config.eval_every == 0:
             new_stats = evaluation_from_generation(model, 
                                                    grammar, 
-                                                   data=None, 
+                                                   evaluation_dataset=evaluation_dataset,
                                                    T=T, 
-                                                   eval_type=evaluation_config.eval_type, 
-                                                   samples_type=evaluation_config.samples_type, 
-                                                   n_samples=evaluation_config.n_samples, 
                                                    device=device, 
                                                    loss_log_path=dirs.loss_log_path,
                                                    output_path=dirs.output_path)
@@ -259,14 +256,18 @@ def main():
         grammar = initialGrammar(cfg.data.l)
     
     grammar.data = grammar.generate_seq()
-    dataset = Dataset(grammar.data, device=device)        
+    dataset = Dataset(grammar.data, device=device)      
+    print(f'Dataset len: {len(dataset)}')  
     train_dataset, test_dataset = torch.utils.data.random_split(dataset, [cfg.data.train_split, 1 - cfg.data.train_split])
-    print(f'Dataset len: {len(dataset)}')
     train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=cfg.data.batch_size, shuffle=True)
     test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=cfg.data.batch_size, shuffle=False)
+    fixed_test_dataset = get_fixed_dataset(test_dataset, batch_size=cfg.data.batch_size, device=device) # fixed test dataset
     
-    # fixed test dataset
-    fixed_test_dataset = get_fixed_dataset(test_dataset, batch_size=cfg.data.batch_size, device=device)
+    evaluation_dataset = EvaluationDataset(l=cfg.data.l,
+                                          eval_dataset=cfg.evaluation.eval_dataset,
+                                          eval_type=cfg.evaluation.eval_type,
+                                          n_samples=cfg.evaluation.n_samples)
+    print(f'Evaluation Dataset len: {len(evaluation_dataset.data)}')
 
     model = TransformerClassifier(
         max_len=cfg.model.max_len,
@@ -291,25 +292,29 @@ def main():
                     weight_decay=cfg.training.weight_decay,
                     train_dataloader=train_dataloader, 
                     test_dataset=fixed_test_dataset,
+                    evaluation_dataset=evaluation_dataset,
                     device=device,
                     verbose=args.verbose
                     )
     else:    
         model.load_state_dict(torch.load(MODELS_DIR / 'n_embed=128_ff=1024_drop=0.1_27012026_221030/model_epochs=96500', map_location=torch.device('cpu')))
-        evals = evaluation_from_generation(model, 
-                                            grammar, 
-                                            data=None, 
-                                            T=cfg.model.T, 
-                                            eval_type='autoregressive', 
-                                            samples_type=cfg.evaluation.samples_type, 
-                                            n_samples=-1, 
-                                            write_steps=True,
-                                            device=device, 
-                                            figures_path=dirs.figure_path,
-                                            loss_log_path=dirs.loss_log_path,
-                                            output_path=dirs.output_path)
         
-
+        for iter_eval_dataset in ['randomised', 'limited', 'complete']:
+            print(f'Evaluation dataset: {iter_eval_dataset}')
+            current_evaluation_dataset = EvaluationDataset(l=cfg.data.l,
+                                          eval_dataset=iter_eval_dataset,
+                                          eval_type=cfg.evaluation.eval_type,
+                                          n_samples=cfg.evaluation.n_samples)
+            evals = evaluation_from_generation(model, 
+                                                grammar, 
+                                                evaluation_dataset=current_evaluation_dataset,
+                                                T=cfg.model.T, 
+                                                write_steps=True,
+                                                device=device, 
+                                                figures_path=dirs.figure_path,
+                                                loss_log_path=dirs.loss_log_path,
+                                                output_path=dirs.output_path)
+            
         exit(0)
         
         # test different seeds
@@ -333,11 +338,8 @@ def main():
             
         #     new_stats = evaluation_from_generation(model, 
         #                                                 grammar, 
-        #                                                 data=None, 
+        #                                                 evaluation_dataset=evaluation_dataset,
         #                                                 T=cfg.model.T, 
-        #                                                 eval_type='autoregressive', 
-        #                                                 samples_type=cfg.evaluation.samples, 
-        #                                                 n_samples=-1, 
         #                                                 write_steps=False,
         #                                                 device=device, 
         #                                                 figures_path=dirs.figure_path,
@@ -355,12 +357,9 @@ def main():
 
             new_stats = evaluation_from_generation(model, 
                                                     grammar, 
-            
+                                                    evaluation_dataset=evaluation_dataset,
                                                     data=None, 
                                                     T=500, 
-                                                    eval_type='autoregressive', 
-                                                    samples_type='full', 
-                                                    n_samples=100, 
                                                     device=device, 
                                                     loss_log_path=dirs.loss_log_path,
                                                     output_path=dirs.output_path)
