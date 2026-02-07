@@ -14,10 +14,11 @@ model:
   dim_feedforward: 1024
   dropout: 0.1
   layer_norm_eps: 0.0002
-  T: 500
+  T: 1500
   eos_weight: 10.0
+  inverse_t: True
 training:
-  epochs: 30000
+  epochs: 60000
   learning_rate: 0.001
   weight_decay: 0.0
 evaluation:
@@ -28,5 +29,5 @@ evaluation:
 paths:
   models_dir: models
   figures_dir: figures
-  experiment_name: testing_evaluation_dataset
-notes: "Tests run on n_embed=128_ff=1024_drop=0.1_27012026_221030/model_epochs=96500"
+  experiment_name: inverse_t
+notes: "testing inverse t"

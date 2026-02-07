@@ -3,8 +3,10 @@ import torch.nn as nn
 from constants import EOS_token, SOS_token, PAD_token, MASK_token
 
 class rblb(nn.Module):
-    def __init__(self, eos_weight=10.0, device='cpu'):
+    def __init__(self, eos_weight=10.0, device='cpu', inverse_t=False):
         super().__init__()
+        
+        self.inverse_t = inverse_t
         
         class_weight = torch.tensor([1.0] * 5)
         class_weight[EOS_token] = eos_weight
@@ -27,8 +29,9 @@ class rblb(nn.Module):
 
         # calculating weighted loss
         loss = loss.reshape((B, L))
-        loss = 1.0/(timestep.unsqueeze(-1) + 1e-5) * loss
+        if self.inverse_t:
+            loss = 1.0/(timestep.unsqueeze(-1) + 1e-5) * loss
+        
         loss = loss.sum() / B
-
 
         return loss

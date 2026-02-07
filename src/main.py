@@ -98,20 +98,35 @@ class TransformerClassifier(torch.nn.Module):
         return X
 
 class Dataset(torch.utils.data.Dataset):
-    def __init__(self, y, device='cpu'):
+    def __init__(self, y, device='cpu', inverse_t=False):
+        # if invers_t=True, mask with probability sampled from 1/x
         self.y = y.to(device)
         self.device = device
+        self.inverse_t = inverse_t
         
     def __len__(self):
         return self.y.shape[0]
     
     def __getitem__(self, index):
         y_sample = self.y[index]
-        prob = torch.rand((1, ), device=self.device) # prob of having a mask (ie the timestep)
+        
+        if not self.inverse_t:
+            prob = torch.rand((1, ), device=self.device) # prob of having a mask (ie the timestep)
+        else:
+            prob = self.sample_inverse_t()
+        
         mask = torch.rand_like(y_sample, dtype=torch.float, device=self.device) < prob.item()
         X_sample = torch.where(mask == True, torch.full_like(y_sample, torch.tensor(MASK_token, device=self.device)), y_sample)
         
         return X_sample, y_sample, prob
+    
+    def sample_inverse_t(self):
+        CLIP_VALUE = 1e-2
+        u = np.random.uniform(0, 1)
+        log_clip = np.log(CLIP_VALUE)
+        sampled_val = np.exp(u * (np.log(1.0) - log_clip) + log_clip)
+        
+        return torch.tensor(sampled_val)
 
 def get_fixed_dataset(dataset, batch_size=32, device='cpu'):
     fixed_dataset = []
@@ -132,9 +147,9 @@ def get_fixed_dataset(dataset, batch_size=32, device='cpu'):
     return fixed_dataset
 
 # noise_resolution -- T in the scheduled unmasker
-def train(model, grammar, T=500, eos_weight=1.0, dirs=None, evaluation_config=None, epochs=5, lr=1e-3, weight_decay=0.01, train_dataloader=None, test_dataset=None, evaluation_dataset=None, device='cpu', verbose=False):
+def train(model, grammar, T=500, eos_weight=1.0, dirs=None, evaluation_config=None, epochs=5, lr=1e-3, weight_decay=0.01, inverse_t=False, train_dataloader=None, test_dataset=None, evaluation_dataset=None, device='cpu', verbose=False):
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
-    loss_fn = rblb(eos_weight=eos_weight, device=device)
+    loss_fn = rblb(eos_weight=eos_weight, device=device, inverse_t=inverse_t)
     
     stats = [[], [], [], [], []] # r1, r2, both, format, epochsteps
     test_loss_stats, train_loss_stats = [], []
@@ -256,7 +271,8 @@ def main():
         grammar = initialGrammar(cfg.data.l)
     
     grammar.data = grammar.generate_seq()
-    dataset = Dataset(grammar.data, device=device)      
+    dataset = Dataset(grammar.data, device=device, inverse_t=cfg.model.inverse_t)
+
     print(f'Dataset len: {len(dataset)}')  
     train_dataset, test_dataset = torch.utils.data.random_split(dataset, [cfg.data.train_split, 1 - cfg.data.train_split])
     train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=cfg.data.batch_size, shuffle=True)
@@ -290,6 +306,7 @@ def main():
                     epochs=cfg.training.epochs, 
                     lr=cfg.training.learning_rate,
                     weight_decay=cfg.training.weight_decay,
+                    inverse_t=cfg.model.inverse_t,
                     train_dataloader=train_dataloader, 
                     test_dataset=fixed_test_dataset,
                     evaluation_dataset=evaluation_dataset,
@@ -299,7 +316,7 @@ def main():
     else:    
         model.load_state_dict(torch.load(MODELS_DIR / 'n_embed=128_ff=1024_drop=0.1_27012026_221030/model_epochs=96500', map_location=torch.device('cpu')))
         
-        for iter_eval_dataset in ['randomised', 'limited', 'complete']:
+        for iter_eval_dataset in ['complete', 'randomised', 'limited', ]:
             print(f'Evaluation dataset: {iter_eval_dataset}')
             current_evaluation_dataset = EvaluationDataset(l=cfg.data.l,
                                           eval_dataset=iter_eval_dataset,
