@@ -20,6 +20,7 @@ model:
 training:
   epochs: 60000
   learning_rate: 0.001
+  num_warmup_steps: 1000
   weight_decay: 0.0
 evaluation:
   eval_every: 500
@@ -29,5 +30,5 @@ evaluation:
 paths:
   models_dir: models
   figures_dir: figures
-  experiment_name: inverse_t
-notes: "testing inverse t"
+  experiment_name: warmup_layernorm
+notes: "Warmup + layer norm on v7 + 1024 setup"

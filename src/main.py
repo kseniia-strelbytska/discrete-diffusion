@@ -147,9 +147,11 @@ def get_fixed_dataset(dataset, batch_size=32, device='cpu'):
     return fixed_dataset
 
 # noise_resolution -- T in the scheduled unmasker
-def train(model, grammar, T=500, eos_weight=1.0, dirs=None, evaluation_config=None, epochs=5, lr=1e-3, weight_decay=0.01, inverse_t=False, train_dataloader=None, test_dataset=None, evaluation_dataset=None, device='cpu', verbose=False):
+def train(model, grammar, T=500, eos_weight=1.0, dirs=None, evaluation_config=None, epochs=5, lr=1e-3, num_warmup_steps=1000, weight_decay=0.01, train_dataloader=None, test_dataset=None, device='cpu', verbose=False):
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
-    loss_fn = rblb(eos_weight=eos_weight, device=device, inverse_t=inverse_t)
+    if num_warmup_steps != 0:
+        lr_scheduler = get_inverse_sqrt_schedule(optimizer, num_warmup_steps=num_warmup_steps)
+    loss_fn = rblb(eos_weight=eos_weight, device=device)
     
     stats = [[], [], [], [], []] # r1, r2, both, format, epochsteps
     test_loss_stats, train_loss_stats = [], []
@@ -176,6 +178,9 @@ def train(model, grammar, T=500, eos_weight=1.0, dirs=None, evaluation_config=No
             loss = loss_fn(X_batch, logits, y_batch, timestep)
             loss.backward()
             optimizer.step()
+            if num_warmup_steps != 0:
+                lr_scheduler.step()
+            
             total_loss += loss.item()
         
         avg_loss = total_loss / len(train_dataloader)
@@ -183,17 +188,27 @@ def train(model, grammar, T=500, eos_weight=1.0, dirs=None, evaluation_config=No
         
         model.eval()
         test_loss = 0
-        for X_batch, y_batch, timestep in test_dataset:
-            logits = model(X_batch)
-            loss = loss_fn(X_batch, logits, y_batch, timestep)
-            test_loss += loss.item()
-        avg_test_loss = test_loss / len(test_dataset)
-        test_loss_stats.append(avg_test_loss)
+        with torch.no_grad():
+            for X_batch, y_batch, timestep in test_dataset:
+                # Ensure batches are on the correct device
+                X_batch = X_batch.to(device)
+                y_batch = y_batch.to(device)
+                timestep = timestep.to(device)
+            
+                logits = model(X_batch)
+                loss = loss_fn(X_batch, logits, y_batch, timestep)
+                test_loss += loss.item()
+            avg_test_loss = test_loss / len(test_dataset)
+            test_loss_stats.append(avg_test_loss)
         
+        current_lr = lr 
+        if num_warmup_steps != 0:
+            current_lr = lr_scheduler.get_last_lr()[0]
+            
         if verbose:
-            print(f"Epoch {epoch+1}/{epochs}, Train Loss: {avg_loss:.4f}, Test Loss: {avg_test_loss:.4f}")
+            print(f"Epoch {epoch+1}/{epochs}, Train Loss: {avg_loss:.4f}, Test Loss: {avg_test_loss:.4f}, Current lr: {current_lr}")
         with open(dirs.loss_log_path, 'a') as f:
-            f.write(f"Epoch {epoch+1}/{epochs}, Train Loss: {avg_loss:.4f}, Test Loss: {avg_test_loss:.4f}\n")
+            f.write(f"Epoch {epoch+1}/{epochs}, Train Loss: {avg_loss:.4f}, Test Loss: {avg_test_loss:.4f}, Current lr: {current_lr}\n")
             
         ax1.clear()
         ax1.plot(np.arange(1, epoch+2), train_loss_stats)
@@ -305,6 +320,7 @@ def main():
                     evaluation_config=cfg.evaluation,
                     epochs=cfg.training.epochs, 
                     lr=cfg.training.learning_rate,
+                    num_warmup_steps=cfg.training.num_warmup_steps,
                     weight_decay=cfg.training.weight_decay,
                     inverse_t=cfg.model.inverse_t,
                     train_dataloader=train_dataloader, 
