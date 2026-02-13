@@ -22,6 +22,8 @@ training:
   learning_rate: 0.001
   num_warmup_steps: 1000
   weight_decay: 0.0
+validation:
+  val_every: 50
 evaluation:
   eval_every: 1000
   n_samples: 200

@@ -147,7 +147,7 @@ def get_fixed_dataset(dataset, batch_size=32, device='cpu'):
     return fixed_dataset
 
 # noise_resolution -- T in the scheduled unmasker
-def train(model, grammar, T=500, eos_weight=1.0, inverse_t=False, dirs=None, evaluation_config=None, epochs=5, lr=1e-3, num_warmup_steps=1000, weight_decay=0.01, train_dataloader=None, test_dataset=None, evaluation_dataset=None, device='cpu', verbose=False):
+def train(model, grammar, T=500, eos_weight=1.0, inverse_t=False, dirs=None, evaluation_config=None, validation_config=None, epochs=5, lr=1e-3, num_warmup_steps=1000, weight_decay=0.01, train_dataloader=None, test_dataset=None, evaluation_dataset=None, device='cpu', verbose=False):
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
     if num_warmup_steps != 0:
         lr_scheduler = get_inverse_sqrt_schedule(optimizer, num_warmup_steps=num_warmup_steps)
@@ -155,18 +155,16 @@ def train(model, grammar, T=500, eos_weight=1.0, inverse_t=False, dirs=None, eva
     
     stats = [[], [], [], [], []] # r1, r2, both, format, epochsteps
     test_loss_stats, train_loss_stats = [], []
+    test_loss_epochs = []
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
         
     with open(dirs.loss_log_path, 'a') as f:
         f.write('-'*20 + f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}\n')
     
-    model.train()
-    
     epochs_iter = range(epochs) if verbose else tqdm(range(epochs), desc="Training Epochs")
     for epoch in epochs_iter:
         total_loss = 0
 
-        model.train()
         for X_batch, y_batch, timestep in train_dataloader:
             # Ensure batches are on the correct device
             X_batch = X_batch.to(device)
@@ -183,43 +181,49 @@ def train(model, grammar, T=500, eos_weight=1.0, inverse_t=False, dirs=None, eva
             
             total_loss += loss.item()
         
-        avg_loss = total_loss / len(train_dataloader)
-        train_loss_stats.append(avg_loss)
         
-        model.eval()
-        test_loss = 0
-        with torch.no_grad():
-            for X_batch, y_batch, timestep in test_dataset:
-                # Ensure batches are on the correct device
-                X_batch = X_batch.to(device)
-                y_batch = y_batch.to(device)
-                timestep = timestep.to(device)
-            
-                logits = model(X_batch)
-                loss = loss_fn(X_batch, logits, y_batch, timestep)
-                test_loss += loss.item()
+        if epoch % validation_config.val_every == 0:
+            avg_loss = total_loss / len(train_dataloader)
+            train_loss_stats.append(avg_loss)
+        
+            model.eval()
+            test_loss = 0
+            with torch.no_grad():
+                for X_batch, y_batch, timestep in test_dataset:
+                    # Ensure batches are on the correct device
+                    X_batch = X_batch.to(device)
+                    y_batch = y_batch.to(device)
+                    timestep = timestep.to(device)
+                
+                    logits = model(X_batch)
+                    loss = loss_fn(X_batch, logits, y_batch, timestep)
+                    test_loss += loss.item()
             avg_test_loss = test_loss / len(test_dataset)
             test_loss_stats.append(avg_test_loss)
-        
-        current_lr = lr 
-        if num_warmup_steps != 0:
-            current_lr = lr_scheduler.get_last_lr()[0]
+            test_loss_epochs.append(epoch + 1)
+                
+            # IMPORTANT: switch model back to train mode after validation
+            model.train()
             
-        if verbose:
-            print(f"Epoch {epoch+1}/{epochs}, Train Loss: {avg_loss:.4f}, Test Loss: {avg_test_loss:.4f}, Current lr: {current_lr}")
-        with open(dirs.loss_log_path, 'a') as f:
-            f.write(f"Epoch {epoch+1}/{epochs}, Train Loss: {avg_loss:.4f}, Test Loss: {avg_test_loss:.4f}, Current lr: {current_lr}\n")
-            
-        ax1.clear()
-        ax1.plot(np.arange(1, epoch+2), train_loss_stats)
-        ax1.plot(np.arange(1, epoch+2), test_loss_stats)
-        ax1.set_xlabel('Epoch')
-        ax1.set_ylabel('Loss')
-        ax1.legend(['Train Loss', 'Test Loss (fixed dataset)'], loc="lower right")
-        ax1.set_title('Loss vs Epoch')
-        ax1.grid(True)
+            current_lr = lr 
+            if num_warmup_steps != 0:
+                current_lr = lr_scheduler.get_last_lr()[0]
+                
+            if verbose:
+                print(f"Epoch {epoch+1}/{epochs}, Train Loss: {avg_loss:.4f}, Test Loss: {avg_test_loss:.4f}, Current lr: {current_lr}")   
+            with open(dirs.loss_log_path, 'a') as f:
+                f.write(f"Epoch {epoch+1}/{epochs}, Train Loss: {avg_loss:.4f}, Test Loss: {avg_test_loss:.4f}, Current lr: {current_lr}\n")
             
         if (epoch + 1) % evaluation_config.eval_every == 0:
+            ax1.clear()
+            ax1.plot(test_loss_epochs, train_loss_stats)
+            ax1.plot(test_loss_epochs, test_loss_stats)
+            ax1.set_xlabel('Epoch')
+            ax1.set_ylabel('Loss')
+            ax1.legend(['Train Loss', 'Test Loss (fixed dataset)'], loc="lower right")
+            ax1.set_title('Loss vs Epoch')
+            ax1.grid(True)
+            
             new_stats = evaluation_from_generation(model, 
                                                    grammar, 
                                                    evaluation_dataset=evaluation_dataset,
@@ -241,8 +245,8 @@ def train(model, grammar, T=500, eos_weight=1.0, inverse_t=False, dirs=None, eva
             ax2.legend(["Rule 1", "Rule 2", "Both Rules", "Format"], loc="lower right")
             torch.save(model.state_dict(), dirs.model_path / f'model_epochs={epoch + 1}')
             
-        plt.tight_layout()
-        plt.savefig(dirs.figure_path / 'plot.png', dpi=150)
+            plt.tight_layout()
+            plt.savefig(dirs.figure_path / 'plot.png', dpi=150)
         
     return model
 
@@ -319,6 +323,7 @@ def main():
                     inverse_t=cfg.model.inverse_t,
                     dirs=dirs,
                     evaluation_config=cfg.evaluation,
+                    validation_config=cfg.validation,
                     epochs=cfg.training.epochs, 
                     lr=cfg.training.learning_rate,
                     num_warmup_steps=cfg.training.num_warmup_steps,
