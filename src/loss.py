@@ -8,7 +8,7 @@ class rblb(nn.Module):
         
         self.inverse_t = inverse_t
         
-        class_weight = torch.tensor([1.0] * 5)
+        class_weight = torch.tensor([1.0] * 5, device=device)
         class_weight[EOS_token] = eos_weight
 
         self.loss_fn = nn.CrossEntropyLoss(reduction='none', weight=class_weight)

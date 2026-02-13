@@ -111,31 +111,37 @@ class Dataset(torch.utils.data.Dataset):
         y_sample = self.y[index]
         
         if not self.inverse_t:
-            prob = torch.rand((1, ), device=self.device) # prob of having a mask (ie the timestep)
+            prob = torch.rand((1, ), device=self.device)
         else:
             prob = self.sample_inverse_t()
         
-        mask = torch.rand_like(y_sample, dtype=torch.float, device=self.device) < prob.item()
-        X_sample = torch.where(mask == True, torch.full_like(y_sample, torch.tensor(MASK_token, device=self.device)), y_sample)
+        return y_sample, prob
+
+    @staticmethod
+    def apply_masking(y_batch, prob_batch, device):
+        mask = torch.rand_like(y_batch, dtype=torch.float, device=device) < prob_batch
+        X_batch = torch.where(mask, torch.full_like(y_batch, MASK_token), y_batch)
         
-        return X_sample, y_sample, prob
-    
+        return X_batch, y_batch, prob_batch
+
     def sample_inverse_t(self):
         CLIP_VALUE = 1e-2
         u = np.random.uniform(0, 1)
         log_clip = np.log(CLIP_VALUE)
         sampled_val = np.exp(u * (np.log(1.0) - log_clip) + log_clip)
         
-        return torch.tensor(sampled_val)
-
+        return torch.tensor(sampled_val, device='cuda')
+   
 def get_fixed_dataset(dataset, batch_size=32, device='cpu'):
     fixed_dataset = []
     batch_size = 32
     for idx in range(len(dataset)):
-        X, y, timestep = dataset.__getitem__(idx)
-        X = X.to(device)
-        y = y.to(device)
+        y_sample, timestep = dataset.__getitem__(idx)
         timestep = timestep.to(device)
+        
+        # Apply masking to get X, y, timestep
+        X, y, timestep = Dataset.apply_masking(y_sample.unsqueeze(0), timestep.unsqueeze(0), device)
+        X, y, timestep = X.squeeze(0), y.squeeze(0), timestep.squeeze(0)
         
         if not fixed_dataset or fixed_dataset[-1][0].shape[0] == batch_size:
             fixed_dataset.append((X.unsqueeze(0), y.unsqueeze(0), timestep.unsqueeze(0)))
@@ -165,11 +171,9 @@ def train(model, grammar, T=500, eos_weight=1.0, inverse_t=False, dirs=None, eva
     for epoch in epochs_iter:
         total_loss = 0
 
-        for X_batch, y_batch, timestep in train_dataloader:
+        for y_batch, timestep in train_dataloader:
             # Ensure batches are on the correct device
-            X_batch = X_batch.to(device)
-            y_batch = y_batch.to(device)
-            timestep = timestep.to(device)
+            X_batch, y_batch, timestep = Dataset.apply_masking(y_batch, timestep, device)  
             
             optimizer.zero_grad()
             logits = model(X_batch)
@@ -190,11 +194,6 @@ def train(model, grammar, T=500, eos_weight=1.0, inverse_t=False, dirs=None, eva
             test_loss = 0
             with torch.no_grad():
                 for X_batch, y_batch, timestep in test_dataset:
-                    # Ensure batches are on the correct device
-                    X_batch = X_batch.to(device)
-                    y_batch = y_batch.to(device)
-                    timestep = timestep.to(device)
-                
                     logits = model(X_batch)
                     loss = loss_fn(X_batch, logits, y_batch, timestep)
                     test_loss += loss.item()
