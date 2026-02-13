@@ -1,5 +1,5 @@
 seed: 42
-device: cpu
+device: auto
 data:
   l: 256
   train_split: 0.9
@@ -14,21 +14,21 @@ model:
   dim_feedforward: 1024
   dropout: 0.1
   layer_norm_eps: 0.0002
-  T: 1500
+  T: 500
   eos_weight: 10.0
-  inverse_t: True
+  inverse_t: False
 training:
-  epochs: 60000
+  epochs: 100000
   learning_rate: 0.001
   num_warmup_steps: 1000
   weight_decay: 0.0
 evaluation:
-  eval_every: 500
+  eval_every: 1000
   n_samples: 200
-  eval_dataset: complete
+  eval_dataset: randomised
   eval_type: full
 paths:
   models_dir: models
   figures_dir: figures
-  experiment_name: warmup_layernorm
-notes: "Warmup + layer norm on v7 + 1024 setup"
+  experiment_name: regular_t_warmup_layernorm
+notes: "regular_t loss + Warmup + layer norm on v7 + 1024 setup (to check overfitting)"

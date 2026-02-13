@@ -98,7 +98,7 @@ class TransformerClassifier(torch.nn.Module):
         return X
 
 class Dataset(torch.utils.data.Dataset):
-    def __init__(self, y, device='cpu', inverse_t=False):
+    def __init__(self, y, inverse_t=False, device='cpu'):
         # if invers_t=True, mask with probability sampled from 1/x
         self.y = y.to(device)
         self.device = device
@@ -147,11 +147,11 @@ def get_fixed_dataset(dataset, batch_size=32, device='cpu'):
     return fixed_dataset
 
 # noise_resolution -- T in the scheduled unmasker
-def train(model, grammar, T=500, eos_weight=1.0, dirs=None, evaluation_config=None, epochs=5, lr=1e-3, num_warmup_steps=1000, weight_decay=0.01, train_dataloader=None, test_dataset=None, device='cpu', verbose=False):
+def train(model, grammar, T=500, eos_weight=1.0, inverse_t=False, dirs=None, evaluation_config=None, epochs=5, lr=1e-3, num_warmup_steps=1000, weight_decay=0.01, train_dataloader=None, test_dataset=None, evaluation_dataset=None, device='cpu', verbose=False):
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
     if num_warmup_steps != 0:
         lr_scheduler = get_inverse_sqrt_schedule(optimizer, num_warmup_steps=num_warmup_steps)
-    loss_fn = rblb(eos_weight=eos_weight, device=device)
+    loss_fn = rblb(eos_weight=eos_weight, inverse_t=inverse_t, device=device)
     
     stats = [[], [], [], [], []] # r1, r2, both, format, epochsteps
     test_loss_stats, train_loss_stats = [], []
@@ -286,9 +286,9 @@ def main():
         grammar = initialGrammar(cfg.data.l)
     
     grammar.data = grammar.generate_seq()
-    dataset = Dataset(grammar.data, device=device, inverse_t=cfg.model.inverse_t)
+    dataset = Dataset(grammar.data, inverse_t=cfg.model.inverse_t, device=device)
 
-    print(f'Dataset len: {len(dataset)}')  
+    print(f'Dataset len: {len(dataset)} using inverse_t sampling {cfg.model.inverse_t}')  
     train_dataset, test_dataset = torch.utils.data.random_split(dataset, [cfg.data.train_split, 1 - cfg.data.train_split])
     train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=cfg.data.batch_size, shuffle=True)
     test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=cfg.data.batch_size, shuffle=False)
@@ -316,13 +316,13 @@ def main():
                     grammar,
                     T=cfg.model.T,
                     eos_weight=cfg.model.eos_weight,
+                    inverse_t=cfg.model.inverse_t,
                     dirs=dirs,
                     evaluation_config=cfg.evaluation,
                     epochs=cfg.training.epochs, 
                     lr=cfg.training.learning_rate,
                     num_warmup_steps=cfg.training.num_warmup_steps,
                     weight_decay=cfg.training.weight_decay,
-                    inverse_t=cfg.model.inverse_t,
                     train_dataloader=train_dataloader, 
                     test_dataset=fixed_test_dataset,
                     evaluation_dataset=evaluation_dataset,
