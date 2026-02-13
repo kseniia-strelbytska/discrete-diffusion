@@ -100,4 +100,4 @@ class anbnGrammar(FormalGrammar):
         
         print(f'Data generated; shape: {data.shape}')
 
-        return data
+        self.data = data

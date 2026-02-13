@@ -63,4 +63,4 @@ class initialGrammar(FormalGrammar):
         
         ## TO CHECK SHAPE
 
-        return valid
+        self.data = valid
