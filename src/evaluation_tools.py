@@ -73,7 +73,7 @@ class EvaluationDataset():
         
         self.full_data = torch.cat(self.full_data, dim=0)
 
-def evaluation_loss(model, dataloader, device='cpu'):
+def evaluation_loss(model, dataloader, device):
     loss_fn = nn.CrossEntropyLoss(reduction='none', ignore_index=PAD_token).to(device)
     
     model.eval()
@@ -135,7 +135,7 @@ def evaluation_from_generation(model, grammar, evaluation_dataset=None, T=500, w
         f.write('')
     
     print(f'Evaluation on data, shape: f{evaluation_dataset.data.shape}')                
-    unmaskModel = ScheduledUnmasker(model, T=T, device=device)
+    unmaskModel = ScheduledUnmasker(model, device, T=T)
     
     model.eval()
     with torch.no_grad():

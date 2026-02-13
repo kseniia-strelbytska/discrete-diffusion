@@ -3,7 +3,7 @@ import torch.nn as nn
 from constants import EOS_token, SOS_token, PAD_token, MASK_token
 
 class rblb(nn.Module):
-    def __init__(self, eos_weight=10.0, inverse_t=False, device='cpu'):
+    def __init__(self, device, eos_weight=10.0, inverse_t=False):
         super().__init__()
         
         self.inverse_t = inverse_t

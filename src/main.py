@@ -98,7 +98,7 @@ class TransformerClassifier(torch.nn.Module):
         return X
 
 class Dataset(torch.utils.data.Dataset):
-    def __init__(self, y, inverse_t=False, device='cpu'):
+    def __init__(self, y, device, inverse_t=False):
         # if invers_t=True, mask with probability sampled from 1/x
         self.y = y.to(device)
         self.device = device
@@ -132,7 +132,7 @@ class Dataset(torch.utils.data.Dataset):
         
         return torch.tensor(sampled_val, device='cuda')
    
-def get_fixed_dataset(dataset, batch_size=32, device='cpu'):
+def get_fixed_dataset(dataset, device, batch_size=32):
     fixed_dataset = []
     batch_size = 32
     for idx in range(len(dataset)):
@@ -157,7 +157,7 @@ def train(model, grammar, T=500, eos_weight=1.0, inverse_t=False, dirs=None, eva
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
     if num_warmup_steps != 0:
         lr_scheduler = get_inverse_sqrt_schedule(optimizer, num_warmup_steps=num_warmup_steps)
-    loss_fn = rblb(eos_weight=eos_weight, inverse_t=inverse_t, device=device)
+    loss_fn = rblb(device, eos_weight=eos_weight, inverse_t=inverse_t)
     
     stats = [[], [], [], [], []] # r1, r2, both, format, epochsteps
     test_loss_stats, train_loss_stats = [], []
@@ -289,13 +289,13 @@ def main():
         grammar = initialGrammar(cfg.data.l)
     
     grammar.data = grammar.generate_seq()
-    dataset = Dataset(grammar.data, inverse_t=cfg.model.inverse_t, device=device)
+    dataset = Dataset(grammar.data, device, inverse_t=cfg.model.inverse_t)
 
-    print(f'Dataset len: {len(dataset)} using inverse_t sampling {cfg.model.inverse_t}')  
+    print(f'Dataset len: {len(dataset)} using inverse_t sampling {cfg.model.inverse_t}')
     train_dataset, test_dataset = torch.utils.data.random_split(dataset, [cfg.data.train_split, 1 - cfg.data.train_split])
     train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=cfg.data.batch_size, shuffle=True)
     test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=cfg.data.batch_size, shuffle=False)
-    fixed_test_dataset = get_fixed_dataset(test_dataset, batch_size=cfg.data.batch_size, device=device) # fixed test dataset
+    fixed_test_dataset = get_fixed_dataset(test_dataset, device, batch_size=cfg.data.batch_size) # fixed test dataset
     
     evaluation_dataset = EvaluationDataset(l=cfg.data.l,
                                           eval_dataset=cfg.evaluation.eval_dataset,

@@ -5,7 +5,7 @@ from constants import EOS_token, SOS_token, PAD_token, MASK_token
 
 # Producing sampled tokens using vectorization
 class ScheduledUnmasker(nn.Module):
-    def __init__(self, model, T=100, device='cpu'):
+    def __init__(self, model, device, T=100):
         super().__init__()
         self.model = model
         self.device = device
