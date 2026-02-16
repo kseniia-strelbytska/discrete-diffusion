@@ -29,7 +29,9 @@ class rblb(nn.Module):
 
         # calculating weighted loss
         loss = loss.reshape((B, L))
-        if self.inverse_t:
+        
+        # if uniform sampling, apply 1/t wrighting
+        if self.inverse_t == False:
             loss = 1.0/(timestep.unsqueeze(-1) + 1e-5) * loss
         
         loss = loss.sum() / B

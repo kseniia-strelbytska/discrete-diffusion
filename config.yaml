@@ -33,4 +33,4 @@ paths:
   models_dir: models
   figures_dir: figures
   experiment_name: regular_t_warmup_layernorm
-notes: "regular_t loss + Warmup + layer norm on v7 + 1024 setup (to check overfitting)"
+notes: "uniform t + weighting + loss + Warmup + layer norm on v7 + 1024 setup"
