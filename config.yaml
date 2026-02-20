@@ -26,7 +26,7 @@ training:
 validation:
   val_every: 50
 evaluation:
-  eval_every: 1000
+  eval_every: 50
   n_samples: 200
   eval_dataset: randomised
   eval_type: full

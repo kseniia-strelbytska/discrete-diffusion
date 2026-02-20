@@ -120,6 +120,7 @@ class TransformerClassifier(torch.nn.Module):
 
         self.l = max_len
         self.sampling_eps = sampling_eps
+        self.vocab_size = vocab_size
         self.embedding = nn.Embedding(vocab_size, embed_dim)
         self.sigma_map = TimestepEmbedder(embed_dim=embed_dim)
 
@@ -138,7 +139,7 @@ class TransformerClassifier(torch.nn.Module):
 
         # Predictor head: a simple linear layer
         # do not allow mask (5) prediction
-        self.fc = nn.Linear(embed_dim, vocab_size - 1)
+        self.fc = nn.Linear(embed_dim, vocab_size)
 
         PE = torch.zeros((max_len, embed_dim))
         pos = torch.arange(max_len).unsqueeze(-1)
@@ -215,7 +216,7 @@ class Dataset(torch.utils.data.Dataset):
         return torch.tensor(sampled_val, device=self.device)
 
     def masking_collate_fn(self, y_batch):
-        y_batch = torch.stack(y_batch)
+        y_batch = torch.tensor(torch.stack(y_batch), device=self.device)
         
         prob = None
         if self.inverse_t:
@@ -278,7 +279,7 @@ def train(
         lr_scheduler = get_inverse_sqrt_schedule(
             optimizer, num_warmup_steps=num_warmup_steps
         )
-    loss_fn = rblb(device, eos_weight=eos_weight, inverse_t=inverse_t)
+    loss_fn = rblb(device, vocab_size=model.vocab_size, eos_weight=eos_weight, inverse_t=inverse_t)
 
     stats = [[], [], [], [], []]  # r1, r2, both, format, epochsteps
     test_loss_stats, train_loss_stats = [], []

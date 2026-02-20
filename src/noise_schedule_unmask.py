@@ -14,11 +14,12 @@ class ScheduledUnmasker(nn.Module):
     # fraction (0 <= fr <= 1) specifies the next step 
     def forward(self, init_X, timestep, eps=1e-5, return_steps=False):
         X = init_X.clone().long().to(self.device)
+        timestep = timestep.clone().to(self.device)
         L = X.shape[0]
         
         # scale down the number of denoising steps acc to noise level
         num_steps = int(self.T * timestep)
-        timesteps = torch.linspace(timestep, eps, num_steps)
+        timesteps = torch.linspace(timestep, eps, num_steps + 1, device=self.device)
         dt = (timestep - eps) / num_steps
         
         steps = [X.clone()]
@@ -31,7 +32,7 @@ class ScheduledUnmasker(nn.Module):
                 alpha_s = 1 - (timesteps[i] - dt)
                 
                 # Get model predictions
-                logits = self.model(X.unsqueeze(0))[0]  # (L, 6)
+                logits = self.model(X.unsqueeze(0), timesteps[i].unsqueeze(0))[0]  # (L, 6)
                 
                 # Convert to probabilities (x_θ in the paper)
                 probs = torch.softmax(logits, dim=-1)  # (L, 6)
