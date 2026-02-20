@@ -279,7 +279,7 @@ def train(
         lr_scheduler = get_inverse_sqrt_schedule(
             optimizer, num_warmup_steps=num_warmup_steps
         )
-    loss_fn = rblb(device, vocab_size=model.vocab_size, eos_weight=eos_weight, inverse_t=inverse_t)
+    loss_fn = rblb(device, vocab_size=model.vocab_size, T=T, sampling_eps=model.sampling_eps, eos_weight=eos_weight, inverse_t=inverse_t)
 
     stats = [[], [], [], [], []]  # r1, r2, both, format, epochsteps
     test_loss_stats, train_loss_stats = [], []
