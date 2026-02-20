@@ -15,6 +15,7 @@ model:
   dropout: 0.1
   layer_norm_eps: 0.0002
   T: 500
+  sampling_eps: 0.00001
   eos_weight: 10.0
   inverse_t: False
 training:
@@ -32,5 +33,5 @@ evaluation:
 paths:
   models_dir: models
   figures_dir: figures
-  experiment_name: regular_t_warmup_layernorm
-notes: "uniform t + weighting + loss + Warmup + layer norm on v7 + 1024 setup"
+  experiment_name: stratified_noise
+notes: "testing stratified_noise"

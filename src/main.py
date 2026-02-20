@@ -5,6 +5,7 @@ import shutil
 from datetime import datetime
 from pathlib import Path
 from types import SimpleNamespace
+import math
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -59,6 +60,48 @@ def setup_experiment_dirs(
 
     return dirs
 
+class TimestepEmbedder(torch.nn.Module):
+    '''
+    Takes in (B, 1): timestep=-log(1-t) (possibly fractional)
+    Returns: (B, embed_dim): vector representation
+    '''
+    def __init__(self, embed_dim, frequency_embedding_size=256):
+        super().__init__()
+        self.mlp = nn.Sequential(
+        nn.Linear(frequency_embedding_size, embed_dim),
+        nn.SiLU(),
+        nn.Linear(embed_dim, embed_dim))
+        self.frequency_embedding_size = frequency_embedding_size
+
+    @staticmethod
+    def timestep_embedding(t, dim, max_period=10000):
+        """
+        Create sinusoidal timestep embeddings.
+        :param t: a 1-D Tensor of N indices, one per batch element.
+                        These may be fractional.
+        :param dim: the dimension of the output.
+        :param max_period: controls the minimum frequency of the embeddings.
+        :return: an (N, D) Tensor of positional embeddings.
+        """
+        # https://github.com/openai/glide-text2im/blob/main/glide_text2im/nn.py
+        half = dim // 2
+        freqs = torch.exp(
+        - math.log(max_period)
+        * torch.arange(start=0, end=half, dtype=torch.float32)
+        / half).to(device=t.device)
+        args = t[:, None].float() * freqs[None]
+        embedding = torch.cat([torch.cos(args), torch.sin(args)], dim=-1)
+        if dim % 2:
+            embedding = torch.cat(
+            [embedding,
+            torch.zeros_like(embedding[:, :1])], dim=-1)
+        return embedding
+
+    def forward(self, t):
+        t_freq = self.timestep_embedding(t, self.frequency_embedding_size)
+        t_emb = self.mlp(t_freq)
+         
+        return t_emb
 
 class TransformerClassifier(torch.nn.Module):
     def __init__(
@@ -71,12 +114,14 @@ class TransformerClassifier(torch.nn.Module):
         dim_feedforward=1024,
         dropout=0.1,
         layer_norm_eps=2e-4,
+        sampling_eps=1e-5,
     ):
         super().__init__()
 
         self.l = max_len
-
+        self.sampling_eps = sampling_eps
         self.embedding = nn.Embedding(vocab_size, embed_dim)
+        self.sigma_map = TimestepEmbedder(embed_dim=embed_dim)
 
         # Transformer/encoder layer
         self.layer = nn.TransformerEncoderLayer(
@@ -103,13 +148,17 @@ class TransformerClassifier(torch.nn.Module):
 
         self.register_buffer("PE", PE)
 
-    def forward(self, X: torch.Tensor):
+    def forward(self, X: torch.Tensor, timestep: torch.Tensor):
         B, L = X.shape
         X = self.embedding(X)  # (B, L, E) = (128, 20, 10)
         E = X.shape[-1]
 
         # Sinusoidal positional encoding
         X += self.PE[:L, :].unsqueeze(0)
+        
+        # Sinusoidal timestep encoding
+        c = torch.nn.functional.silu(self.sigma_map(-torch.log(1 - (1 - self.sampling_eps) * timestep)))
+        X += c
 
         # Pass through network
         X = self.transformer_encoder(src=X)
@@ -121,69 +170,89 @@ class TransformerClassifier(torch.nn.Module):
 class Dataset(torch.utils.data.Dataset):
     """
     If inverse_t is True, samples a random masking probability for each sample from 1/x.
+    
+    Dependent on the number of timesteps (T)
     """
 
-    def __init__(self, y_data, device, inverse_t=False):
+    def __init__(self, y_data, device, T, sampling_eps=1e-5, inverse_t=False):
         self.device = device
         self.y_data = y_data.to(device)
+        
+        self.T = T
+        self.sampling_eps = sampling_eps
         self.inverse_t = inverse_t
 
     def __len__(self):
         return self.y_data.shape[0]
 
     def __getitem__(self, index):
-        prob = None
-        if self.inverse_t:
-            prob = self.sample_inverse_t()
-        else:
-            prob = torch.rand((1,), device=self.device)
+        return self.y_data[index]
 
-        return self.y_data[index], prob
+    # @staticmethod
+    # def apply_masking(y_batch, prob_batch, device):
+    #     mask = torch.rand_like(y_batch, dtype=torch.float, device=device) < prob_batch
+    #     x_batch = torch.where(mask, torch.full_like(y_batch, MASK_token), y_batch)
 
-    @staticmethod
-    def apply_masking(y_batch, prob_batch, device):
-        mask = torch.rand_like(y_batch, dtype=torch.float, device=device) < prob_batch
-        x_batch = torch.where(mask, torch.full_like(y_batch, MASK_token), y_batch)
+    #     return x_batch
 
-        return x_batch
+    def stratified_sampling(self, batch_size):
+        shift = torch.rand((batch_size, ), device=self.device) / batch_size
+        samples = torch.arange(batch_size, device=self.device) / batch_size + shift 
+        samples %= 1 
+        samples = (1 - self.sampling_eps) * samples + self.sampling_eps
+        
+        samples = (samples * self.T).to(torch.int) # round down
+        samples = (samples.float() / self.T) + 1 / self.T
+        
+        return samples.unsqueeze(-1)
 
-    def sample_inverse_t(self):
+    def sample_inverse_t(self, batch_size):
         CLIP_VALUE = 1e-2
-        u = np.random.uniform(0, 1)
+        u = np.random.uniform(0, 1, size=(batch_size, ))
         log_clip = np.log(CLIP_VALUE)
         sampled_val = np.exp(u * (np.log(1.0) - log_clip) + log_clip)
 
         return torch.tensor(sampled_val, device=self.device)
 
+    def masking_collate_fn(self, y_batch):
+        y_batch = torch.stack(y_batch)
+        
+        prob = None
+        if self.inverse_t:
+            prob = self.sample_inverse_t(y_batch.shape[0])
+        else:
+            prob = self.stratified_sampling(y_batch.shape[0])
+            
+        mask = torch.rand_like(y_batch, dtype=torch.float, device=self.device) < prob
+        x_batch = torch.where(mask, torch.full_like(y_batch, MASK_token), y_batch)
+            
+        return x_batch, y_batch, prob
 
 def get_fixed_dataset(dataset, device, batch_size=32):
     fixed_dataset = []
     x_samples, y_samples, timesteps = [], [], []
 
-    for y_sample, timestep in dataset:
+    for y_sample in dataset:
         # Apply masking to individual sample
-        mask = torch.rand_like(y_sample, dtype=torch.float, device=device) < timestep
-        x_sample = torch.where(mask, torch.full_like(y_sample, MASK_token), y_sample)
-
-        x_samples.append(x_sample)
+        
         y_samples.append(y_sample)
-        timesteps.append(timestep)
-
+        
         # When we have enough samples for a batch, stack them and add to dataset
-        if len(x_samples) == batch_size:
+        if len(y_samples) == batch_size:
+            x, y, prob = dataset.masking_collate_fn(y_samples)
             fixed_dataset.append(
-                (torch.stack(x_samples), torch.stack(y_samples), torch.stack(timesteps))
+                (x, y, prob)
             )
-            x_samples, y_samples, timesteps = [], [], []
+            y_samples = []
 
     # Handle remaining samples if any
-    if x_samples:
+    if y_samples:
+        x, y, prob = dataset.masking_collate_fn(y_samples)
         fixed_dataset.append(
-            (torch.stack(x_samples), torch.stack(y_samples), torch.stack(timesteps))
+            (x, y, prob)
         )
 
     return fixed_dataset
-
 
 def train(
     model,
@@ -224,11 +293,9 @@ def train(
     )
     for epoch in epochs_iter:
         total_loss = 0
-        for y_batch, timestep in train_dataloader:
-            x_batch = Dataset.apply_masking(y_batch, timestep, device)
-
+        for x_batch, y_batch, timestep in train_dataloader:
             optimizer.zero_grad()
-            logits = model(x_batch)
+            logits = model(x_batch, timestep)
             loss = loss_fn(x_batch, logits, y_batch, timestep)
             loss.backward()
             optimizer.step()
@@ -245,7 +312,7 @@ def train(
             test_loss = 0
             with torch.no_grad():
                 for X_batch, y_batch, timestep in test_dataset:
-                    logits = model(X_batch)
+                    logits = model(X_batch, timestep)
                     loss = loss_fn(X_batch, logits, y_batch, timestep)
                     test_loss += loss.item()
             avg_test_loss = test_loss / len(test_dataset)
@@ -377,17 +444,19 @@ def main():
     grammar = get_grammar(cfg.data.grammar, cfg.data.l)
     grammar.generate_seq()  # generates the data and stores in grammar.data
 
-    dataset = Dataset(grammar.data, device, inverse_t=cfg.model.inverse_t)
+    dataset = Dataset(grammar.data, device, cfg.model.T, sampling_eps=cfg.model.sampling_eps, inverse_t=cfg.model.inverse_t)
 
     print(f"Dataset len: {len(dataset)} using inverse_t sampling {cfg.model.inverse_t}")
     train_dataset, test_dataset = torch.utils.data.random_split(
         dataset, [cfg.data.train_split, 1 - cfg.data.train_split]
     )
     train_dataloader = torch.utils.data.DataLoader(
-        train_dataset, batch_size=cfg.data.batch_size, shuffle=True
+        train_dataset, batch_size=cfg.data.batch_size, shuffle=True, collate_fn=dataset.masking_collate_fn
     )
-    # test_dataloader = torch.utils.data.DataLoader(
-    #     test_dataset, batch_size=cfg.data.batch_size, shuffle=False)
+    
+    test_data = dataset.y_data[test_dataset.indices] # grab only test samples
+    test_dataset = Dataset(test_data, device, cfg.model.T, 
+                       sampling_eps=cfg.model.sampling_eps, inverse_t=cfg.model.inverse_t)
     fixed_test_dataset = get_fixed_dataset(
         test_dataset, device, batch_size=cfg.data.batch_size
     )  # fixed test dataset
@@ -398,6 +467,7 @@ def main():
         eval_type=cfg.evaluation.eval_type,
         n_samples=cfg.evaluation.n_samples,
     )
+    
     print(f"Evaluation Dataset len: {len(evaluation_dataset.data)}")
 
     model = TransformerClassifier(
@@ -409,6 +479,7 @@ def main():
         dim_feedforward=cfg.model.dim_feedforward,
         dropout=cfg.model.dropout,
         layer_norm_eps=cfg.model.layer_norm_eps,
+        sampling_eps=cfg.model.sampling_eps,
     ).to(device)
 
     if args.mode == "train":
