@@ -1,5 +1,6 @@
 seed: 42
 device: cuda
+strategy: categorical #categoricak or greedy
 data:
   l: 256
   train_split: 0.9
@@ -24,7 +25,7 @@ training:
   num_warmup_steps: 1000
   weight_decay: 0.0
 validation:
-  val_every: 100
+  val_every: 1000
 evaluation:
   eval_every: 5000
   n_samples: 200

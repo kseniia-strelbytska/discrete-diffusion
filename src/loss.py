@@ -23,6 +23,7 @@ class rblb(nn.Module):
         xt = sample at time t 
         Returns ans, where ans.exp() = logits sub parameterised
         '''
+       
         logits[:, :, MASK_token] = self.neg_infinity
         
         logits = logits - torch.logsumexp(logits, dim=-1, keepdim=True)
@@ -33,8 +34,33 @@ class rblb(nn.Module):
         
         return logits
     
-    # ELBO loss for T, (p.5 top of MDLM paper)
+    # ELBO loss, (eq 8 in MDLM paper)
     def forward(self, xt, logits, y_true, timestep):
+        logits = logits.clone()
+        logits = self.subs_parameterisation(logits, xt)
+        
+        dt = 1 / self.T 
+        
+        timestep = timestep.clamp(self.sampling_eps, 1 - self.sampling_eps).unsqueeze(-1)
+
+        #Extracts the logits corresponding to the true class labels
+        log_prob_x = torch.gather(logits, -1, y_true[:, :, None]).squeeze(-1) 
+
+        loss = - dt / timestep * log_prob_x
+        loss = self.T * loss 
+
+        loss = loss.sum() / torch.numel(xt)
+        #only calculate loss for non-padded tokens
+        #attention_mask = (y_true != PAD_token)
+        #loss = loss * attention_mask
+        #calculate average loss
+        #loss = loss.sum() / attention_mask.sum()
+        
+        return loss
+
+
+    # ELBO loss for T, (eq 9 in MDLM paper)
+    def forward_old(self, xt, logits, y_true, timestep):
         logits = logits.clone()
         
         log_prob_mask = logits[:, :, MASK_token]
@@ -63,6 +89,11 @@ class rblb(nn.Module):
         loss = self.T * loss * (xt == MASK_token)
         
         loss = loss.sum() / torch.numel(xt)
+        #only calculate loss for non-padded tokens
+        #attention_mask = (y_true != PAD_token)
+        #loss = loss * attention_mask
+        #calculate average loss
+        #loss = loss.sum() / attention_mask.sum()
         
         return loss
     

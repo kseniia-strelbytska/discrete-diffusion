@@ -1,0 +1,14 @@
+project: discrete-diffusion
+entity: am3049-university-of-cambridge
+method: random
+parameters:
+  seed:
+    distribution: int_uniform
+    min: 0
+    max: 100000
+command:
+  - python
+  - src/main.py
+#    - --mode
+#    - train
+#    - --save

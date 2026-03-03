@@ -12,16 +12,23 @@ class ScheduledUnmasker(nn.Module):
         self.T = T
 
     # fraction (0 <= fr <= 1) specifies the next step 
-    def forward(self, init_X, timestep, eps=1e-5, return_steps=False):
+    def forward(self, init_X, timestep, strategy = 'categorical', return_steps=False, eps=1e-5):
         X = init_X.clone().long().to(self.device)
         timestep = timestep.clone().to(self.device)
         L = X.shape[0]
         
         # scale down the number of denoising steps acc to noise level
-        num_steps = int(self.T * timestep)
-        timesteps = torch.linspace(timestep, eps, num_steps + 1, device=self.device)
-        dt = (timestep - eps) / num_steps
+        #num_steps = int(self.T * timestep)
+        #timesteps = torch.linspace(timestep, eps, num_steps + 1, device=self.device)
+        #dt = (timestep - eps) / num_steps
         
+        #round timestep (up) to the nearest multiple of 1/T
+        num_steps = int(torch.ceil(timestep * self.T).item())
+        timestep = num_steps / self.T
+        timesteps = torch.linspace(timestep, 0, num_steps + 1, device=self.device)
+        dt = 1 / self.T
+
+
         steps = [X.clone()]
                 
         self.model.eval()
@@ -39,9 +46,22 @@ class ScheduledUnmasker(nn.Module):
                 
                 probs[:, :-1] *= (alpha_s - alpha_t) / (1 - alpha_t)
                 probs[:, -1] = (1 - alpha_s) / (1 - alpha_t) # mask prob
+
+                if strategy == 'categorical':
+                    # sample from the categorical distribution
+                    sampled_X = torch.multinomial(probs, 1).squeeze(-1)
+                elif strategy == 'greedy':
+                    #greedy sampling
+                    sampled_X = probs.argmax(dim=-1)
+                else:
+                    raise ValueError(f"Unknown sampling strategy: {strategy}")
+
                                                 
-                sampled_X = torch.distributions.categorical.Categorical(probs=probs).sample()
+                #sampled_X = torch.distributions.categorical.Categorical(probs=probs).sample()
                 
+                #print(X[X != MASK_token])
+                #print(sampled_X[X != MASK_token])
+
                 X[X == MASK_token] = sampled_X[X == MASK_token]
                 steps.append(X.clone())
 

@@ -1,0 +1,13 @@
+project: discrete-diffusion
+entity: am3049-university-of-cambridge
+method: grid
+parameters:
+  strategy:
+    values: ['categorical', 'greedy']
+  model.n_layers:
+    values: [4, 6, 8]
+  model.embed_dim:
+    values: [16, 64, 128, 256]
+command:
+  - python
+  - src/main.py
