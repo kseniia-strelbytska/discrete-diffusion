@@ -2,6 +2,7 @@ import torch
 import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
+from datetime import datetime
 
 from loss import rblb
 from evaluation_tools import evaluation_from_generation
@@ -55,7 +56,7 @@ def train(
 
     for epoch in epochs_iter:
         #Calculate the eval metrics at initialisation
-        if epoch == 0:
+        if False and epoch == 0:
             new_stats = evaluation_from_generation(
                 model,
                 grammar,
@@ -204,7 +205,6 @@ def train(
             
             # Save plot and checkpoint only when saving is enabled.
             if save_mode and dirs is not None:
-                os.makedirs(dirs.figure_path, exist_ok=True)
                 plt.savefig(dirs.figure_path / "plot.png", dpi=150)
                 torch.save(
                     model.state_dict(), dirs.model_path / f"model_epochs={epoch + 1}"

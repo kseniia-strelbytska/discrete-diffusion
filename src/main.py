@@ -6,7 +6,6 @@ from datetime import datetime
 from pathlib import Path
 from types import SimpleNamespace
 import math
-from datetime import datetime
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -147,6 +146,21 @@ def main():
     if torch.cuda.is_available():
         torch.cuda.manual_seed(cfg.seed)
         torch.cuda.manual_seed_all(cfg.seed)
+    
+    random.seed(cfg.seed)
+    np.random.seed(cfg.seed)
+    torch.manual_seed(cfg.seed)
+    os.environ['PYTHONHASHSEED'] = str(cfg.seed)
+    if torch.cuda.is_available():
+        os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":16:8"
+        torch.cuda.manual_seed(cfg.seed)
+        torch.cuda.manual_seed_all(cfg.seed)
+        # CuDNN deterministic
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+
+    # Enforce deterministic algorithms
+    torch.use_deterministic_algorithms(True)
 
     # Device configuration
     device = get_device(cfg.device)
