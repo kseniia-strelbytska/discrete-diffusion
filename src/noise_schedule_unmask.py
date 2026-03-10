@@ -5,11 +5,12 @@ from constants import EOS_token, SOS_token, PAD_token, MASK_token
 
 # Producing sampled tokens using vectorization
 class ScheduledUnmasker(nn.Module):
-    def __init__(self, model, device, T=100):
+    def __init__(self, model, device, T=100, denoise="0"):
         super().__init__()
         self.model = model
         self.device = device
         self.T = T
+        self.denoise = denoise
 
     # fraction (0 <= fr <= 1) specifies the next step 
     def forward(self, init_X, timestep, strategy = 'categorical', return_steps=False, eps=1e-5):
@@ -18,16 +19,18 @@ class ScheduledUnmasker(nn.Module):
         L = X.shape[0]
         
         # scale down the number of denoising steps acc to noise level
-        #num_steps = int(self.T * timestep)
-        #timesteps = torch.linspace(timestep, eps, num_steps + 1, device=self.device)
-        #dt = (timestep - eps) / num_steps
-        
-        #round timestep (up) to the nearest multiple of 1/T
-        num_steps = int(torch.ceil(timestep * self.T).item())
-        timestep = num_steps / self.T
-        timesteps = torch.linspace(timestep, 0, num_steps + 1, device=self.device)
-        dt = 1 / self.T
-
+        if self.denoise == "eps":
+            num_steps = int(self.T * timestep)
+            timesteps = torch.linspace(timestep, eps, num_steps + 1, device=self.device)
+            dt = (timestep - eps) / num_steps
+        elif self.denoise == "0":
+            #round timestep (up) to the nearest multiple of 1/T
+            num_steps = int(torch.ceil(timestep * self.T).item())
+            timestep = num_steps / self.T
+            timesteps = torch.linspace(timestep, 0, num_steps + 1, device=self.device)
+            dt = 1 / self.T
+        else:
+            raise ValueError(f"{self.denoise} is not defined")
 
         steps = [X.clone()]
                 

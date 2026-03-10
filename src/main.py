@@ -126,20 +126,20 @@ def main():
         save_mode=args.save,
     )
 
-    # Initialize Weights & Biases only when running under a sweep
-    if os.getenv("WANDB_SWEEP_ID") is not None:
-        wandb.init(config=base_config)
 
-        if hasattr(wandb.config, "seed"):
-            cfg.seed = wandb.config.seed
-        if hasattr(wandb.config, "strategy"):
-            cfg.strategy = wandb.config.strategy
-        if hasattr(wandb.config, "model.n_layers"):
-            cfg.model.n_layers = wandb.config.model["n_layers"]
-        if hasattr(wandb.config, "model.embed_dim"):
-            cfg.model.embed_dim = wandb.config.model["embed_dim"]
+    if os.getenv("WANDB_SWEEP_ID") is not None:
+        wandb.init()
+
+        for key, value in wandb.config.items():
+            parts = key.split(".")
+            obj = cfg
+            for part in parts[:-1]:
+                obj = getattr(obj, part)
+            setattr(obj, parts[-1], value)
+            print(f"Sweep override: {key} = {value}")
 
     
+
     random.seed(cfg.seed)
     np.random.seed(cfg.seed)
     torch.manual_seed(cfg.seed)
@@ -234,7 +234,9 @@ def main():
             verbose=args.verbose,
             save_mode=args.save,
             strategy=cfg.strategy,
-            wandb=wandb
+            wandb=wandb,
+            loss_type=cfg.training.loss_type,
+            denoise=cfg.training.denoise
         )
     elif args.mode == "eval":
         model.load_state_dict(

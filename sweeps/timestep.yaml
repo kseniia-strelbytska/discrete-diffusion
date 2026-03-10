@@ -5,12 +5,8 @@ metric:
   name: Rule_Accuracy/eval_both_rules_acc #Loss/test_loss
 method: grid
 parameters:
-  strategy:
-    values: ['categorical', 'greedy']
-  model.n_layers:
-    values: [4, 6, 8]
-  model.embed_dim:
-    values: [16, 64, 128, 256]
+  model.T:
+    values: [50, 100, 200, 300, 500]
 command:
   - python
   - src/main.py

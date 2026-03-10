@@ -148,10 +148,11 @@ def get_timeline(max_len=258, steps=None, idx=-1):
 
 # eval_type: diffusion or autoregressive
 # samples_type for anbn: random or full
-def evaluation_from_generation(model, grammar, evaluation_dataset=None, T=500, strategy = 'categorical', write_steps=False, device='cpu', figures_path=None, loss_log_path=None, output_path=None, save_mode=False):
+def evaluation_from_generation(model, grammar, evaluation_dataset=None, T=500, strategy = 'categorical', write_steps=False, device='cpu', figures_path=None, loss_log_path=None, output_path=None, save_mode=False, denoise="0"):
     # r1, r2, both, format
     stats = np.array([0, 0, 0, 0])
     total = 0
+    sequences = []
 
     # Optionally prepare output file if saving is enabled.
     if save_mode:
@@ -159,7 +160,7 @@ def evaluation_from_generation(model, grammar, evaluation_dataset=None, T=500, s
             f.write("")
 
     print(f"Evaluation on data, shape: f{evaluation_dataset.data.shape}")
-    unmaskModel = ScheduledUnmasker(model, device, T=T)
+    unmaskModel = ScheduledUnmasker(model, device, T=T, denoise=denoise)
     
     model.eval()
     with torch.no_grad():
@@ -176,10 +177,12 @@ def evaluation_from_generation(model, grammar, evaluation_dataset=None, T=500, s
             y_pred_cpu = y_pred.detach().to("cpu")
             y_pred_stats = grammar.evaluate(y_pred_cpu)
             stats += y_pred_stats
-            
+            seq_str = ''.join([str(i) for i in y_pred_cpu.tolist()])
+            sequences.append(seq_str)
+
             if save_mode:
                 with open(output_path, 'a') as f:
-                    f.write("IDX " + str(idx) + " " + ''.join([str(i) for i in y_pred_cpu.tolist()]))
+                    f.write("IDX " + str(idx) + " " + seq_str)
                     is_format_ok = ('True' if y_pred_stats[-1] == 1 else 'False')
                     cnt_zeros, cnt_ones = (y_pred_cpu==0).sum(), (y_pred_cpu==1).sum()
                     f.write(f' zeros={cnt_zeros}, ones={cnt_ones}, format={is_format_ok} \n')
@@ -216,5 +219,5 @@ def evaluation_from_generation(model, grammar, evaluation_dataset=None, T=500, s
         with open(loss_log_path, "a") as f:
             f.write(evaluation_log + "\n")
 
-    return stats / total
+    return stats / total, sequences
   

@@ -5,12 +5,10 @@ metric:
   name: Rule_Accuracy/eval_both_rules_acc #Loss/test_loss
 method: grid
 parameters:
-  strategy:
-    values: ['categorical', 'greedy']
-  model.n_layers:
-    values: [4, 6, 8]
-  model.embed_dim:
-    values: [16, 64, 128, 256]
+  training.loss_type:
+    values: ["eq8", "eq9"]
+  training.denoise:
+    values: ["0", "eps"]
 command:
   - python
   - src/main.py

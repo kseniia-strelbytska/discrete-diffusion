@@ -30,14 +30,16 @@ def train(
     verbose=False,
     save_mode: bool = False,
     strategy='categorical',
-    wandb=None
+    wandb=None,
+    loss_type="eq8",
+    denoise="0"
 ):
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
     if num_warmup_steps != 0:
         lr_scheduler = get_inverse_sqrt_schedule(
             optimizer, num_warmup_steps=num_warmup_steps
         )
-    loss_fn = rblb(device, vocab_size=model.vocab_size, T=T, sampling_eps=model.sampling_eps, eos_weight=eos_weight, inverse_t=inverse_t)
+    loss_fn = rblb(device, vocab_size=model.vocab_size, T=T, sampling_eps=model.sampling_eps, eos_weight=eos_weight, inverse_t=inverse_t, loss_type=loss_type)
 
     stats = [[], [], [], [], []]  # r1, r2, both, format, epochsteps
     test_loss_stats, train_loss_stats = [], []
@@ -57,7 +59,7 @@ def train(
     for epoch in epochs_iter:
         #Calculate the eval metrics at initialisation
         if epoch == 0:
-            new_stats = evaluation_from_generation(
+            new_stats, sequences = evaluation_from_generation(
                 model,
                 grammar,
                 evaluation_dataset=evaluation_dataset,
@@ -69,6 +71,7 @@ def train(
                 loss_log_path=dirs.loss_log_path,
                 output_path=dirs.output_path,
                 save_mode=save_mode,
+                denoise=denoise
             )
             for i in range(4):
                 stats[i].append(new_stats[i])
@@ -77,13 +80,17 @@ def train(
             # Log evaluation stats to Weights & Biases if enabled.
             panel_name = "Rule_Accuracy"
             if wandb.run is not None:
-                wandb.log(  
+                table = wandb.Table(columns=["sequence"])
+                for seq in sequences:
+                    table.add_data(seq)
+                wandb.log(
                     {
                         f'{panel_name}/epoch': epoch + 1,
                         f'{panel_name}/eval_rule1_acc': float(new_stats[0]),
                         f'{panel_name}/eval_rule2_acc': float(new_stats[1]),
                         f'{panel_name}/eval_both_rules_acc': float(new_stats[2]),
                         f'{panel_name}/eval_format_acc': float(new_stats[3]),
+                        f'{panel_name}/generated_sequences': table,
                     },
                     step=epoch + 1,
                 )
@@ -152,7 +159,7 @@ def train(
                     f.write(log_line + "\n")
 
         if (epoch + 1) % evaluation_config.eval_every == 0:
-            new_stats = evaluation_from_generation(
+            new_stats, sequences = evaluation_from_generation(
                 model,
                 grammar,
                 evaluation_dataset=evaluation_dataset,
@@ -164,6 +171,7 @@ def train(
                 loss_log_path=dirs.loss_log_path,
                 output_path=dirs.output_path,
                 save_mode=save_mode,
+                denoise=denoise
             )
             for i in range(4):
                 stats[i].append(new_stats[i])
@@ -172,13 +180,17 @@ def train(
             # Log evaluation stats to Weights & Biases if enabled.
             panel_name = "Rule_Accuracy"
             if wandb.run is not None:
-                wandb.log(  
+                table = wandb.Table(columns=["sequence"])
+                for seq in sequences:
+                    table.add_data(seq)
+                wandb.log(
                     {
                         f'{panel_name}/epoch': epoch + 1,
                         f'{panel_name}/eval_rule1_acc': float(new_stats[0]),
                         f'{panel_name}/eval_rule2_acc': float(new_stats[1]),
                         f'{panel_name}/eval_both_rules_acc': float(new_stats[2]),
                         f'{panel_name}/eval_format_acc': float(new_stats[3]),
+                        f'{panel_name}/generated_sequences': table,
                     },
                     step=epoch + 1,
                 )

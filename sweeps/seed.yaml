@@ -1,5 +1,8 @@
 project: discrete-diffusion
 entity: am3049-university-of-cambridge
+metric:
+  goal: maximize
+  name: Rule_Accuracy/eval_both_rules_acc #Loss/test_loss
 method: random
 parameters:
   seed:
