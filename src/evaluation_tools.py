@@ -181,23 +181,24 @@ def evaluation_from_generation(model, grammar, evaluation_dataset=None, T=500, s
             sequences.append(seq_str)
 
             if save_mode:
-                with open(output_path, 'a') as f:
-                    f.write("IDX " + str(idx) + " " + seq_str)
-                    is_format_ok = ('True' if y_pred_stats[-1] == 1 else 'False')
-                    cnt_zeros, cnt_ones = (y_pred_cpu==0).sum(), (y_pred_cpu==1).sum()
-                    f.write(f' zeros={cnt_zeros}, ones={cnt_ones}, format={is_format_ok} \n')
-                
-                    if write_steps == True:
-                        f.write('Full denoising log: \n')
-                        prev = torch.tensor([0])
-                        for step in steps:
-                            if step.tolist() != prev.tolist():
-                                f.write(''.join([str(i) for i in step.tolist()]) + '\n')
-                                cnt_zeros, cnt_ones, masks = (step==0).sum(), (step==1).sum(), (step==MASK_token).sum()
-                                f.write(f' zeros={cnt_zeros}, ones={cnt_ones}, masks={masks} \n')
-                                prev = step
-                        
-                        f.write('-' * 30 + '\n')
+                if y_pred_stats[-1] == 0:
+                    with open(output_path, 'a') as f:
+                        f.write("IDX " + str(idx) + " " + seq_str)
+                        is_format_ok = ('True' if y_pred_stats[-1] == 1 else 'False')
+                        cnt_zeros, cnt_ones = (y_pred_cpu==0).sum(), (y_pred_cpu==1).sum()
+                        f.write(f' zeros={cnt_zeros}, ones={cnt_ones}, format={is_format_ok} \n')
+                    
+                        if write_steps == True:
+                            f.write('Full denoising log: \n')
+                            prev = torch.tensor([0])
+                            for step in steps:
+                                if step.tolist() != prev.tolist():
+                                    f.write(''.join([str(i) for i in step.tolist()]) + '\n')
+                                    cnt_zeros, cnt_ones, masks = (step==0).sum(), (step==1).sum(), (step==MASK_token).sum()
+                                    f.write(f' zeros={cnt_zeros}, ones={cnt_ones}, masks={masks} \n')
+                                    prev = step
+                            
+                            f.write('-' * 30 + '\n')
                     
             if save_mode and write_steps == True:
                 with open(figures_path / f'IDX={idx}.txt', 'a') as f:

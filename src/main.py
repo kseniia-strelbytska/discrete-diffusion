@@ -237,9 +237,14 @@ def main():
         )
     elif args.mode == "eval":
         model.load_state_dict(
+            # torch.load(
+            #     MODELS_DIR
+            #     / "n_embed=128_ff=1024_drop=0.1_27012026_221030/model_epochs=96500",
+            #     map_location=torch.device("cpu"),
+            # )
+            
             torch.load(
-                MODELS_DIR
-                / "n_embed=128_ff=1024_drop=0.1_27012026_221030/model_epochs=96500",
+                PROJECT_ROOT / "models/greedy_decoding_11032026_204348/model_epochs=65000",
                 map_location=torch.device("cpu"),
             )
         )

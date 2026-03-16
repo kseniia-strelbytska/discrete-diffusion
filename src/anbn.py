@@ -75,9 +75,14 @@ class anbnGrammar(FormalGrammar):
         return True
         
     def evaluate(self, seq):
-        a = self.does_satisfy_rule1(seq)
-        b = self.does_satisfy_rule2(seq)
-        c = self.does_satisfy_format(seq)
+        # Ignore tokens after the first EOS token for evaluation.
+        # If EOS is absent, keep the current behavior and use the full sequence.
+        eos_positions = torch.where(seq == EOS_token)[0]
+        eval_seq = seq[:eos_positions[0] + 1] if len(eos_positions) > 0 else seq
+
+        a = self.does_satisfy_rule1(eval_seq)
+        b = self.does_satisfy_rule2(eval_seq)
+        c = self.does_satisfy_format(eval_seq)
         
         return np.array([int(i) for i in [a, b, (a & b), c]])
 

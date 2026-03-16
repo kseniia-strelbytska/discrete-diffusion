@@ -1,6 +1,6 @@
 seed: 42
-device: cuda
-strategy: categorical #categorical or greedy
+device: auto
+strategy: greedy #categorical or greedy
 data:
   l: 256
   train_split: 0.9
@@ -36,5 +36,5 @@ evaluation:
 paths:
   models_dir: models
   figures_dir: figures
-  experiment_name: change_loss_elbo
-notes: "testing stratified_noise"
+  experiment_name: greedy_decoding_evaluation
+notes: "Evaluating greedy decoding (format concerns)"
