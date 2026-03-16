@@ -43,7 +43,7 @@ class rblb(nn.Module):
         
             dt = 1 / self.T 
         
-            timestep = timestep.clamp(self.sampling_eps, 1 - self.sampling_eps).unsqueeze(-1)
+            timestep = timestep.clamp(self.sampling_eps, 1 - self.sampling_eps).view(-1, 1)
 
             #Extracts the logits corresponding to the true class labels
             log_prob_x = torch.gather(logits, -1, y_true[:, :, None]).squeeze(-1) 
@@ -60,7 +60,7 @@ class rblb(nn.Module):
         
             dt = 1 / self.T 
         
-            timestep = timestep.clamp(dt + self.sampling_eps, 1 - self.sampling_eps).unsqueeze(-1)
+            timestep = timestep.clamp(dt + self.sampling_eps, 1 - self.sampling_eps).view(-1, 1)
         
             alpha_t = 1 - timestep + torch.zeros_like(xt)
             alpha_s = 1 - (timestep - dt) + torch.zeros_like(xt)
@@ -81,14 +81,11 @@ class rblb(nn.Module):
         else:
             raise ValueError(f"{self.loss_type} is not defined.")
 
-
-
-        loss = loss.sum() / torch.numel(xt)
-        #only calculate loss for non-padded tokens
-        #attention_mask = (y_true != PAD_token)
-        #loss = loss * attention_mask
-        #calculate average loss
-        #loss = loss.sum() / attention_mask.sum()
+        # only calculate loss for non-padded tokens
+        attention_mask = (y_true != PAD_token)
+        loss = loss * attention_mask
+        # calculate average loss
+        loss = loss.sum() / attention_mask.sum()
         
         return loss
 
