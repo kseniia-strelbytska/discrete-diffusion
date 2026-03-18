@@ -102,10 +102,8 @@ class TransformerClassifier(torch.nn.Module):
         X += self.PE[:L, :].unsqueeze(0)
         
         # Sinusoidal timestep encoding
-        t = timestep.view(-1)  # ensure 1D shape (B,)
-        sigma = -torch.log(1 - (1 - self.sampling_eps) * t)
-        c = self.sigma_map(sigma)  # (B, embed_dim)
-        X = X + c.unsqueeze(1)  # broadcast to (B, L, embed_dim)
+        #c = torch.nn.functional.silu(self.sigma_map(-torch.log(1 - (1 - self.sampling_eps) * timestep)))
+        #X += c
 
         # Pass through network
         X = self.transformer_encoder(src=X)

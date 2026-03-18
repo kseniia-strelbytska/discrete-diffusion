@@ -1,5 +1,5 @@
 seed: 42
-device: cuda
+device: cpu
 strategy: greedy #categorical or greedy
 data:
   l: 256
@@ -30,7 +30,7 @@ validation:
   val_every: 1000
 evaluation:
   eval_every: 5000
-  n_samples: 200
+  n_samples: 20
   eval_dataset: randomised
   eval_type: full
 paths:
