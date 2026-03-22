@@ -25,6 +25,8 @@ from noise_schedule_unmask import ScheduledUnmasker
 from dataset import Dataset, get_fixed_dataset
 from model import TransformerClassifier
 from model_v2 import v2TransformerClassifier
+from model_RPE import RPETransformerClassifier
+from model_FIRE import FIRETransformerClassifier
 from trainer import train
 
 
@@ -240,6 +242,30 @@ def main():
             layer_norm_eps=cfg.model.layer_norm_eps,
             sampling_eps=cfg.model.sampling_eps,
         ).to(device)
+    elif cfg.model.architecture == "RPE":
+        model = RPETransformerClassifier(
+            max_len=cfg.model.max_len,
+            vocab_size=cfg.model.vocab_size,
+            n_head=cfg.model.n_head,
+            n_layers=cfg.model.n_layers,
+            embed_dim=cfg.model.embed_dim,
+            dim_feedforward=cfg.model.dim_feedforward,
+            dropout=cfg.model.dropout,
+            layer_norm_eps=cfg.model.layer_norm_eps,
+            sampling_eps=cfg.model.sampling_eps,
+        ).to(device)
+    elif cfg.model.architecture == "FIRE":
+        model = FIRETransformerClassifier(
+            max_len=cfg.model.max_len,
+            vocab_size=cfg.model.vocab_size,
+            n_head=cfg.model.n_head,
+            n_layers=cfg.model.n_layers,
+            embed_dim=cfg.model.embed_dim,
+            dim_feedforward=cfg.model.dim_feedforward,
+            dropout=cfg.model.dropout,
+            layer_norm_eps=cfg.model.layer_norm_eps,
+            sampling_eps=cfg.model.sampling_eps,
+        ).to(device)
     else:
         raise ValueError(f"Invalid model architecture: {cfg.model.architecture}")
 
@@ -268,6 +294,11 @@ def main():
             loss_type=cfg.training.loss_type,
             denoise=cfg.training.denoise
         )
+        
+        torch.save(
+            model.state_dict(), dirs.model_path / f"model_final_{cfg.model.architecture}.pt"
+        )
+        
     elif args.mode == "eval":
         model.load_state_dict(
             # torch.load(
