@@ -1,15 +1,14 @@
 seed: 42
 device: auto
-strategy: None #categorical or temperature-sampling
-temperature: 0.1 
-# strategy: greedy if temperature <= 0, categorical if temperature = 1.0, tempareture-scaled categorical otherwise.
-
+strategy: None # (redundant) categorical or temperature-sampling
+temperature: 0.1 # controls strategy: greedy if temperature <= 0, categorical if temperature = 1.0, tempareture-scaled categorical otherwise.
 data:
   l: 256
   train_split: 0.9
   batch_size: 64
   grammar: anbn
 model:
+  architecture: v2 # classic or v2
   max_len: 258       
   vocab_size: 6
   n_head: 4

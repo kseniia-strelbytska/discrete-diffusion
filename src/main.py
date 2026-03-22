@@ -24,6 +24,7 @@ from loss import rblb
 from noise_schedule_unmask import ScheduledUnmasker
 from dataset import Dataset, get_fixed_dataset
 from model import TransformerClassifier
+from model_v2 import v2TransformerClassifier
 from trainer import train
 
 
@@ -215,17 +216,32 @@ def main():
     
     print(f"Evaluation Dataset len: {len(evaluation_dataset.data)}")
 
-    model = TransformerClassifier(
-        max_len=cfg.model.max_len,
-        vocab_size=cfg.model.vocab_size,
-        n_head=cfg.model.n_head,
-        n_layers=cfg.model.n_layers,
-        embed_dim=cfg.model.embed_dim,
-        dim_feedforward=cfg.model.dim_feedforward,
-        dropout=cfg.model.dropout,
-        layer_norm_eps=cfg.model.layer_norm_eps,
-        sampling_eps=cfg.model.sampling_eps,
-    ).to(device)
+    if cfg.model.architecture == "classic":
+        model = TransformerClassifier(
+            max_len=cfg.model.max_len,
+            vocab_size=cfg.model.vocab_size,
+            n_head=cfg.model.n_head,
+            n_layers=cfg.model.n_layers,
+            embed_dim=cfg.model.embed_dim,
+            dim_feedforward=cfg.model.dim_feedforward,
+            dropout=cfg.model.dropout,
+            layer_norm_eps=cfg.model.layer_norm_eps,
+            sampling_eps=cfg.model.sampling_eps,
+        ).to(device)
+    elif cfg.model.architecture == "v2":
+        model = v2TransformerClassifier(
+            max_len=cfg.model.max_len,
+            vocab_size=cfg.model.vocab_size,
+            n_head=cfg.model.n_head,
+            n_layers=cfg.model.n_layers,
+            embed_dim=cfg.model.embed_dim,
+            dim_feedforward=cfg.model.dim_feedforward,
+            dropout=cfg.model.dropout,
+            layer_norm_eps=cfg.model.layer_norm_eps,
+            sampling_eps=cfg.model.sampling_eps,
+        ).to(device)
+    else:
+        raise ValueError(f"Invalid model architecture: {cfg.model.architecture}")
 
     if args.mode == "train":
         model = train(
