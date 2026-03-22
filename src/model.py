@@ -2,8 +2,6 @@ import torch
 import torch.nn as nn
 import math
 
-
-
 class TimestepEmbedder(torch.nn.Module):
     '''
     Takes in (B, 1): timestep=-log(1-t) (possibly fractional)

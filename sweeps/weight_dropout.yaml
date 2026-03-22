@@ -5,8 +5,12 @@ metric:
   name: Rule_Accuracy/eval_both_rules_acc
 method: grid
 parameters:
-  model.layer_norm_eps:
-    values: [0.0002, 0.002, 0.02]
+  model.dropout:
+    values: [0.0, 0.1]
+  model.weight_decay:
+    values: [0.0, 0.01]
 command:
   - python
-  - src/main.py --config config_decoding.yaml
+  - src/main.py
+  - --config
+  - config_decoding.yaml

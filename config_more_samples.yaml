@@ -2,16 +2,16 @@ seed: 42
 device: auto
 strategy: greedy #categorical or greedy
 data:
-  l: 256
+  l: 512
   train_split: 0.9
   batch_size: 64
   grammar: anbn
 model:
-  max_len: 258       
+  max_len: 514       
   vocab_size: 6
   n_head: 4
   n_layers: 4
-  embed_dim: 256
+  embed_dim: 512
   dim_feedforward: 1024
   dropout: 0.1
   layer_norm_eps: 0.0002
@@ -20,7 +20,7 @@ model:
   eos_weight: 10.0
   inverse_t: False
 training:
-  epochs: 50000
+  epochs: 100000
   learning_rate: 0.001
   num_warmup_steps: 1000
   weight_decay: 0.0

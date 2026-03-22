@@ -83,8 +83,8 @@ def parse_args():
         choices=["train", "eval"],
         help="Mode: train or eval.",
     )
-    return parser.parse_args()
-
+    args, unknown = parser.parse_known_args()
+    return args
 
 def get_device(cfg_device):
     if cfg_device == "auto":
@@ -129,6 +129,22 @@ def main():
 
     if os.getenv("WANDB_SWEEP_ID") is not None:
         wandb.init()
+        
+        if "model_preset" in wandb.config:
+            if wandb.config.model_preset == "256_258_256":
+                wandb.config.update({
+                    "model.l": 256,
+                    "model.max_len": 258,
+                    "model.lembed_dim": 256,
+                    "data.l": 256
+                }, allow_val_change=True)
+            elif wandb.config.model_preset == "512_518_512":
+                wandb.config.update({
+                    "model.l": 512,
+                    "model.max_len": 518, # Using 518 from your prompt vs 514 in your yaml
+                    "model.lembed_dim": 512,
+                    "data.l": 512
+                }, allow_val_change=True)
 
         for key, value in wandb.config.items():
             parts = key.split(".")
@@ -138,7 +154,6 @@ def main():
             setattr(obj, parts[-1], value)
             print(f"Sweep override: {key} = {value}")
 
-    
 
     random.seed(cfg.seed)
     np.random.seed(cfg.seed)

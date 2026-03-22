@@ -1,0 +1,14 @@
+project: discrete-diffusion
+entity: am3049-university-of-cambridge
+metric:
+  goal: maximize
+  name: Rule_Accuracy/eval_both_rules_acc
+method: grid
+parameters:
+  model.layer_norm_eps:
+    values: [0.0002, 0.002, 0.02]
+command:
+  - python
+  - src/main.py
+  - --config
+  - config_decoding.yaml
