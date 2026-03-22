@@ -1,0 +1,14 @@
+project: discrete-diffusion
+entity: am3049-university-of-cambridge
+metric:
+  goal: maximize
+  name: Rule_Accuracy/eval_both_rules_acc
+method: grid
+parameters:
+  model.temperature:
+    values: [0.0, 0.1, 0.5, 1.0, 2.0]
+command:
+  - python
+  - src/main.py
+  - --config
+  - config.yaml

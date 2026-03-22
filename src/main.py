@@ -154,6 +154,8 @@ def main():
             setattr(obj, parts[-1], value)
             print(f"Sweep override: {key} = {value}")
 
+    if cfg.wandb.project and cfg.wandb.group:
+        wandb.init(project=cfg.wandb.project, group=cfg.wandb.group, config=cfg)
 
     random.seed(cfg.seed)
     np.random.seed(cfg.seed)

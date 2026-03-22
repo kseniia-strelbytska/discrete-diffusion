@@ -81,9 +81,11 @@ class rblb(nn.Module):
         else:
             raise ValueError(f"{self.loss_type} is not defined.")
 
-
-
-        loss = loss.sum() / torch.numel(xt)
+        # mask_count = (xt == MASK_token).sum()
+        # loss = loss.sum() / (mask_count + 1e-6) # average over masked tokens
+        
+        loss = loss.sum() / torch.numel(xt) # average over all tokens
+        
         #only calculate loss for non-padded tokens
         #attention_mask = (y_true != PAD_token)
         #loss = loss * attention_mask

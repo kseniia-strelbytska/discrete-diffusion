@@ -13,7 +13,7 @@ class ScheduledUnmasker(nn.Module):
         self.denoise = denoise
 
     # fraction (0 <= fr <= 1) specifies the next step 
-    def forward(self, init_X, timestep, strategy = 'categorical', return_steps=False, eps=1e-5):
+    def forward(self, init_X, timestep, strategy = 'categorical', temperature=1.0, return_steps=False, eps=1e-5):
         X = init_X.clone().long().to(self.device)
         timestep = timestep.clone().to(self.device)
         L = X.shape[0]
@@ -50,15 +50,23 @@ class ScheduledUnmasker(nn.Module):
                 probs[:, :-1] *= (alpha_s - alpha_t) / (1 - alpha_t)
                 probs[:, -1] = (1 - alpha_s) / (1 - alpha_t) # mask prob
 
-                if strategy == 'categorical':
-                    # sample from the categorical distribution
-                    sampled_X = torch.multinomial(probs, 1).squeeze(-1)
-                elif strategy == 'greedy':
-                    #greedy sampling
+                # if strategy == 'categorical':
+                #     # sample from the categorical distribution
+                #     sampled_X = torch.multinomial(probs, 1).squeeze(-1)
+                # elif strategy == 'greedy':
+                #     #greedy sampling
+                #     sampled_X = probs.argmax(dim=-1)
+                # else:
+                #     raise ValueError(f"Unknown sampling strategy: {strategy}")
+                
+                if temperature <= 0:
+                    # greedy sampling
                     sampled_X = probs.argmax(dim=-1)
                 else:
-                    raise ValueError(f"Unknown sampling strategy: {strategy}")
-
+                    # temperature-scaled categorical sampling
+                    # or categorical sampling if temperature = 1.0
+                    scaled_probs = torch.softmax(logits / temperature, dim=-1)
+                    sampled_X = torch.multinomial(scaled_probs, 1).squeeze(-1)
                                                 
                 #sampled_X = torch.distributions.categorical.Categorical(probs=probs).sample()
                 

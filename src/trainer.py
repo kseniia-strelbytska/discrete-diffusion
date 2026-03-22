@@ -58,7 +58,7 @@ def train(
 
     for epoch in epochs_iter:
         #Calculate the eval metrics at initialisation
-        if epoch == 0:
+        if epoch == 0 and False: # skip initial evaluation to save time; set to True to enable
             new_stats, sequences = evaluation_from_generation(
                 model,
                 grammar,

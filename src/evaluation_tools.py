@@ -148,7 +148,17 @@ def get_timeline(max_len=258, steps=None, idx=-1):
 
 # eval_type: diffusion or autoregressive
 # samples_type for anbn: random or full
-def evaluation_from_generation(model, grammar, evaluation_dataset=None, T=500, strategy = 'categorical', write_steps=False, device='cpu', figures_path=None, loss_log_path=None, output_path=None, save_mode=False, denoise="0"):
+def evaluation_from_generation(model, 
+                               grammar, 
+                               evaluation_dataset=None, 
+                               T=500, strategy = 'categorical', 
+                               temperature=1.0, 
+                               write_steps=False, 
+                               device='cpu', 
+                               figures_path=None, 
+                               loss_log_path=None, 
+                               output_path=None, 
+                               save_mode=False, denoise="0"):
     # r1, r2, both, format
     stats = np.array([0, 0, 0, 0])
     total = 0
@@ -168,9 +178,9 @@ def evaluation_from_generation(model, grammar, evaluation_dataset=None, T=500, s
             total += 1
             
             if write_steps == False:
-                y_pred = unmaskModel(s, ((s == MASK_token).sum() / torch.numel(s)), strategy) # no batch dimension
+                y_pred = unmaskModel(s, ((s == MASK_token).sum() / torch.numel(s)), strategy, temperature=temperature) # no batch dimension
             else:
-                y_pred, steps = unmaskModel(s, ((s == MASK_token).sum() / torch.numel(s)), strategy, return_steps=True)
+                y_pred, steps = unmaskModel(s, ((s == MASK_token).sum() / torch.numel(s)), strategy, temperature=temperature, return_steps=True)
 
             # `grammar.evaluate()` uses Python loops/indexing; it's much faster on CPU tensors
             # Moving a single (L,) tensor to CPU is cheap compared to thousands of tiny GPU syncs
