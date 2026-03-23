@@ -8,7 +8,7 @@ data:
   batch_size: 64
   grammar: anbn
 model:
-  architecture: FIRE # classic (torch-native) or v2 (QKV low-level) or RPE or FIRE
+  architecture: RPE # classic (torch-native) or v2 (QKV low-level) or RPE or FIRE
   max_len: 258       
   vocab_size: 6
   n_head: 4
@@ -37,9 +37,9 @@ evaluation:
   eval_type: full
 wandb:
   project: "discrete-diffusion"
-  group: "architectural-changes"
+  group: "RPE-architecture-fixed"
 paths:
   models_dir: models
   figures_dir: figures
-  experiment_name: greedy_decoding_evaluation
+  experiment_name: RPE-architecture-fixed
 notes: "Evaluating greedy decoding (format concerns)"

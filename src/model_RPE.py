@@ -120,11 +120,22 @@ class RPETransformerClassifier(torch.nn.Module):
         # Predictor head: a simple linear layer
         # do not allow mask (5) prediction
         self.fc = nn.Linear(embed_dim, vocab_size)
+        
+        PE = torch.zeros((max_len, embed_dim))
+        pos = torch.arange(max_len).unsqueeze(-1)
+        div = torch.pow(1e4, 2 * torch.arange(0, embed_dim // 2) / embed_dim)
+        PE[:, 0::2] = torch.sin(pos / div)
+        PE[:, 1::2] = torch.cos(pos / div)
+
+        self.register_buffer("PE", PE)
 
     def forward(self, X: torch.Tensor, timestep: torch.Tensor):
         B, L = X.shape
         X = self.embedding(X)  # (B, L, E) = (128, 20, 10)
         E = X.shape[-1]
+        
+        # Sinusoidal positional encoding
+        X += self.PE[:L, :].unsqueeze(0)
         
         # Pass through network
         X = self.transformer_encoder(X)

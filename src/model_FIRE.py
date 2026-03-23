@@ -83,8 +83,6 @@ class FireSelfAttention(nn.Module):
             )
 
         # concave function to amplify differences among local positions
-        def phi(self, c: nn.Parameter, x: int) -> torch.Tensor:
-            return torch.log1p(c * x)
         def phi(self, c: nn.Parameter, x: torch.Tensor) -> torch.Tensor:
             return torch.log1p(c * x)
 
@@ -102,15 +100,23 @@ class FireSelfAttention(nn.Module):
             # constrain c to be > 0
             c = torch.nn.functional.softplus(self.c)
 
-            # compute bias matrix
+            # compute bias matrix using vectorized operations
             # below, i is the query position and j is the key position, 0 <= i - j < i
-            bias = torch.zeros(seq_length, seq_length).to(src.device)
-            for i in range(1, seq_length):
-                for j in range(0, i):
-                    # we have to use i + 1 in the denominator to compensate for 0-based indexing
-                    bias[i, j] = self.phi(c, i - j) / self.phi(
-                        c, torch.maximum(self.L, torch.tensor(i + 1, device=src.device))
-                    )
+            positions = torch.arange(seq_length, device=src.device).unsqueeze(1)
+            positions_diff = positions - torch.arange(seq_length, device=src.device).unsqueeze(0)
+            # Create lower triangular mask for causal attention
+            causal_mask = positions_diff >= 0
+            positions_diff = positions_diff.float()
+            
+            # Compute numerator: phi(c, i - j)
+            numerator = self.phi(c, positions_diff)
+            # Compute denominator: phi(c, max(L, i + 1))
+            denom_positions = torch.maximum(self.L, positions + 1)
+            denominator = self.phi(c, denom_positions)
+            
+            # Compute bias
+            bias = numerator / denominator
+            bias = bias * causal_mask.float()  # Apply causal mask
             # apply MLP to bias matrix
             bias = self.f_theta(bias.unsqueeze(2)).squeeze(2)
             # add causal mask
@@ -153,6 +159,32 @@ class FireSelfAttention(nn.Module):
         # pass through final linear layer
         return self.W_o(attn_results)
     
+class TransformerBlock(nn.Module):
+    """A standard Transformer block using FIRE Self Attention."""
+    def __init__(self, embed_dim, n_head, dim_feedforward, fire_hidden_size=32):
+        super().__init__()
+        # 1. Attention with a SMALL hidden size for the positional MLP
+        self.attention = FireSelfAttention(
+            dim_model=embed_dim, 
+            num_heads=n_head, 
+            hidden_size=fire_hidden_size 
+        )
+        self.norm1 = nn.LayerNorm(embed_dim)
+        
+        # 2. The actual Feed-Forward Network using dim_feedforward
+        self.ffn = nn.Sequential(
+            nn.Linear(embed_dim, dim_feedforward),
+            nn.GELU(),
+            nn.Linear(dim_feedforward, embed_dim)
+        )
+        self.norm2 = nn.LayerNorm(embed_dim)
+
+    def forward(self, x):
+        # Standard residual connections
+        x = x + self.attention(self.norm1(x))
+        x = x + self.ffn(self.norm2(x))
+        return x
+
 class FIRETransformerClassifier(torch.nn.Module):
     def __init__(
         self,
@@ -172,22 +204,24 @@ class FIRETransformerClassifier(torch.nn.Module):
         self.sampling_eps = sampling_eps
         self.vocab_size = vocab_size
         self.embedding = nn.Embedding(vocab_size, embed_dim)
-        # self.sigma_map = TimestepEmbedder(embed_dim=embed_dim)
 
+        # Build network using the new Transformer blocks
         self.transformer_encoder = nn.Sequential(
-            *[FireSelfAttention(dim_model=embed_dim, 
-                                num_heads=n_head,
-                                hidden_size=dim_feedforward) for _ in range(n_layers)])
+            *[TransformerBlock(
+                embed_dim=embed_dim, 
+                n_head=n_head,
+                dim_feedforward=dim_feedforward,
+                fire_hidden_size=32 # Keep this small!
+            ) for _ in range(n_layers)]
+        )
 
         # Predictor head: a simple linear layer
-        # do not allow mask (5) prediction
         self.fc = nn.Linear(embed_dim, vocab_size)
 
-    def forward(self, X: torch.Tensor, timestep: torch.Tensor):
-        B, L = X.shape
-        X = self.embedding(X)  # (B, L, E) = (128, 20, 10)
-        E = X.shape[-1]
-
+    def forward(self, X: torch.Tensor, timestep: torch.Tensor = None):
+        # B, L = X.shape
+        X = self.embedding(X)  
+        
         # Pass through network
         X = self.transformer_encoder(X)
         X = self.fc(X)
