@@ -104,19 +104,19 @@ class FireSelfAttention(nn.Module):
 
             # compute bias matrix
             # below, i is the query position and j is the key position, 0 <= i - j < i
-            bias = torch.zeros(seq_length, seq_length)
+            bias = torch.zeros(seq_length, seq_length).to(src.device)
             for i in range(1, seq_length):
                 for j in range(0, i):
                     # we have to use i + 1 in the denominator to compensate for 0-based indexing
                     bias[i, j] = self.phi(c, i - j) / self.phi(
-                        c, torch.maximum(self.L, torch.tensor(i + 1))
+                        c, torch.maximum(self.L, torch.tensor(i + 1, device=src.device))
                     )
             # apply MLP to bias matrix
             bias = self.f_theta(bias.unsqueeze(2)).squeeze(2)
             # add causal mask
             lookahead_mask = torch.ones(seq_length, seq_length, dtype=torch.bool).triu(
                 diagonal=1
-            )
+            ).to(src.device)
             bias.masked_fill_(lookahead_mask, float("-inf"))
             # repeat bias matrix for batch_size
             bias = bias.repeat(batch_size, 1, 1)

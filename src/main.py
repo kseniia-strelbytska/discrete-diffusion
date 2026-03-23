@@ -296,7 +296,7 @@ def main():
         )
         
         torch.save(
-            model.state_dict(), dirs.model_path / f"model_final_{cfg.model.architecture}.pt"
+            model.state_dict(), MODELS_DIR / f"model_final_{cfg.model.architecture}.pt"
         )
         
     elif args.mode == "eval":
