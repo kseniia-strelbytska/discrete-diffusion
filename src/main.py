@@ -339,6 +339,8 @@ def main():
                 model,
                 grammar,
                 evaluation_dataset=current_evaluation_dataset,
+                strategy=cfg.strategy,
+                temperature=cfg.temperature,
                 T=cfg.model.T,
                 write_steps=True,
                 device=device,
