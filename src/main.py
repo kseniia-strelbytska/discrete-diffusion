@@ -308,10 +308,11 @@ def main():
             # )
             
             torch.load(
-                PROJECT_ROOT / "models/greedy_decoding_11032026_204348/model_epochs=65000",
-                map_location=torch.device("cpu"),
+                PROJECT_ROOT / "models/RPE-architecture-fixed_23032026_204407/model_epochs=40000"
             )
         )
+        
+        model = model.to(device)
 
         for iter_eval_dataset in [
             "complete",
