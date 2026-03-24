@@ -59,7 +59,7 @@ def train(
     for epoch in epochs_iter:
         #Calculate the eval metrics at initialisation
         if epoch == 0 and False: # skip initial evaluation to save time; set to True to enable
-            new_stats, sequences = evaluation_from_generation(
+            new_stats, new_stats_eos, total_eos, sequences, sequences_eos = evaluation_from_generation(
                 model,
                 grammar,
                 evaluation_dataset=evaluation_dataset,
@@ -83,6 +83,9 @@ def train(
                 table = wandb.Table(columns=["sequence"])
                 for seq in sequences:
                     table.add_data(seq)
+                table_eos = wandb.Table(columns=["sequence"])
+                for seq in sequences_eos:
+                    table_eos.add_data(seq)
                 wandb.log(
                     {
                         f'{panel_name}/epoch': epoch + 1,
@@ -91,6 +94,13 @@ def train(
                         f'{panel_name}/eval_both_rules_acc': float(new_stats[2]),
                         f'{panel_name}/eval_format_acc': float(new_stats[3]),
                         f'{panel_name}/generated_sequences': table,
+                        f'{panel_name}_Finished/epoch': epoch + 1,
+                        f'{panel_name}_Finished/finished_pct': total_eos / len(sequences),
+                        f'{panel_name}_Finished/eval_rule1_acc': float(new_stats_eos[0]),
+                        f'{panel_name}_Finished/eval_rule2_acc': float(new_stats_eos[1]),
+                        f'{panel_name}_Finished/eval_both_rules_acc': float(new_stats_eos[2]),
+                        f'{panel_name}_Finished/eval_format_acc': float(new_stats_eos[3]),
+                        f'{panel_name}_Finished/generated_sequences': table_eos,
                     },
                     step=epoch + 1,
                 )
@@ -159,7 +169,7 @@ def train(
                     f.write(log_line + "\n")
 
         if (epoch + 1) % evaluation_config.eval_every == 0:
-            new_stats, sequences = evaluation_from_generation(
+            new_stats, new_stats_eos, total_eos, sequences, sequences_eos = evaluation_from_generation(
                 model,
                 grammar,
                 evaluation_dataset=evaluation_dataset,
@@ -183,6 +193,9 @@ def train(
                 table = wandb.Table(columns=["sequence"])
                 for seq in sequences:
                     table.add_data(seq)
+                table_eos = wandb.Table(columns=["sequence"])
+                for seq in sequences_eos:
+                    table_eos.add_data(seq)
                 wandb.log(
                     {
                         f'{panel_name}/epoch': epoch + 1,
@@ -191,6 +204,13 @@ def train(
                         f'{panel_name}/eval_both_rules_acc': float(new_stats[2]),
                         f'{panel_name}/eval_format_acc': float(new_stats[3]),
                         f'{panel_name}/generated_sequences': table,
+                        f'{panel_name}_Finished/epoch': epoch + 1,
+                        f'{panel_name}_Finished/finished_pct': total_eos / len(sequences),
+                        f'{panel_name}_Finished/eval_rule1_acc': float(new_stats_eos[0]),
+                        f'{panel_name}_Finished/eval_rule2_acc': float(new_stats_eos[1]),
+                        f'{panel_name}_Finished/eval_both_rules_acc': float(new_stats_eos[2]),
+                        f'{panel_name}_Finished/eval_format_acc': float(new_stats_eos[3]),
+                        f'{panel_name}_Finished/generated_sequences': table_eos,
                     },
                     step=epoch + 1,
                 )

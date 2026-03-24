@@ -161,8 +161,11 @@ def evaluation_from_generation(model,
                                save_mode=False, denoise="0"):
     # r1, r2, both, format
     stats = np.array([0, 0, 0, 0])
+    stats_eos = np.array([0, 0, 0, 0])  # stats for sequences that contain EOS
     total = 0
+    total_eos = 0  # count of sequences containing EOS
     sequences = []
+    sequences_eos = []  # sequences that contain EOS
 
     # Optionally prepare output file if saving is enabled.
     if save_mode:
@@ -190,6 +193,13 @@ def evaluation_from_generation(model,
             seq_str = ''.join([str(i) for i in y_pred_cpu.tolist()])
             sequences.append(seq_str)
 
+            # Track finished sequences (those containing EOS)
+            has_eos = (y_pred_cpu == EOS_token).any().item()
+            if has_eos:
+                stats_eos += y_pred_stats
+                total_eos += 1
+                sequences_eos.append(seq_str)
+
             if save_mode:
                 if y_pred_stats[-1] == 0:
                     with open(output_path, 'a') as f:
@@ -215,11 +225,17 @@ def evaluation_from_generation(model,
                     ans, output_str = get_timeline(max_len=grammar.l+2, steps=steps, idx=idx)  
                     f.write(output_str)
     
+    eos_denom = max(total_eos, 1)
     evaluation_log = f"""
     Evaluation from generation satisfies rule #1: {stats[0]}/{total} ({stats[0]/total})
     Evaluation from generation satisfies rule #2: {stats[1]}/{total} ({stats[1]/total})
     Evaluation from generation satisfies both rules: {stats[2]}/{total} ({stats[2]/total})
     Evaluation from generation satisfies satisfies format: {stats[3]}/{total} ({stats[3]/total})
+    Finished sequences (with EOS): {total_eos}/{total}
+    [Finished only] satisfies rule #1: {stats_eos[0]}/{total_eos} ({stats_eos[0]/eos_denom})
+    [Finished only] satisfies rule #2: {stats_eos[1]}/{total_eos} ({stats_eos[1]/eos_denom})
+    [Finished only] satisfies both rules: {stats_eos[2]}/{total_eos} ({stats_eos[2]/eos_denom})
+    [Finished only] satisfies format: {stats_eos[3]}/{total_eos} ({stats_eos[3]/eos_denom})
     """
 
     # Always print the summary.
@@ -230,5 +246,5 @@ def evaluation_from_generation(model,
         with open(loss_log_path, "a") as f:
             f.write(evaluation_log + "\n")
 
-    return stats / total, sequences
+    return stats / total, stats_eos / eos_denom, total_eos, sequences, sequences_eos
   
