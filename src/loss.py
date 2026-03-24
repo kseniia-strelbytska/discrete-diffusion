@@ -11,12 +11,13 @@ class rblb(nn.Module):
         self.sampling_eps = sampling_eps
         self.inverse_t = inverse_t
         self.loss_type = loss_type
+        self.eos_weight = eos_weight
         
-        class_weight = torch.tensor([1.0] * vocab_size, device=device)
-        class_weight[EOS_token] = eos_weight
+        # class_weight = torch.tensor([1.0] * vocab_size, device=device)
+        # class_weight[EOS_token] = eos_weight
 
-        self.loss_fn = nn.CrossEntropyLoss(reduction='none', weight=class_weight)
-        self.loss_fn = self.loss_fn.to(device)
+        # self.loss_fn = nn.CrossEntropyLoss(reduction='none', weight=class_weight)
+        # self.loss_fn = self.loss_fn.to(device)
         
     def subs_parameterisation(self, logits, xt):
         '''
@@ -80,6 +81,11 @@ class rblb(nn.Module):
             loss = self.T * loss * (xt == MASK_token)
         else:
             raise ValueError(f"{self.loss_type} is not defined.")
+
+        # upweight EOS targets for both eq8 and eq9
+        token_weight = torch.ones_like(loss).to(loss.device)
+        token_weight = token_weight.masked_fill(y_true == EOS_token, self.eos_weight)
+        loss = loss * token_weight
 
         # mask_count = (xt == MASK_token).sum()
         # loss = loss.sum() / (mask_count + 1e-6) # average over masked tokens

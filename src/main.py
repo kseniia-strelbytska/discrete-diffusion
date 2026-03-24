@@ -329,6 +329,11 @@ def main():
                 sampling_eps=cfg.model.sampling_eps,
                 device=device,
             )
+            
+            iter_output_path = dirs.output_path.parent / f"outputs_{iter_eval_dataset}.txt"
+            iter_figure_path = dirs.figure_path.parent / f"figures_{iter_eval_dataset}"
+            iter_figure_path.mkdir(parents=True, exist_ok=True)
+            
             evals = evaluation_from_generation(
                 model,
                 grammar,
@@ -336,9 +341,9 @@ def main():
                 T=cfg.model.T,
                 write_steps=True,
                 device=device,
-                figures_path=dirs.figure_path,
+                figures_path=iter_figure_path,
                 loss_log_path=dirs.loss_log_path,
-                output_path=dirs.output_path,
+                output_path=iter_output_path,
                 save_mode=args.save
             )
 
