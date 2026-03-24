@@ -30,6 +30,7 @@ def train(
     verbose=False,
     save_mode: bool = False,
     strategy='categorical',
+    temperature=1.0,
     wandb=None,
     loss_type="eq8",
     denoise="0"
@@ -65,6 +66,7 @@ def train(
                 evaluation_dataset=evaluation_dataset,
                 T=T,
                 strategy = strategy,
+                temperature=temperature,
                 write_steps=False,
                 device=device,
                 figures_path=dirs.figure_path,
@@ -175,6 +177,7 @@ def train(
                 evaluation_dataset=evaluation_dataset,
                 T=T,
                 strategy = strategy,
+                temperature=temperature,
                 write_steps=False,
                 device=device,
                 figures_path=dirs.figure_path,

@@ -290,6 +290,7 @@ def main():
             verbose=args.verbose,
             save_mode=args.save,
             strategy=cfg.strategy,
+            temperature=cfg.temperature,
             wandb=wandb,
             loss_type=cfg.training.loss_type,
             denoise=cfg.training.denoise
