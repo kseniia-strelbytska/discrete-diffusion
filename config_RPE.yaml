@@ -41,5 +41,5 @@ wandb:
 paths:
   models_dir: models
   figures_dir: figures
-  experiment_name: RPE-architecture-fixed
+  experiment_name: fixed-denoising-RPE-architecture
 notes: "Evaluating greedy decoding (format concerns)"

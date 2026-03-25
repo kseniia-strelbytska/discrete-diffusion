@@ -44,33 +44,28 @@ class anbnGrammar(FormalGrammar):
     # checks for format
     def does_satisfy_format(self, seq):
         '''
-        The format for the strings is 
-        SOS 000...0111...1 EOS PAD
+        The seq supplied is truncated at the first EOS token (if it exists) for evaluation.
+        Thus the desired format for the strings is 
+        SOS [0/1] EOS
+        
         '''
         
         if (seq == MASK_token).long().sum() != 0: # contains masked tokens
             return False 
         
-        ordered_tokens = [SOS_token, 0, 1, EOS_token, PAD_token] # the correct order of tokens
-        available = [1, 10**9, 10**9, 1, 10**9] # max number of each token
-        token_pos = 0
+        SOS_token_count, EOS_token_count = (seq == SOS_token).long().sum(), (seq == EOS_token).long().sum()
+        if SOS_token_count != 1 or EOS_token_count != 1:
+            # more than one SOS/EOS token, or missing SOS/EOS token
+            return False
         
-        for idx in range(len(seq)):
-            # use a loop (it is allowed for some tokens to be missing completely, e.g. SOS 0 EOS is valid)
-            while token_pos < len(ordered_tokens) and seq[idx] != ordered_tokens[token_pos]:
-                token_pos += 1 
-            
-            if token_pos >= len(ordered_tokens) or seq[idx] != ordered_tokens[token_pos]:
-                # either token not in the allowed set / token seen before is met
-                return False 
-            available[token_pos] -= 1
-            if available[token_pos] < 0:
-                # more than one SOS/EOS
-                return False
-            
-        if available[0] != 0 or available[3] != 0:
-            # SOS/EOS is missing
-            return False 
+        if seq[0] != SOS_token or seq[-1] != EOS_token:
+            # SOS token is not at the start, or EOS token is not at the end
+            return False
+        
+        zero_count, one_count = (seq[1:-1] == 0).long().sum(), (seq[1:-1] == 1).long().sum()
+        if zero_count + one_count != len(seq) - 2:
+            # some other token (i.e. PAD) is present between SOS and EOS
+            return False
             
         return True
         

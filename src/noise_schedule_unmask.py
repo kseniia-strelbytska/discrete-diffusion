@@ -45,7 +45,10 @@ class ScheduledUnmasker(nn.Module):
                 logits = self.model(X.unsqueeze(0), timesteps[i].unsqueeze(0))[0]  # (L, 6)
                 
                 # Convert to probabilities (x_θ in the paper)
-                probs = torch.softmax(logits, dim=-1)  # (L, 6)
+                if temperature <= 0: # greedy
+                    probs = torch.softmax(logits, dim=-1)
+                else:
+                    probs = torch.softmax(logits / temperature, dim=-1)
                 
                 probs[:, :-1] *= (alpha_s - alpha_t) / (1 - alpha_t)
                 probs[:, -1] = (1 - alpha_s) / (1 - alpha_t) # mask prob
@@ -63,10 +66,7 @@ class ScheduledUnmasker(nn.Module):
                     # greedy sampling
                     sampled_X = probs.argmax(dim=-1)
                 else:
-                    # temperature-scaled categorical sampling
-                    # or categorical sampling if temperature = 1.0
-                    scaled_probs = torch.softmax(logits / temperature, dim=-1)
-                    sampled_X = torch.multinomial(scaled_probs, 1).squeeze(-1)
+                    sampled_X = torch.multinomial(probs, 1).squeeze(-1)
                                                 
                 #sampled_X = torch.distributions.categorical.Categorical(probs=probs).sample()
                 
