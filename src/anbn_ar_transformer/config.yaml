@@ -25,7 +25,7 @@ evaluation:
   samples_type: random
   eval_type: autoregressive
 paths:
-  models_dir: models
-  figures_dir: figures
-  experiment_name: see_cpu_run
-notes: "Moved to device. Like the paper, except: lr scheduler, layer norm"
+  models_dir: src/anbn_ar_transformer/models
+  figures_dir: src/anbn_ar_transformer/figures
+  experiment_name: initial_test
+notes: "Initial test"

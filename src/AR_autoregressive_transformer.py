@@ -14,8 +14,8 @@ import yaml
 from tqdm import tqdm
 from transformers.optimization import get_inverse_sqrt_schedule
 
-from evaluation_tools import evaluation_loss, evaluation_from_generation
-from generation_and_predictions import get_prediction
+from evaluation_tools import evaluation_from_generation
+from AR_generation_and_predictions import get_prediction
 from anbn import anbnGrammar
 from initialgrammar import initialGrammar
 from constants import EOS_token, SOS_token, PAD_token, MASK_token
@@ -56,6 +56,7 @@ def setup_experiment_dirs(PROJECT_ROOT, MODELS_DIR, FIGURES_DIR, config_path, ex
 class Model(nn.Module):
     def __init__(self, max_len=20, vocab_size=5, n_head=4, n_layers=2, embed_dim=128, dim_feedforward=1024, dropout=0.1):
         super().__init__() 
+        self.architecture='autoregressive'
 
         self.n_head=n_head
         self.n_layers=n_layers
@@ -246,7 +247,8 @@ def main():
     else:
         grammar = initialGrammar(cfg.data.l)
     
-    grammar.data = grammar.generate_seq()
+    grammar.generate_seq()
+    print(f'Data generated and received; shape: {grammar.data.shape}')
 
     X = grammar.data.clone()[:, :-1]
     y = grammar.data.clone()[:, 1:]

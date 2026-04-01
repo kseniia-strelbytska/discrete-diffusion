@@ -8,7 +8,7 @@ class TimestepEmbedder(torch.nn.Module):
     Returns: (B, embed_dim): vector representation
     '''
     def __init__(self, embed_dim, frequency_embedding_size=256):
-        super().__init__()
+        super().__init__()        
         self.mlp = nn.Sequential(
         nn.Linear(frequency_embedding_size, embed_dim),
         nn.SiLU(),
@@ -59,6 +59,7 @@ class TransformerClassifier(torch.nn.Module):
         sampling_eps=1e-5,
     ):
         super().__init__()
+        self.architecture='diffusion'
 
         self.l = max_len
         self.sampling_eps = sampling_eps

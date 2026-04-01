@@ -52,6 +52,11 @@ class Dataset(torch.utils.data.Dataset):
 
     def masking_collate_fn(self, y_batch):
         y_batch = torch.stack(y_batch).to(self.device)
+
+        # T=0 signals autoregressive mode: no noise schedule, return clean sequences.
+        if self.T == 0:
+            timestep = torch.zeros(y_batch.shape[0], 1, device=self.device)
+            return y_batch, y_batch, timestep
         
         prob = None
         if self.inverse_t:

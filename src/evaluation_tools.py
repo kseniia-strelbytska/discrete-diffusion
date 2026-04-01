@@ -6,6 +6,7 @@ from noise_schedule_unmask import ScheduledUnmasker
 from constants import EOS_token, SOS_token, PAD_token, MASK_token
 from anbn import anbnGrammar
 from dataset import Dataset, get_fixed_dataset
+from AR_generation_and_predictions import get_prediction
 
 class EvaluationDataset():
     '''
@@ -159,7 +160,8 @@ def evaluation_from_generation(model,
                                figures_path=None, 
                                loss_log_path=None, 
                                output_path=None, 
-                               save_mode=False, denoise="0"):
+                               save_mode=False, 
+                               denoise="0"):
     # r1, r2, both, format
     stats = np.array([0, 0, 0, 0])
     stats_eos = np.array([0, 0, 0, 0])  # stats for sequences that contain EOS
@@ -181,10 +183,13 @@ def evaluation_from_generation(model,
         for idx, s in enumerate(tqdm(evaluation_dataset.data)):
             total += 1
             
-            if write_steps == False:
-                y_pred = unmaskModel(s, ((s == MASK_token).sum() / torch.numel(s)), strategy, temperature=temperature) # no batch dimension
+            if model.architecture == 'diffusion':
+                if write_steps == False:
+                    y_pred = unmaskModel(s, ((s == MASK_token).sum() / torch.numel(s)), strategy, temperature=temperature) # no batch dimension
+                else:
+                    y_pred, steps = unmaskModel(s, ((s == MASK_token).sum() / torch.numel(s)), strategy, temperature=temperature, return_steps=True)
             else:
-                y_pred, steps = unmaskModel(s, ((s == MASK_token).sum() / torch.numel(s)), strategy, temperature=temperature, return_steps=True)
+                y_pred = get_prediction(model, s, grammar.l + 2)  # autoregressive generation; no batch dimension
 
             # `grammar.evaluate()` uses Python loops/indexing; it's much faster on CPU tensors
             # Moving a single (L,) tensor to CPU is cheap compared to thousands of tiny GPU syncs

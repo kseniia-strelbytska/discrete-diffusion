@@ -111,8 +111,9 @@ def train(
         total_loss = 0
         for x_batch, y_batch, timestep in train_dataloader:
             optimizer.zero_grad()
-            logits = model(x_batch, timestep)
-            loss = loss_fn(x_batch, logits, y_batch, timestep)
+            model_input = y_batch if model.architecture == 'autoregressive' else x_batch
+            logits = model(model_input, timestep)
+            loss = loss_fn(model_input, logits, y_batch, timestep)
             loss.backward()
             optimizer.step()
             if num_warmup_steps != 0:
@@ -130,8 +131,9 @@ def train(
                 # Test loss in eval mode on the held-out loader.
                 test_loss = 0.0
                 for X_batch, y_batch, timestep in test_dataset:
-                    logits = model(X_batch, timestep)
-                    loss = loss_fn(X_batch, logits, y_batch, timestep)
+                    model_input = y_batch if model.architecture == 'autoregressive' else X_batch
+                    logits = model(model_input, timestep)
+                    loss = loss_fn(model_input, logits, y_batch, timestep)
                     test_loss += loss.item()
                 avg_test_loss = test_loss / len(test_dataset)
                 test_loss_stats.append(avg_test_loss)

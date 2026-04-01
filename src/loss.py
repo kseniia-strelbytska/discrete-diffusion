@@ -38,7 +38,18 @@ class rblb(nn.Module):
     
     # ELBO loss, (eq 8 in MDLM paper)
     def forward(self, xt, logits, y_true, timestep):
-        if self.loss_type == "eq8":
+        if self.loss_type == "cross_entropy":
+            # Standard next-token-prediction loss for autoregressive models.
+            # xt is the clean input sequence; logits[:, i, :] predicts xt[:, i+1].
+            B, L, V = logits.shape
+            loss = torch.nn.functional.cross_entropy(
+                logits[:, :-1, :].reshape(-1, V),
+                xt[:, 1:].reshape(-1).long(),
+                ignore_index=PAD_token,
+            )
+            return loss
+
+        elif self.loss_type == "eq8":
             logits = logits.clone()
             logits = self.subs_parameterisation(logits, xt)
         

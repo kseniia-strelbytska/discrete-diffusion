@@ -199,6 +199,7 @@ class FIRETransformerClassifier(torch.nn.Module):
         sampling_eps=1e-5,
     ):
         super().__init__()
+        self.architecture='diffusion'
 
         self.l = max_len
         self.sampling_eps = sampling_eps
