@@ -188,6 +188,9 @@ def train(
                 save_mode=save_mode,
                 denoise=denoise
             )
+            
+            exit(0)
+            
             for i in range(4):
                 stats[i].append(new_stats[i])
             stats[-1].append(epoch + 1)

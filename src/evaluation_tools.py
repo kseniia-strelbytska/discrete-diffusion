@@ -59,6 +59,11 @@ class EvaluationDataset():
         self.data = self.full_data.clone() if eval_type == 'full' else self.sampled_data
         
     def _init_limited(self):
+        '''
+        For each l0 in [1, l//2], we add two sequences: 
+        000...0 (l0 zeros) and 
+        000...01 (l0 zeros and one '1')
+        '''
         for l0 in range(1, self.l // 2 + 1):
             self.full_data.append(torch.tensor([SOS_token] + [0]*l0 + [MASK_token]*(self.l + 1 - l0)).unsqueeze(0))
             self.full_data.append(torch.tensor([SOS_token] + [0]*l0 + [1] + [MASK_token]*(self.l - l0)).unsqueeze(0))
@@ -66,6 +71,10 @@ class EvaluationDataset():
         self.full_data = torch.cat(self.full_data, dim=0)
         
     def _init_randomised(self):
+        '''
+        For each l0 (# of zeros) in [8, 32], we sample 4 values of l1 (# of ones) in [1, l0], 
+        and add the corresponding sequence.
+        '''
         for l0 in range(8, 33):
             # range [1, l0]
             sampled_l1 = torch.randperm(l0)[:4] + 1 
@@ -75,6 +84,9 @@ class EvaluationDataset():
         self.full_data = torch.cat(self.full_data, dim=0)
         
     def _init_complete(self):
+        '''
+        For each l0 in [32, 64], we add the sequence with l0 zeros and l1 ones, where l1 = 64 - l0.
+        '''
         for l0 in range(32, 65):
             for l1 in range(0, 64-l0+1):
                 self.full_data.append(torch.tensor([SOS_token] + [0]*l0 + [1]*l1 + [MASK_token] * (self.l + 1 - l0 - l1)).unsqueeze(0))
