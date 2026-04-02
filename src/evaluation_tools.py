@@ -58,11 +58,14 @@ class EvaluationDataset():
         self.sampled_data = self.full_data.clone()[torch.randperm(self.full_data.shape[0])][:n_samples]
         self.data = self.full_data.clone() if eval_type == 'full' else self.sampled_data
         
+         
     def _init_limited(self):
         '''
         For each l0 in [1, l//2], we add two sequences: 
         000...0 (l0 zeros) and 
         000...01 (l0 zeros and one '1')
+        
+        Total samples: l//2 (l0 values) * 2 (sequences per l0) = l samples
         '''
         for l0 in range(1, self.l // 2 + 1):
             self.full_data.append(torch.tensor([SOS_token] + [0]*l0 + [MASK_token]*(self.l + 1 - l0)).unsqueeze(0))
@@ -86,6 +89,8 @@ class EvaluationDataset():
     def _init_complete(self):
         '''
         For each l0 in [32, 64], we add the sequence with l0 zeros and l1 ones, where l1 = 64 - l0.
+        
+        Total samples: 33 (l0 values) * 34 / 2 = 561
         '''
         for l0 in range(32, 65):
             for l1 in range(0, 64-l0+1):
@@ -173,7 +178,8 @@ def evaluation_from_generation(model,
                                loss_log_path=None, 
                                output_path=None, 
                                save_mode=False, 
-                               denoise="0"):
+                               denoise="0", 
+                               cutoff=None):
     # r1, r2, both, format
     stats = np.array([0, 0, 0, 0])
     stats_eos = np.array([0, 0, 0, 0])  # stats for sequences that contain EOS
@@ -201,7 +207,7 @@ def evaluation_from_generation(model,
                 else:
                     y_pred, steps = unmaskModel(s, ((s == MASK_token).sum() / torch.numel(s)), strategy, temperature=temperature, return_steps=True)
             else:
-                y_pred = get_prediction(model, s, grammar.l + 2)  # autoregressive generation; no batch dimension
+                y_pred = get_prediction(model, s, max_tokens=cutoff)  # autoregressive generation; no batch dimension
 
             # `grammar.evaluate()` uses Python loops/indexing; it's much faster on CPU tensors
             # Moving a single (L,) tensor to CPU is cheap compared to thousands of tiny GPU syncs

@@ -33,8 +33,8 @@ validation:
 evaluation:
   eval_every: 5000
   n_samples: 200
-  eval_dataset: randomised
-  eval_type: full
+  eval_dataset: randomised # limited or randomised or complete
+  eval_type: full # full or random
 wandb:
   project: "discrete-diffusion"
   group: "RPE-architecture-fixed"

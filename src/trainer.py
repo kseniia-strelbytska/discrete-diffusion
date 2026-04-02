@@ -33,7 +33,8 @@ def train(
     temperature=1.0,
     wandb=None,
     loss_type="eq8",
-    denoise="0"
+    denoise="0",
+    cutoff=None
 ):
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
     if num_warmup_steps != 0:
@@ -59,7 +60,7 @@ def train(
 
     for epoch in epochs_iter:
         #Calculate the eval metrics at initialisation
-        if epoch == 0 and False: # skip initial evaluation to save time; set to True to enable
+        if epoch == 0: # skip initial evaluation to save time; set to True to enable
             new_stats, new_stats_eos, total_eos, sequences, sequences_eos = evaluation_from_generation(
                 model,
                 grammar,
@@ -73,7 +74,8 @@ def train(
                 loss_log_path=dirs.loss_log_path,
                 output_path=dirs.output_path,
                 save_mode=save_mode,
-                denoise=denoise
+                denoise=denoise,
+                cutoff=cutoff
             )
             for i in range(4):
                 stats[i].append(new_stats[i])
@@ -106,6 +108,9 @@ def train(
                     },
                     step=epoch + 1,
                 )
+
+            # Restore training mode after evaluation.
+            model.train()
 
         #Train the model
         total_loss = 0
@@ -186,10 +191,9 @@ def train(
                 loss_log_path=dirs.loss_log_path,
                 output_path=dirs.output_path,
                 save_mode=save_mode,
-                denoise=denoise
+                denoise=denoise,
+                cutoff=cutoff
             )
-            
-            exit(0)
             
             for i in range(4):
                 stats[i].append(new_stats[i])
@@ -222,6 +226,9 @@ def train(
                     },
                     step=epoch + 1,
                 )
+
+            # Restore training mode after evaluation.
+            model.train()
 
             ax1.clear()
             ax1.plot(test_loss_epochs, train_loss_stats)

@@ -304,7 +304,8 @@ def main():
             temperature=cfg.temperature,
             wandb=wandb,
             loss_type=cfg.training.loss_type,
-            denoise=cfg.training.denoise
+            denoise=cfg.training.denoise,
+            cutoff=cfg.evaluation.cutoff
         )
         
         torch.save(
@@ -358,7 +359,8 @@ def main():
                 figures_path=iter_figure_path,
                 loss_log_path=dirs.loss_log_path,
                 output_path=iter_output_path,
-                save_mode=args.save
+                save_mode=args.save,
+                cutoff=cfg.evaluation.cutoff
             )
 
         exit(0)

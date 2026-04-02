@@ -31,8 +31,8 @@ validation:
 evaluation:
   eval_every: 5000
   n_samples: 20
-  eval_dataset: randomised
-  eval_type: full
+  eval_dataset: randomised # limited or randomised or complete
+  eval_type: full # full or random
 paths:
   models_dir: models
   figures_dir: figures
