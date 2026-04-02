@@ -42,5 +42,5 @@ wandb:
 paths:
   models_dir: models
   figures_dir: figures
-  experiment_name: AR_RE
-notes: "Testing the model Rule Extrapolation AR model"
+  experiment_name: AR_improved
+notes: "Testing the improved (to match RE) AR model"

@@ -2,6 +2,7 @@
 import torch
 from constants import PAD_token, SOS_token, EOS_token
 from torch import nn
+import math
     
 class ARTransformerClassifier(nn.Module):
     def __init__(self, 
@@ -22,9 +23,10 @@ class ARTransformerClassifier(nn.Module):
         self.embed_dim=embed_dim
         self.vocab_size=vocab_size
         self.sampling_eps=sampling_eps  # not used; kept for interface compatibility
+        
+        self.Dropout = nn.Dropout(dropout)
 
         self.embedding = nn.Embedding(vocab_size, embed_dim)
-        self.positional_embedding = nn.Embedding(max_len, embed_dim)
 
         self.layer = nn.TransformerEncoderLayer(d_model=embed_dim, 
                                                 nhead=n_head, 
@@ -36,13 +38,23 @@ class ARTransformerClassifier(nn.Module):
 
         self.fc = nn.Linear(embed_dim, vocab_size)
 
+        PE = torch.zeros((max_len, embed_dim))
+        pos = torch.arange(max_len).unsqueeze(-1)
+        div = torch.pow(1e4, 2 * torch.arange(0, embed_dim // 2) / embed_dim)
+        PE[:, 0::2] = torch.sin(pos / div)
+        PE[:, 1::2] = torch.cos(pos / div)
+
+        self.register_buffer("PE", PE)
+
     def forward(self, X, timestep=None):
         B, L = X.shape 
-        mask = torch.triu(torch.ones(L, L, device=X.device), diagonal=1).bool()
-        padding_mask = (X == PAD_token)
+        mask = torch.triu(torch.full((L, L), float('-inf'), device=X.device), diagonal=1)
+        padding_mask = (X == PAD_token).to(X.device) # (B, L)
     
-        positions = self.positional_embedding(torch.arange(0, L, device=X.device).unsqueeze(0)) # (1, L) -> (1, L, E)
-        X = self.embedding(X) + positions # (B, L, E)
+        X = self.embedding(X) * math.sqrt(self.embed_dim) # (B, L, E)
+        # Sinusoidal positional encoding
+        X += self.PE[:L, :].unsqueeze(0)
+        X = self.Dropout(X)
 
         X = self.transformer_encoder(src=X, 
                                      mask=mask, 
