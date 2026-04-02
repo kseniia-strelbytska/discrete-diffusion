@@ -30,7 +30,7 @@ from model_v2 import v2TransformerClassifier
 from model_RPE import RPETransformerClassifier
 from model_FIRE import FIRETransformerClassifier
 from AR_model_AR import ARTransformerClassifier
-
+from AR_model_RE import TransformerDecoder
 
 def dict_to_ns(d):
     return SimpleNamespace(
@@ -276,7 +276,17 @@ def main():
             embed_dim=cfg.model.embed_dim,
             dim_feedforward=cfg.model.dim_feedforward,
             dropout=cfg.model.dropout,
+            layer_norm_eps=cfg.model.layer_norm_eps
         ).to(device)
+    elif cfg.model.architecture == "RE":
+        model = TransformerDecoder(
+        vocab_size=cfg.model.vocab_size,
+        dim_model=cfg.model.embed_dim,
+        num_heads=cfg.model.n_head,
+        num_decoder_layers=cfg.model.n_layers,
+        dropout_p=cfg.model.dropout,
+        dim_feedforward=cfg.model.dim_feedforward,
+        layer_norm_eps=cfg.model.layer_norm_eps).to(device)
     else:
         raise ValueError(f"Invalid model architecture: {cfg.model.architecture}")
 

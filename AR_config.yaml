@@ -8,12 +8,12 @@ data:
   batch_size: 128
   grammar: anbn
 model:
-  architecture: autoregressive # classic (torch-native) or v2 (QKV low-level) or RPE or FIRE or autoregressive
+  architecture: RE # classic (torch-native) or v2 (QKV low-level) or RPE or FIRE or autoregressive or RE
   max_len: 258       
   vocab_size: 5
-  n_head: 4
+  n_head: 5
   n_layers: 7
-  embed_dim: 128
+  embed_dim: 10
   dim_feedforward: 1024
   dropout: 0.1
   layer_norm_eps: 0.006
@@ -42,5 +42,5 @@ wandb:
 paths:
   models_dir: models
   figures_dir: figures
-  experiment_name: AR_larger
-notes: "Testing a larger AR model"
+  experiment_name: AR_RE
+notes: "Testing the model Rule Extrapolation AR model"

@@ -39,6 +39,7 @@ class rblb(nn.Module):
     # ELBO loss, (eq 8 in MDLM paper)
     def forward(self, xt, logits, y_true, timestep):
         if self.loss_type == "cross_entropy":
+            # no EOS weight. 
             # Standard next-token-prediction loss for autoregressive models.
             # xt is the clean input sequence; logits[:, i, :] predicts xt[:, i+1].
             B, L, V = logits.shape
