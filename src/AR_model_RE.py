@@ -34,8 +34,11 @@ class PositionalEncoding(nn.Module):
 
     def forward(self, token_embedding: torch.Tensor) -> torch.Tensor:
         # Residual connection + pos encoding
+        # return self.dropout(
+        #     token_embedding + self.pos_encoding[:, : token_embedding.size(1), :]  # type: ignore[index]
+        # )
         return self.dropout(
-            token_embedding + self.pos_encoding[:, : token_embedding.size(1), :]  # type: ignore[index]
+            token_embedding  
         )
 
 

@@ -31,6 +31,7 @@ from model_RPE import RPETransformerClassifier
 from model_FIRE import FIRETransformerClassifier
 from AR_model_AR import ARTransformerClassifier
 from AR_model_RE import TransformerDecoder
+from model_timestep import TimestepTransformerClassifier
 
 def dict_to_ns(d):
     return SimpleNamespace(
@@ -287,6 +288,18 @@ def main():
         dropout_p=cfg.model.dropout,
         dim_feedforward=cfg.model.dim_feedforward,
         layer_norm_eps=cfg.model.layer_norm_eps
+        ).to(device)
+    elif cfg.model.architecture == "timestep":
+        model = TimestepTransformerClassifier(
+            max_len=cfg.model.max_len,
+            vocab_size=cfg.model.vocab_size,
+            n_head=cfg.model.n_head,
+            n_layers=cfg.model.n_layers,
+            embed_dim=cfg.model.embed_dim,
+            dim_feedforward=cfg.model.dim_feedforward,
+            dropout=cfg.model.dropout,
+            layer_norm_eps=cfg.model.layer_norm_eps,
+            sampling_eps=cfg.model.sampling_eps
         ).to(device)
     else:
         raise ValueError(f"Invalid model architecture: {cfg.model.architecture}")

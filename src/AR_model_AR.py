@@ -24,7 +24,7 @@ class ARTransformerClassifier(nn.Module):
         self.vocab_size=vocab_size
         self.sampling_eps=sampling_eps  # not used; kept for interface compatibility
         
-        self.Dropout = nn.Dropout(dropout)
+        self.dropout = nn.Dropout(dropout)
 
         self.embedding = nn.Embedding(vocab_size, embed_dim)
 
@@ -53,8 +53,7 @@ class ARTransformerClassifier(nn.Module):
     
         X = self.embedding(X) * math.sqrt(self.embed_dim) # (B, L, E)
         # Sinusoidal positional encoding
-        X += self.PE[:L, :].unsqueeze(0)
-        X = self.Dropout(X)
+        X = self.dropout(X + self.PE[:L, :].unsqueeze(0)) # (B, L, E)
 
         X = self.transformer_encoder(src=X, 
                                      mask=mask, 
