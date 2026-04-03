@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 
-from constants import MASK_token
+from constants import MASK_token, PAD_token, SOS_token
 
 class Dataset(torch.utils.data.Dataset):
     """
@@ -64,7 +64,9 @@ class Dataset(torch.utils.data.Dataset):
         else:
             prob = self.stratified_sampling(y_batch.shape[0])
             
-        mask = torch.rand_like(y_batch, dtype=torch.float, device=self.device) < prob
+        mask = (torch.rand_like(y_batch, dtype=torch.float, device=self.device) < prob) \
+               & (y_batch != PAD_token) \
+               & (y_batch != SOS_token)
         x_batch = torch.where(mask, torch.full_like(y_batch, MASK_token), y_batch)
             
         return x_batch, y_batch, prob

@@ -49,7 +49,13 @@ class ScheduledUnmasker(nn.Module):
                     probs = torch.softmax(logits, dim=-1)
                 else:
                     probs = torch.softmax(logits / temperature, dim=-1)
-                
+
+                # SUBS parameterization: structural tokens cannot be predicted at content positions
+                probs[:, MASK_token] = 0.0
+                probs[:, SOS_token]  = 0.0
+                probs[:, PAD_token]  = 0.0
+                probs = probs / (probs.sum(dim=-1, keepdim=True) + 1e-8)
+
                 probs[:, :-1] *= (alpha_s - alpha_t) / (1 - alpha_t)
                 probs[:, -1] = (1 - alpha_s) / (1 - alpha_t) # mask prob
 
@@ -74,6 +80,16 @@ class ScheduledUnmasker(nn.Module):
                 #print(sampled_X[X != MASK_token])
 
                 X[X == MASK_token] = sampled_X[X == MASK_token]
+
+                # Post-EOS cleanup: freeze everything after the first EOS as PAD
+                eos_positions = (X == EOS_token).nonzero(as_tuple=False)
+                if eos_positions.numel() > 0:
+                    first_eos = eos_positions[0, 0].item()
+                    after_eos = torch.zeros_like(X, dtype=torch.bool)
+                    after_eos[first_eos + 1:] = True
+                    X = torch.where(after_eos & (X == MASK_token),
+                                    torch.full_like(X, PAD_token), X)
+
                 steps.append(X.clone())
 
             if return_steps == True:

@@ -62,7 +62,8 @@ class rblb(nn.Module):
             log_prob_x = torch.gather(logits, -1, y_true[:, :, None]).squeeze(-1) 
 
             loss = - dt / timestep * log_prob_x
-            loss = self.T * loss 
+            loss = self.T * loss
+            loss = loss * (xt == MASK_token).float()
 
         elif self.loss_type == "eq9":
             logits = logits.clone()
@@ -99,10 +100,8 @@ class rblb(nn.Module):
         token_weight = token_weight.masked_fill(y_true == EOS_token, self.eos_weight)
         loss = loss * token_weight
 
-        # mask_count = (xt == MASK_token).sum()
-        # loss = loss.sum() / (mask_count + 1e-6) # average over masked tokens
-        
-        loss = loss.sum() / torch.numel(xt) # average over all tokens
+        mask_count = (xt == MASK_token).sum()
+        loss = loss.sum() / (mask_count + 1e-8)
         
         #only calculate loss for non-padded tokens
         #attention_mask = (y_true != PAD_token)

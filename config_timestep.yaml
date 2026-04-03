@@ -12,7 +12,7 @@ model:
   max_len: 258       
   vocab_size: 6
   n_head: 4
-  n_layers: 4
+  n_layers: 6
   embed_dim: 256
   dim_feedforward: 1024
   dropout: 0.1
@@ -23,7 +23,7 @@ model:
   inverse_t: False
 training:
   epochs: 100000
-  learning_rate: 0.001
+  learning_rate: 3e-4
   num_warmup_steps: 1000
   weight_decay: 0.0
   loss_type: eq8 # eq8 or eq9
