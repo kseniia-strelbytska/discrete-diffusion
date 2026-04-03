@@ -5,42 +5,42 @@ temperature: 0.1 # controls strategy: greedy if temperature <= 0, categorical if
 data:
   l: 256
   train_split: 0.9
-  batch_size: 64
+  batch_size: 128
   grammar: anbn
 model:
-  architecture: classic # classic (torch-native) or v2 (QKV low-level) or RPE or FIRE
+  architecture: classic # classic (torch-native) or v2 (QKV low-level) or RPE or FIRE or autoregressive or RE
   max_len: 258       
   vocab_size: 6
   n_head: 4
-  n_layers: 4
+  n_layers: 7
   embed_dim: 256
   dim_feedforward: 1024
   dropout: 0.1
-  layer_norm_eps: 0.0002
-  T: 500
+  layer_norm_eps: 0.006
+  T: 100 # set to 0 if using autoregressive architecture; otherwise, the number of diffusion steps
   sampling_eps: 0.00001
-  eos_weight: 10.0
+  eos_weight: 1.0
   inverse_t: False
 training:
   epochs: 100000
-  learning_rate: 0.001
+  learning_rate: 0.002
   num_warmup_steps: 1000
   weight_decay: 0.0
-  loss_type: eq8 # eq8 or eq9
+  loss_type: eq8 # eq8, eq9, or cross_entropy (for autoregressive)
   denoise: "0" # "0" or eps
 validation:
   val_every: 1000
 evaluation:
   eval_every: 5000
   n_samples: 200
-  eval_dataset: randomised # limited or randomised or complete
+  eval_dataset: complete # limited or randomised or complete
   eval_type: full # full or random
   cutoff: 258 # max prediction length cutoff (for autoregressive only)
 wandb:
   project: "discrete-diffusion"
-  group: "RPE-architecture-fixed"
+  group: "classic_upd"
 paths:
   models_dir: models
   figures_dir: figures
-  experiment_name: RPE-architecture-fixed
-notes: "Evaluating greedy decoding (format concerns)"
+  experiment_name: classic_upd
+notes: "Testing the updated (scaling by sqrt(dim_model) + add dropout after pos encoding) classic model"

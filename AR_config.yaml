@@ -19,7 +19,7 @@ model:
   layer_norm_eps: 0.006
   T: 0 # set to 0 if using autoregressive architecture; otherwise, the number of diffusion steps
   sampling_eps: 0.00001
-  eos_weight: 10.0
+  eos_weight: 10.0 # unussed for autoregressive
   inverse_t: False
 training:
   epochs: 100000

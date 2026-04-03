@@ -64,6 +64,8 @@ class TransformerClassifier(torch.nn.Module):
         self.l = max_len
         self.sampling_eps = sampling_eps
         self.vocab_size = vocab_size
+        self.embed_dim = embed_dim
+        
         self.embedding = nn.Embedding(vocab_size, embed_dim)
         self.sigma_map = TimestepEmbedder(embed_dim=embed_dim)
 
@@ -80,10 +82,6 @@ class TransformerClassifier(torch.nn.Module):
             self.layer, num_layers=n_layers
         )
 
-        # Predictor head: a simple linear layer
-        # do not allow mask (5) prediction
-        self.fc = nn.Linear(embed_dim, vocab_size)
-
         PE = torch.zeros((max_len, embed_dim))
         pos = torch.arange(max_len).unsqueeze(-1)
         div = torch.pow(1e4, 2 * torch.arange(0, embed_dim // 2) / embed_dim)
@@ -91,15 +89,23 @@ class TransformerClassifier(torch.nn.Module):
         PE[:, 1::2] = torch.cos(pos / div)
 
         self.register_buffer("PE", PE)
+        
+        self.Dropout = nn.Dropout(dropout)
+        
+        # Predictor head: a simple linear layer
+        self.fc = nn.Linear(embed_dim, vocab_size)
 
     def forward(self, X: torch.Tensor, timestep: torch.Tensor):
         B, L = X.shape
-        X = self.embedding(X)  # (B, L, E) = (128, 20, 10)
+        
+        X = self.embedding(X)
+        # X = self.embedding(X) * math.sqrt(self.embed_dim)  # (B, L, E) = (128, 20, 10)
         E = X.shape[-1]
 
         # Sinusoidal positional encoding
         X += self.PE[:L, :].unsqueeze(0)
         
+        # X = self.Dropout(X) # (B, L, E)
         # Sinusoidal timestep encoding
         #c = torch.nn.functional.silu(self.sigma_map(-torch.log(1 - (1 - self.sampling_eps) * timestep)))
         #X += c

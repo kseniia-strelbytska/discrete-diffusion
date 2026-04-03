@@ -28,13 +28,13 @@ class ARTransformerClassifier(nn.Module):
 
         self.embedding = nn.Embedding(vocab_size, embed_dim)
 
-        self.layer = nn.TransformerEncoderLayer(d_model=embed_dim, 
+        layer = nn.TransformerEncoderLayer(d_model=embed_dim, 
                                                 nhead=n_head, 
                                                 dim_feedforward=dim_feedforward, 
                                                 dropout=dropout, 
                                                 layer_norm_eps=layer_norm_eps,
                                                 batch_first=True)
-        self.transformer_encoder = nn.TransformerEncoder(self.layer, num_layers=n_layers)
+        self.transformer_encoder = nn.TransformerEncoder(layer, num_layers=n_layers)
 
         self.fc = nn.Linear(embed_dim, vocab_size)
 

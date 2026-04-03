@@ -29,13 +29,13 @@ class PositionalEncoding(nn.Module):
         pos_encoding[:, 1::2] = torch.cos(positions_list * division_term)
 
         # Saving buffer (same as parameter without gradients needed)
-        pos_encoding = pos_encoding.unsqueeze(0).transpose(0, 1)
+        pos_encoding = pos_encoding.unsqueeze(0)
         self.register_buffer("pos_encoding", pos_encoding)
 
     def forward(self, token_embedding: torch.Tensor) -> torch.Tensor:
         # Residual connection + pos encoding
         return self.dropout(
-            token_embedding + self.pos_encoding[: token_embedding.size(0), :]  # type: ignore[index]
+            token_embedding + self.pos_encoding[:, : token_embedding.size(1), :]  # type: ignore[index]
         )
 
 
@@ -103,6 +103,8 @@ class TransformerDecoder(nn.Module):
             dim_feedforward=dim_feedforward,
             layer_norm_eps=layer_norm_eps,
         )
+        
+        print(f'Layer norm eps {layer_norm_eps}')
 
         if self.relu_rescale > 0 and self.relu_rescale != 1.0:
             layer.activation = (

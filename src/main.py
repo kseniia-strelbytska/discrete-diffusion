@@ -286,7 +286,8 @@ def main():
         num_decoder_layers=cfg.model.n_layers,
         dropout_p=cfg.model.dropout,
         dim_feedforward=cfg.model.dim_feedforward,
-        layer_norm_eps=cfg.model.layer_norm_eps).to(device)
+        layer_norm_eps=cfg.model.layer_norm_eps
+        ).to(device)
     else:
         raise ValueError(f"Invalid model architecture: {cfg.model.architecture}")
 
