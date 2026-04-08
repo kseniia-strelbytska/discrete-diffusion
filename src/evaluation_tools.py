@@ -203,9 +203,9 @@ def evaluation_from_generation(model,
             
             if model.architecture == 'diffusion':
                 if write_steps == False:
-                    y_pred = unmaskModel(s, ((s == MASK_token).sum() / torch.numel(s)), strategy, temperature=temperature) # no batch dimension
+                    y_pred = unmaskModel(s, torch.tensor(1.0), strategy, temperature=temperature) # no batch dimension
                 else:
-                    y_pred, steps = unmaskModel(s, ((s == MASK_token).sum() / torch.numel(s)), strategy, temperature=temperature, return_steps=True)
+                    y_pred, steps = unmaskModel(s, torch.tensor(1.0), strategy, temperature=temperature, return_steps=True)
             else:
                 y_pred = get_prediction(model, s, max_tokens=cutoff)  # autoregressive generation; no batch dimension
 

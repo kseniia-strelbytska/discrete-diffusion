@@ -23,24 +23,25 @@ model:
   inverse_t: False
 training:
   epochs: 100000
-  learning_rate: 3e-4
+  learning_rate: 0.0003
   num_warmup_steps: 1000
   weight_decay: 0.0
   loss_type: eq8 # eq8 or eq9
   denoise: "0" # "0" or eps
+  suffix_mix_prob: 0.5 # fraction of training batches using contiguous-suffix masking
 validation:
   val_every: 1000
 evaluation:
   eval_every: 5000
   n_samples: 200
-  eval_dataset: complete # limited or randomised or complete
+  eval_dataset: limited # limited or randomised or complete
   eval_type: full # full or random
   cutoff: 258 # max prediction length cutoff (for autoregressive only)
 wandb:
   project: "discrete-diffusion"
-  group: "Diffusion-with-timestep-embedding"
+  group: "claude-major-refactoring"
 paths:
   models_dir: models
   figures_dir: figures
-  experiment_name: Diffusion-with-timestep-embedding
+  experiment_name: claude-major-refactoring
 notes: "Evaluating timestep embedding architecture"

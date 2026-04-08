@@ -188,7 +188,9 @@ def main():
     grammar = get_grammar(cfg.data.grammar, cfg.data.l)
     grammar.generate_seq()  # generates the data and stores in grammar.data
 
-    dataset = Dataset(grammar.data, device, cfg.model.T, sampling_eps=cfg.model.sampling_eps, inverse_t=cfg.model.inverse_t)
+    suffix_mix_prob = getattr(cfg.training, 'suffix_mix_prob', 0.0)
+    dataset = Dataset(grammar.data, device, cfg.model.T, sampling_eps=cfg.model.sampling_eps,
+                      inverse_t=cfg.model.inverse_t, suffix_mix_prob=suffix_mix_prob)
 
     print(f"Dataset len: {len(dataset)} using inverse_t sampling {cfg.model.inverse_t}")
     
@@ -200,8 +202,9 @@ def main():
     )
     
     test_data = dataset.y_data[test_dataset.indices] # grab only test samples
-    test_dataset = Dataset(test_data, device, cfg.model.T, 
-                       sampling_eps=cfg.model.sampling_eps, inverse_t=cfg.model.inverse_t)
+    test_dataset = Dataset(test_data, device, cfg.model.T,
+                       sampling_eps=cfg.model.sampling_eps, inverse_t=cfg.model.inverse_t,
+                       suffix_mix_prob=suffix_mix_prob)
     fixed_test_dataset = get_fixed_dataset(
         test_dataset, device, batch_size=cfg.data.batch_size
     )  # fixed test dataset
