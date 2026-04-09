@@ -1,0 +1,53 @@
+BASELINE REPORT — RPE Architecture
+====================================
+Date: 2026-04-08
+Source: /workspaces/discrete-diffusion/figures/RPE-architecture-fixed_23032026_204407/loss_log.txt
+
+Architecture   : RPETransformerClassifier (Relative Positional Encoding)
+Layers         : 4
+Embed dim      : 256
+Heads          : 4
+FFN dim        : 1024
+Max seq len    : 258  (L=256)
+Diffusion T    : 500
+Denoising mode : "0" (random order)
+Temperature    : 0.1 (near-greedy)
+Parameters     : ~3.3M
+
+IMPORTANT NOTE: The RPE model entirely ignores the timestep parameter.
+  It is a pure masked language model (BERT-style denoiser), NOT a
+  proper timestep-conditioned diffusion model.
+
+Training: 100,000 epochs, LR=0.001, AdamW, inverse-sqrt warmup (1000 steps)
+Loss type: eq8 (MDLM ELBO), eos_weight=10.0
+Training dataset: 128 sequences (L=256 grammar, 90/10 train/test split)
+
+RESULTS (from training log at epoch 85,000 — best checkpoint):
+  Eval dataset : randomised (100 samples, l0 in [8,32], l1 random in [1,l0])
+  Rule 1 acc   : 91%  (count(0s)==count(1s))
+  Rule 2 acc   : 100% (0s precede 1s)
+  Both rules   : 91%
+  Format acc   : 93%
+  Test ELBO    : ~2.4–2.7  (does NOT converge to 0)
+
+Results at epoch 100,000 (final, degraded):
+  Rule 1 acc   : 72%
+  Rule 2 acc   : 99%
+  Both rules   : 72%
+  Test ELBO    : ~2.8
+
+BEST AR MODEL (for comparison):
+  Architecture : ARTransformerClassifier (autoregressive)
+  Eval dataset : complete (561 samples)
+  Both rules   : 94%
+  Test loss    : ~0.04 (cross-entropy, converges smoothly)
+
+ANALYSIS:
+- Test ELBO never reaches 0 for the RPE diffusion model. The model
+  capacity (3.3M params) and the random denoising order both limit performance.
+- Rule 2 (ordering) is learned reliably; Rule 1 (counting) is the bottleneck.
+- The AR model outperforms the diffusion model on the complete eval set.
+
+TARGETS FOR IMPROVEMENT:
+  Primary   : Both-rules accuracy ≥ 98% on complete eval (561 samples)
+  Secondary : Test ELBO loss → near 0

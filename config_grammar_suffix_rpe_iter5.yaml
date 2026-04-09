@@ -1,0 +1,57 @@
+seed: 42
+device: auto
+strategy: None
+temperature: 0.0   # greedy decoding
+
+data:
+  l: 256
+  train_split: 0.9
+  batch_size: 64
+  grammar: anbn
+  masking_type: grammar_suffix
+
+model:
+  architecture: RPE
+  max_len: 258
+  vocab_size: 6
+  n_head: 8           # 4→8 heads for better counting precision
+  n_layers: 8         # 6→8 layers for more capacity
+  embed_dim: 512      # 256→512 for richer representations
+  dim_feedforward: 2048  # 1024→2048
+  dropout: 0.1
+  layer_norm_eps: 0.00001
+  T: 500
+  sampling_eps: 0.00001
+  eos_weight: 10.0
+  inverse_t: False
+
+training:
+  epochs: 30000
+  learning_rate: 0.0003
+  num_warmup_steps: 3000
+  weight_decay: 0.0
+  loss_type: eq8
+  denoise: ltr
+  ema_decay: 0.9999
+  grad_clip_norm: 1.0
+
+validation:
+  val_every: 500
+
+evaluation:
+  eval_every: 5000
+  n_samples: 100
+  eval_dataset: complete
+  eval_type: random
+  cutoff: 258
+
+wandb:
+  project: ""
+  group: ""
+
+paths:
+  models_dir: models
+  figures_dir: figures
+  experiment_name: grammar-suffix-rpe-iter5
+
+notes: "RPE (8L 512d 8H) — 4x bigger model for counting precision. LR=0.0003 (3x lower than iter4), warmup=3000 (3x more) for larger model stability."

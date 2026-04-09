@@ -1,0 +1,46 @@
+{
+    "name": "Claude Research Sandbox (ML)",
+    "image": "mcr.microsoft.com/devcontainers/python:3.11", 
+    "features": {
+        // Essential for Claude Code CLI
+        "ghcr.io/devcontainers/features/node:1": {},
+        // Homebrew for Linux (installs to /home/linuxbrew)
+        "ghcr.io/devcontainers/features/common-utils:1": {
+            "installHiB": true
+        }
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-toolsai.jupyter",
+                "tamasfe.even-better-toml",
+                "christian-kohler.path-intellisense"
+            ]
+        }
+    },
+    // This command runs after the container is built.
+    // It installs Claude Code, your ML stack, and logs into wandb if you have the key.
+    "postCreateCommand": "npm install -g @anthropic-ai/claude-code && pip3 install torch numpy matplotlib tqdm pyyaml transformers wandb && echo 'Environment ready! Use \"claude auth\" to begin.'" ,
+    
+    // Environment variables for W&B and safety
+    "remoteEnv": {
+        "WANDB_ANONYMOUS": "allow",
+        "PYTHONPATH": "${containerWorkspaceFolder}"
+    },
+
+    "remoteUser": "vscode"
+
+    "runArgs": [
+    "--gpus", "all",
+    "--privileged",
+    "--device", "/dev/nvidia0:/dev/nvidia0",
+    "--device", "/dev/nvidiactl:/dev/nvidiactl",
+    "--device", "/dev/nvidia-uvm:/dev/nvidia-uvm",
+    "--device", "/dev/nvidia-uvm-tools:/dev/nvidia-uvm-tools"
+    ],
+    "containerEnv": {
+        "NVIDIA_VISIBLE_DEVICES": "all",
+        "NVIDIA_DRIVER_CAPABILITIES": "all"
+    }
+}

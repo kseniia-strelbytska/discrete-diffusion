@@ -1,0 +1,9 @@
+[submodule "d3pm"]
+	path = d3pm
+	url = https://github.com/cloneofsimo/d3pm
+[submodule "mdlm"]
+	path = mdlm
+	url = https://github.com/kuleshov-group/mdlm
+[submodule "Score-Entropy-Discrete-Diffusion"]
+	path = Score-Entropy-Discrete-Diffusion
+	url = https://github.com/louaaron/Score-Entropy-Discrete-Diffusion

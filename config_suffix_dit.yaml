@@ -1,0 +1,57 @@
+seed: 42
+device: auto
+strategy: None
+temperature: 0.0   # greedy decoding at eval
+
+data:
+  l: 256
+  train_split: 0.9
+  batch_size: 64
+  grammar: anbn
+  masking_type: suffix   # KEY: reveal prefix, mask suffix → aligns with LTR eval
+
+model:
+  architecture: dit
+  max_len: 258
+  vocab_size: 6
+  n_head: 8
+  n_layers: 6
+  embed_dim: 256
+  cond_dim: 256
+  dim_feedforward: 1024
+  dropout: 0.1
+  layer_norm_eps: 0.00001
+  T: 500
+  sampling_eps: 0.00001
+  eos_weight: 10.0
+  inverse_t: False
+
+training:
+  epochs: 30000
+  learning_rate: 0.001
+  num_warmup_steps: 1000
+  weight_decay: 0.0
+  loss_type: eq8
+  denoise: ltr        # left-to-right denoising at eval time
+  ema_decay: 0.9999
+
+validation:
+  val_every: 500
+
+evaluation:
+  eval_every: 5000
+  n_samples: 100
+  eval_dataset: complete   # harder eval: l0 in [32,64]
+  eval_type: random        # sample 100 from 561
+  cutoff: 258
+
+wandb:
+  project: ""
+  group: ""
+
+paths:
+  models_dir: models
+  figures_dir: figures
+  experiment_name: suffix-dit-iter2
+
+notes: "DiT (6L 256d 8H AdaLN) + suffix masking + LTR eval + EMA. Iteration 2 — training distribution aligned with eval."

@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -E \"\\\\.\\(py|yaml|json|txt|md|cfg|conf\\)$\")",
+      "Bash(ls:*)",
+      "Bash(python:*)",
+      "Bash(kill %1)",
+      "Bash(nvidia-smi)",
+      "Bash(python3 -c \"import torch; print\\('CUDA:', torch.cuda.is_available\\(\\), '| MPS:', torch.backends.mps.is_available\\(\\)\\)\")",
+      "Bash(/workspaces/discrete-diffusion/.venv/bin/python --version)",
+      "Bash(/workspaces/discrete-diffusion/.venv/bin/python -c \"import torch; print\\('torch', torch.__version__, '| CUDA:', torch.cuda.is_available\\(\\)\\)\")",
+      "Bash(pip list:*)",
+      "Bash(echo \"Training PID: $!\")",
+      "Bash(echo \"PID: $!\")",
+      "Bash(kill 77060)"
+    ]
+  }
+}

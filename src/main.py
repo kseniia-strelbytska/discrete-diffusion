@@ -32,6 +32,7 @@ from model_FIRE import FIRETransformerClassifier
 from AR_model_AR import ARTransformerClassifier
 from AR_model_RE import TransformerDecoder
 from model_timestep import TimestepTransformerClassifier
+from model_dit import DiTDiffusionModel
 
 def dict_to_ns(d):
     return SimpleNamespace(
@@ -188,7 +189,8 @@ def main():
     grammar = get_grammar(cfg.data.grammar, cfg.data.l)
     grammar.generate_seq()  # generates the data and stores in grammar.data
 
-    dataset = Dataset(grammar.data, device, cfg.model.T, sampling_eps=cfg.model.sampling_eps, inverse_t=cfg.model.inverse_t)
+    masking_type = getattr(cfg.data, 'masking_type', 'random')
+    dataset = Dataset(grammar.data, device, cfg.model.T, sampling_eps=cfg.model.sampling_eps, inverse_t=cfg.model.inverse_t, masking_type=masking_type)
 
     print(f"Dataset len: {len(dataset)} using inverse_t sampling {cfg.model.inverse_t}")
     
@@ -200,8 +202,8 @@ def main():
     )
     
     test_data = dataset.y_data[test_dataset.indices] # grab only test samples
-    test_dataset = Dataset(test_data, device, cfg.model.T, 
-                       sampling_eps=cfg.model.sampling_eps, inverse_t=cfg.model.inverse_t)
+    test_dataset = Dataset(test_data, device, cfg.model.T,
+                       sampling_eps=cfg.model.sampling_eps, inverse_t=cfg.model.inverse_t, masking_type=masking_type)
     fixed_test_dataset = get_fixed_dataset(
         test_dataset, device, batch_size=cfg.data.batch_size
     )  # fixed test dataset
@@ -301,6 +303,19 @@ def main():
             layer_norm_eps=cfg.model.layer_norm_eps,
             sampling_eps=cfg.model.sampling_eps
         ).to(device)
+    elif cfg.model.architecture == "dit":
+        model = DiTDiffusionModel(
+            max_len=cfg.model.max_len,
+            vocab_size=cfg.model.vocab_size,
+            n_head=cfg.model.n_head,
+            n_layers=cfg.model.n_layers,
+            embed_dim=cfg.model.embed_dim,
+            cond_dim=getattr(cfg.model, 'cond_dim', 256),
+            dim_feedforward=cfg.model.dim_feedforward,
+            dropout=cfg.model.dropout,
+            layer_norm_eps=cfg.model.layer_norm_eps,
+            sampling_eps=cfg.model.sampling_eps,
+        ).to(device)
     else:
         raise ValueError(f"Invalid model architecture: {cfg.model.architecture}")
 
@@ -329,7 +344,9 @@ def main():
             wandb=wandb,
             loss_type=cfg.training.loss_type,
             denoise=cfg.training.denoise,
-            cutoff=cfg.evaluation.cutoff
+            cutoff=cfg.evaluation.cutoff,
+            ema_decay=getattr(cfg.training, 'ema_decay', 0.0),
+            grad_clip_norm=getattr(cfg.training, 'grad_clip_norm', 0.0),
         )
         
         torch.save(

@@ -12,12 +12,19 @@ class ScheduledUnmasker(nn.Module):
         self.T = T
         self.denoise = denoise
 
-    # fraction (0 <= fr <= 1) specifies the next step 
+    # fraction (0 <= fr <= 1) specifies the next step
     def forward(self, init_X, timestep, strategy = 'categorical', temperature=1.0, return_steps=False, eps=1e-5):
+        # Left-to-right denoising: special path, ignores timestep schedule
+        if self.denoise == "ltr":
+            result = self._ltr_forward(init_X, temperature, eps=eps)
+            if return_steps:
+                return result, [result]
+            return result
+
         X = init_X.clone().long().to(self.device)
         timestep = timestep.clone().to(self.device)
         L = X.shape[0]
-        
+
         # scale down the number of denoising steps acc to noise level
         if self.denoise == "eps":
             num_steps = int(self.T * timestep)
@@ -78,4 +85,44 @@ class ScheduledUnmasker(nn.Module):
 
             if return_steps == True:
                 return X, steps
-            return X 
+            return X
+
+    def _ltr_forward(self, init_X, temperature, eps=1e-5):
+        """
+        Left-to-right denoising: unmask tokens from left to right.
+        At each step the model sees all already-revealed tokens plus remaining MASKs,
+        conditioned on the current noise level (= fraction of still-masked tokens).
+        This mimics AR generation over the masked suffix while respecting the diffusion
+        time conditioning, helping models with explicit timestep embeddings (e.g. DiT).
+        """
+        X = init_X.clone().long().to(self.device)
+
+        # Collect masked positions in left-to-right order
+        mask_positions = (X == MASK_token).nonzero(as_tuple=True)[0]
+        n_total = X.numel()
+        n_mask_start = len(mask_positions)
+
+        if n_mask_start == 0:
+            return X
+
+        self.model.eval()
+        with torch.no_grad():
+            for step, pos in enumerate(mask_positions):
+                # Timestep = fraction of tokens still masked — decreases as we reveal
+                n_remaining = n_mask_start - step
+                t = max(float(n_remaining) / n_total, eps)
+                t_tensor = torch.tensor([t], dtype=torch.float, device=self.device)
+
+                logits = self.model(X.unsqueeze(0), t_tensor)[0]  # (L, vocab_size)
+
+                # Get logits for this position; suppress MASK token
+                pos_logits = logits[pos].clone()
+                pos_logits[MASK_token] = -1e9
+
+                if temperature <= 0:
+                    X[pos] = pos_logits.argmax()
+                else:
+                    probs = torch.softmax(pos_logits / temperature, dim=-1)
+                    X[pos] = torch.multinomial(probs, 1).squeeze()
+
+        return X

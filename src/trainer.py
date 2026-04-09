@@ -3,11 +3,38 @@ import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
 from datetime import datetime
+from copy import deepcopy
 
 from loss import rblb
 from evaluation_tools import evaluation_from_generation
 from transformers.optimization import get_inverse_sqrt_schedule
 import wandb
+
+
+class EMA:
+    """
+    Exponential Moving Average of model weights.
+    Used only for evaluation — the train model still receives gradient updates.
+    Following MDLM paper (mdlm/diffusion.py) which uses decay=0.9999.
+    """
+    def __init__(self, model, decay: float = 0.9999):
+        self.decay = decay
+        self.shadow = {k: v.detach().clone() for k, v in model.state_dict().items()}
+
+    @torch.no_grad()
+    def update(self, model):
+        for k, v in model.state_dict().items():
+            self.shadow[k].mul_(self.decay).add_(v.detach(), alpha=1.0 - self.decay)
+
+    def apply_to(self, model):
+        """Load EMA weights into model (for evaluation). Returns original weights dict."""
+        orig = {k: v.detach().clone() for k, v in model.state_dict().items()}
+        model.load_state_dict(self.shadow)
+        return orig
+
+    def restore(self, model, orig):
+        """Restore original weights after evaluation."""
+        model.load_state_dict(orig)
 
 
 def train(
@@ -34,7 +61,9 @@ def train(
     wandb=None,
     loss_type="eq8",
     denoise="0",
-    cutoff=None
+    cutoff=None,
+    ema_decay: float = 0.0,   # 0 = disabled; 0.9999 = MDLM default
+    grad_clip_norm: float = 0.0,  # 0 = disabled; 1.0 = recommended
 ):
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
     if num_warmup_steps != 0:
@@ -42,6 +71,9 @@ def train(
             optimizer, num_warmup_steps=num_warmup_steps
         )
     loss_fn = rblb(device, vocab_size=model.vocab_size, T=T, sampling_eps=model.sampling_eps, eos_weight=eos_weight, inverse_t=inverse_t, loss_type=loss_type)
+
+    # Initialise EMA (disabled when ema_decay == 0)
+    ema = EMA(model, decay=ema_decay) if ema_decay > 0 else None
 
     stats = [[], [], [], [], []]  # r1, r2, both, format, epochsteps
     test_loss_stats, train_loss_stats = [], []
@@ -120,11 +152,15 @@ def train(
             logits = model(model_input, timestep)
             loss = loss_fn(model_input, logits, y_batch, timestep)
             loss.backward()
+            if grad_clip_norm > 0:
+                torch.nn.utils.clip_grad_norm_(model.parameters(), grad_clip_norm)
             optimizer.step()
             if num_warmup_steps != 0:
                 lr_scheduler.step()
 
             total_loss += loss.item()
+            if ema is not None:
+                ema.update(model)
 
         if epoch % validation_config.val_every == 0:
             # Optimization (train-mode) loss averaged over the epoch.
@@ -178,6 +214,9 @@ def train(
                     f.write(log_line + "\n")
 
         if (epoch + 1) % evaluation_config.eval_every == 0:
+            # Swap to EMA weights for generation-based evaluation
+            orig_weights = ema.apply_to(model) if ema is not None else None
+
             new_stats, new_stats_eos, total_eos, sequences, sequences_eos = evaluation_from_generation(
                 model,
                 grammar,
@@ -227,6 +266,10 @@ def train(
                     step=epoch + 1,
                 )
 
+            # Restore train weights after EMA-based evaluation
+            if ema is not None and orig_weights is not None:
+                ema.restore(model, orig_weights)
+
             # Restore training mode after evaluation.
             model.train()
 
@@ -256,5 +299,9 @@ def train(
                 torch.save(
                     model.state_dict(), dirs.model_path / f"model_epochs={epoch + 1}"
                 )
+                if ema is not None:
+                    torch.save(
+                        ema.shadow, dirs.model_path / f"ema_epochs={epoch + 1}"
+                    )
 
     return model

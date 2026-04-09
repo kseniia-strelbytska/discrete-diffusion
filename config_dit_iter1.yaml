@@ -1,0 +1,56 @@
+seed: 42
+device: auto
+strategy: None
+temperature: 0.1   # near-greedy; <= 0 for pure greedy
+
+data:
+  l: 256
+  train_split: 0.9
+  batch_size: 64
+  grammar: anbn
+
+model:
+  architecture: dit     # DiTDiffusionModel with AdaLN timestep conditioning
+  max_len: 258          # l + 2
+  vocab_size: 6
+  n_head: 4
+  n_layers: 4
+  embed_dim: 256
+  cond_dim: 128         # timestep embedding dimension for AdaLN
+  dim_feedforward: 1024
+  dropout: 0.1
+  layer_norm_eps: 0.00001
+  T: 500
+  sampling_eps: 0.00001
+  eos_weight: 10.0
+  inverse_t: False
+
+training:
+  epochs: 20000
+  learning_rate: 0.0003
+  num_warmup_steps: 2000
+  weight_decay: 0.0
+  loss_type: eq8
+  denoise: "ltr"        # left-to-right denoising at eval time
+  ema_decay: 0.9999     # EMA following MDLM paper
+
+validation:
+  val_every: 1000
+
+evaluation:
+  eval_every: 5000
+  n_samples: 100        # samples from eval_dataset
+  eval_dataset: randomised  # l0 in [8,32], l1 in [1,l0] — fast, comparable to baseline
+  eval_type: full
+  cutoff: 258
+
+wandb:
+  project: ""
+  group: ""
+
+paths:
+  models_dir: models
+  figures_dir: figures
+  experiment_name: dit-ltr-ema-iter1
+
+notes: "DiT (4L 256d AdaLN) + LTR denoising + EMA. Iteration 1 of improvement plan."
