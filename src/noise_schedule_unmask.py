@@ -32,7 +32,7 @@ class ScheduledUnmasker(nn.Module):
         else:
             raise ValueError(f"{self.denoise} is not defined")
 
-        steps = [X.clone()]
+        steps, timesteps_log = [X.clone()], [timestep]
                 
         self.model.eval()
         with torch.no_grad():            
@@ -75,7 +75,8 @@ class ScheduledUnmasker(nn.Module):
 
                 X[X == MASK_token] = sampled_X[X == MASK_token]
                 steps.append(X.clone())
+                timesteps_log.append(timesteps[i] - dt)
 
             if return_steps == True:
-                return X, steps
+                return X, steps, timesteps
             return X 

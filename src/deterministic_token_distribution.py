@@ -164,6 +164,28 @@ def correct_determineTokenDistribution(seq, vocab_size):
 
 # ------------------- TESTING  -------------------
 
+def verify_correct_determineTokenDistribution_sanity(max_n=6):
+    """
+    correct_determineTokenDistribution must find exactly 1 completion for any fully-unmasked valid sequence,
+    and that completion must give probability 1.0 everywhere.
+    """
+    failures = []
+    for n in range(1, max_n + 1):
+        L = 2 * n + 2
+        seq = torch.tensor([SOS_token] + [0]*n + [1]*n + [EOS_token], dtype=torch.long)
+        result = correct_determineTokenDistribution(seq, vocab_size=6)
+        if result[0] is None:
+            failures.append((seq, 'got None for fully valid sequence'))
+            continue
+        if not torch.all(result[1].max(dim=-1).values == 1.0):
+            failures.append((seq, 'probabilities not deterministic for unmasked sequence'))
+    
+    if not failures:
+        print(f'correct_solve sanity check passed for n=1..{max_n}')
+    else:
+        print('SANITY FAILURES:', failures)
+
+
 def gen_random_test(vocab_size):
     n = 1 + random.randint(5, 20)
     seq = torch.zeros((n,))
@@ -370,6 +392,9 @@ def main():
              torch.tensor([SOS_token, MASK_token, MASK_token, MASK_token, MASK_token, MASK_token, MASK_token, MASK_token, MASK_token, EOS_token, PAD_token], dtype=torch.long),
              torch.tensor([SOS_token, MASK_token, MASK_token, MASK_token, MASK_token, MASK_token, MASK_token, MASK_token, EOS_token, MASK_token, PAD_token], dtype=torch.long)]
     
+    print('Verifying correct_determineTokenDistribution sanity...')
+    verify_correct_determineTokenDistribution_sanity(max_n=200)
+    
     print('Testing on single long sequence with all masking patterns')
     single_long_tests = exhaustive_single_long(n=10)
     testing(vocab_size=6, tests=single_long_tests, n_random_tests=0)
@@ -402,6 +427,10 @@ if __name__ == '__main__':
 '''
 Testing log:
 
+Testing on single long sequence with all masking patterns
+Running custom tests: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2097152/2097152 [33:28<00:00, 1044.07it/s]
+Running random tests: 0it [00:00, ?it/s]
+All tests passed (total: 2097152)
 Testing on exhaustive tests on length up to 16
 Running custom tests: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████| 393218/393218 [04:32<00:00, 1445.61it/s]
 Running random tests: 0it [00:00, ?it/s]

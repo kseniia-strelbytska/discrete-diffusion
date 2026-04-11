@@ -24,6 +24,7 @@ from loss import rblb
 from noise_schedule_unmask import ScheduledUnmasker
 from dataset import Dataset, get_fixed_dataset
 from trainer import train
+from investigate_token_distribution import investigate_dataset
 
 from model import TransformerClassifier
 from model_v2 import v2TransformerClassifier
@@ -86,8 +87,8 @@ def parse_args():
         "--mode",
         type=str,
         default="train",
-        choices=["train", "eval"],
-        help="Mode: train or eval.",
+        choices=["train", "eval", "investigate"],
+        help="Mode: train, eval, or investigate.",
     )
     args, unknown = parser.parse_known_args()
     return args
@@ -335,7 +336,20 @@ def main():
         torch.save(
             model.state_dict(), MODELS_DIR / f"model_final_{cfg.model.architecture}.pt"
         )
+    elif args.mode == "investigate":
+        model.load_state_dict(
+            torch.load(
+                MODELS_DIR / "RPE-architecture-fixed_23032026_204407/model_epochs=40000", map_location=torch.device("cpu")))
+        model = model.to(device)
         
+        unmasker = ScheduledUnmasker(model, 
+                                     device=device, 
+                                     T=cfg.model.T, 
+                                     denoise=cfg.training.denoise)
+        
+        investigate_dataset(model, unmasker, device=device, dataset=evaluation_dataset.data, figures_dir=dirs.figure_path, n_first_tokens=cfg.investigation.n_first_tokens)
+        print('Finished investigation of token distributions successfully. Check the logs for details.')
+    
     elif args.mode == "eval":
         model.load_state_dict(
             # torch.load(
@@ -345,16 +359,16 @@ def main():
             # )
             
             torch.load(
-                PROJECT_ROOT / "models/RPE-architecture-fixed_23032026_204407/model_epochs=40000"
+                PROJECT_ROOT / "models/RPE-architecture-fixed_23032026_204407/model_epochs=40000", map_location=torch.device('cpu')
             )
         )
         
         model = model.to(device)
 
         for iter_eval_dataset in [
-            "complete",
-            "randomised",
             "limited",
+            "randomised",
+            "complete",
         ]:
             print(f"Evaluation dataset: {iter_eval_dataset}")
             current_evaluation_dataset = EvaluationDataset(
