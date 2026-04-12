@@ -353,7 +353,8 @@ def main():
                             grammar=grammar, 
                             dataset=evaluation_dataset.data, 
                             figures_dir=dirs.figure_path, 
-                            n_first_tokens=cfg.investigation.n_first_tokens)
+                            n_first_tokens=cfg.investigation.n_first_tokens, 
+                            store_numeric=cfg.investigation.store_numeric)
         print('Finished investigation of token distributions successfully. Check the logs for details.')
     
     elif args.mode == "eval":

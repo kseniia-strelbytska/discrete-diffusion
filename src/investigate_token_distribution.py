@@ -14,7 +14,7 @@ from evaluation_tools import EvaluationDataset, evaluation_from_generation
 
 
 def investigate_seq(model, unmasker, device, grammar, seq, figures_dir,
-                    failing_ID, correct_ID, n_first_tokens=10**9):
+                    failing_ID, correct_ID, n_first_tokens=10**9, store_numeric=False):
     """
     Investigate a single sequence.
     
@@ -49,12 +49,13 @@ def investigate_seq(model, unmasker, device, grammar, seq, figures_dir,
 
         numeric_log = group_dir / f'{case_label}_numeric.txt'
         plot_path = group_dir / f'{case_label}_kl_plot.png'
-
-        # ---- numeric log header ----
-        with open(numeric_log, 'w') as f:
-            f.write(f'START for sequence: {input_seq.tolist()}\n')
-            f.write(f'Final sequence:     {final_1d.tolist()}\n')
-            f.write(f'Evaluation (r1, r2, both, fmt): {grammar.evaluate(final_1d).tolist()}\n\n')
+        
+        if store_numeric:
+            # ---- numeric log header ----
+            with open(numeric_log, 'w') as f:
+                f.write(f'START for sequence: {input_seq.tolist()}\n')
+                f.write(f'Final sequence:     {final_1d.tolist()}\n')
+                f.write(f'Evaluation (r1, r2, both, fmt): {grammar.evaluate(final_1d).tolist()}\n\n')
 
         # ---- per-step loop ----
         prev_timestep = -1.0
@@ -74,8 +75,9 @@ def investigate_seq(model, unmasker, device, grammar, seq, figures_dir,
             model_input    = seq_step.unsqueeze(0) if seq_step.dim() == 1 else seq_step
             timestep_input = timestep.unsqueeze(0) if timestep.dim() == 0 else timestep
 
-            predicted_distribution = model(model_input, timestep_input).squeeze(0)
-            predicted_distribution = torch.softmax(predicted_distribution, dim=-1)[:n_first_tokens]
+            predicted_logits = model(model_input, timestep_input).squeeze(0)
+            predicted_log_probs = F.log_softmax(predicted_logits, dim=-1)
+            predicted_distribution = predicted_log_probs.exp()
 
             # determineTokenDistribution expects a 1D sequence.
             dt_seq = seq_step if seq_step.dim() == 1 else seq_step.squeeze(0)
@@ -87,8 +89,7 @@ def investigate_seq(model, unmasker, device, grammar, seq, figures_dir,
                 break
 
             expected_dist_tensor = expected_distribution[1][:n_first_tokens].to(device)
-            div = F.kl_div(predicted_distribution.log(), expected_dist_tensor,
-               reduction='sum').item() / predicted_distribution.shape[0]
+            div = F.kl_div(predicted_log_probs, expected_dist_tensor, reduction='sum').item() / predicted_logits.shape[0]
 
             kl_divergences.append(div)
             timestep_values.append(timestep.item())
@@ -98,18 +99,20 @@ def investigate_seq(model, unmasker, device, grammar, seq, figures_dir,
             rounded_predicted = [[round(x, PRECISION) for x in row]
                                   for row in predicted_distribution.tolist()]
 
-            with open(numeric_log, 'a') as f:
-                f.write(f'Timestep: {timestep.item():.4f},  KL Divergence: {div:.4f}\n')
-                f.write('Expected distribution:\n')
-                for row in rounded_expected:
-                    f.write(f'  {row}\n')
-                f.write('Predicted distribution:\n')
-                for row in rounded_predicted:
-                    f.write(f'  {row}\n')
-                f.write('\n')
+            if store_numeric:
+                with open(numeric_log, 'a') as f:
+                    f.write(f'Timestep: {timestep.item():.4f},  KL Divergence: {div:.4f}\n')
+                    f.write('Expected distribution:\n')
+                    for row in rounded_expected:
+                        f.write(f'  {row}\n')
+                    f.write('Predicted distribution:\n')
+                    for row in rounded_predicted:
+                        f.write(f'  {row}\n')
+                    f.write('\n')
 
-        with open(numeric_log, 'a') as f:
-            f.write(f'FINISH for sequence: {input_seq.tolist()}\n')
+        if store_numeric:
+            with open(numeric_log, 'a') as f:
+                f.write(f'FINISH for sequence: {input_seq.tolist()}\n')
 
         # ---- KL divergence line plot ----
         if kl_divergences:

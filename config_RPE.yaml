@@ -38,6 +38,7 @@ evaluation:
   cutoff: 256
 investigation:
   n_first_tokens: 258 # how many first tokens to investigate the distribution of
+  store_numeric: True # whether to store numeric logs of the investigation
 wandb:
   project: "discrete-diffusion"
   group: "RPE-architecture-fixed"
