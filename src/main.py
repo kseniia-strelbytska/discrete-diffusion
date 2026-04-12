@@ -25,6 +25,7 @@ from noise_schedule_unmask import ScheduledUnmasker
 from dataset import Dataset, get_fixed_dataset
 from trainer import train
 from investigate_token_distribution import investigate_dataset
+from attention_maps import attach_attention_hooks, extract_attention_maps, plot_attention_maps, remove_hooks
 
 from model import TransformerClassifier
 from model_v2 import v2TransformerClassifier
@@ -347,15 +348,35 @@ def main():
                                      T=cfg.model.T, 
                                      denoise=cfg.training.denoise)
         
-        investigate_dataset(model, 
-                            unmasker, 
-                            device=device, 
-                            grammar=grammar, 
-                            dataset=evaluation_dataset.data, 
-                            figures_dir=dirs.figure_path, 
-                            n_first_tokens=cfg.investigation.n_first_tokens, 
-                            store_numeric=cfg.investigation.store_numeric)
-        print('Finished investigation of token distributions successfully. Check the logs for details.')
+        # investigate_dataset(model, 
+        #                     unmasker, 
+        #                     device=device, 
+        #                     grammar=grammar, 
+        #                     dataset=evaluation_dataset.data, 
+        #                     figures_dir=dirs.figure_path, 
+        #                     n_first_tokens=cfg.investigation.n_first_tokens, 
+        #                     store_numeric=cfg.investigation.store_numeric)
+        # print('Finished investigation of token distributions successfully. Check the logs for details.')
+
+        # --- Attention-map visualisation ---
+        try:
+            hooks = attach_attention_hooks(model)
+        except ValueError as e:
+            print(f'Skipping attention maps: {e}')
+        else:
+            # Example: build a dummy sequence of length cfg.model.max_len
+            # SOS, then alternating 0/1 fill, then EOS, then PAD to max_len
+            L = cfg.model.max_len
+            half = (L - 2) // 2          # tokens available between SOS and EOS
+            seq = torch.tensor([3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 5, 5, 5, 5], dtype=torch.long)
+            seq = seq.to(device)
+            
+            attn_maps = extract_attention_maps(model, seq, device)
+            attn_dir = dirs.figure_path / 'attention_maps'
+            plot_attention_maps(attn_maps, seq, save_dir=attn_dir,
+                                title_prefix='f1case_', row_range=(0, 30), col_range=(0, 30))
+            remove_hooks(hooks)
+            print(f'Attention maps saved to {attn_dir}')
     
     elif args.mode == "eval":
         model.load_state_dict(

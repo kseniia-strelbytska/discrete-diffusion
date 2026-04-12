@@ -45,5 +45,5 @@ wandb:
 paths:
   models_dir: models
   figures_dir: figures
-  experiment_name: token-distribution
-notes: "Find failing cases"
+  experiment_name: attention-maps
+notes: "Visualising attention maps for RPE architecture with fixed positional encodings"
