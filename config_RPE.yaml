@@ -37,7 +37,7 @@ evaluation:
   eval_type: full # full or random
   cutoff: 256
 investigation:
-  n_first_tokens: 10 # how many first tokens to investigate the distribution of
+  n_first_tokens: 258 # how many first tokens to investigate the distribution of
 wandb:
   project: "discrete-diffusion"
   group: "RPE-architecture-fixed"

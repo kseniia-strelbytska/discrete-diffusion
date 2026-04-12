@@ -347,7 +347,13 @@ def main():
                                      T=cfg.model.T, 
                                      denoise=cfg.training.denoise)
         
-        investigate_dataset(model, unmasker, device=device, dataset=evaluation_dataset.data, figures_dir=dirs.figure_path, n_first_tokens=cfg.investigation.n_first_tokens)
+        investigate_dataset(model, 
+                            unmasker, 
+                            device=device, 
+                            grammar=grammar, 
+                            dataset=evaluation_dataset.data, 
+                            figures_dir=dirs.figure_path, 
+                            n_first_tokens=cfg.investigation.n_first_tokens)
         print('Finished investigation of token distributions successfully. Check the logs for details.')
     
     elif args.mode == "eval":

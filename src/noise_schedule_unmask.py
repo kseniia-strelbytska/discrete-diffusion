@@ -37,10 +37,12 @@ class ScheduledUnmasker(nn.Module):
         self.model.eval()
         with torch.no_grad():            
             for i in range(num_steps):
+                if timesteps[i] <= 0:
+                    break
                 # Linear schedule: α_t = 1 - t
                 alpha_t = 1 - timesteps[i]
                 alpha_s = 1 - (timesteps[i] - dt)
-                
+                                
                 # Get model predictions
                 logits = self.model(X.unsqueeze(0), timesteps[i].unsqueeze(0))[0]  # (L, 6)
                 
@@ -50,9 +52,9 @@ class ScheduledUnmasker(nn.Module):
                 else:
                     probs = torch.softmax(logits / temperature, dim=-1)
                 
-                probs[:, :-1] *= (alpha_s - alpha_t) / (1 - alpha_t)
-                probs[:, -1] = (1 - alpha_s) / (1 - alpha_t) # mask prob
-
+                probs[:, :-1] *= ((alpha_s - alpha_t) / (1 - alpha_t)).clamp(min=0.0) 
+                probs[:, -1] = ((1 - alpha_s) / (1 - alpha_t)).clamp(min=0.0, max=1.0) # mask prob
+                
                 # if strategy == 'categorical':
                 #     # sample from the categorical distribution
                 #     sampled_X = torch.multinomial(probs, 1).squeeze(-1)
@@ -78,5 +80,5 @@ class ScheduledUnmasker(nn.Module):
                 timesteps_log.append(timesteps[i] - dt)
 
             if return_steps == True:
-                return X, steps, timesteps
+                return X, steps, timesteps_log
             return X 
