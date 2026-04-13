@@ -1,7 +1,7 @@
 seed: 42
 device: auto
 strategy: None # (redundant) categorical or temperature-sampling
-temperature: 0.1 # controls strategy: greedy if temperature <= 0, categorical if temperature = 1.0, tempareture-scaled categorical otherwise.
+temperature: 0.00001 # controls strategy: greedy if temperature <= 0, categorical if temperature = 1.0, tempareture-scaled categorical otherwise.
 data:
   l: 256
   train_split: 0.9
@@ -33,9 +33,9 @@ validation:
 evaluation:
   eval_every: 5000
   n_samples: 200
-  eval_dataset: randomised # limited or randomised or complete
+  eval_dataset: complete # limited or randomised or complete
   eval_type: full # full or random
-  cutoff: 256
+  cutoff: 258
 investigation:
   n_first_tokens: 258 # how many first tokens to investigate the distribution of
   store_numeric: True # whether to store numeric logs of the investigation
@@ -45,5 +45,5 @@ wandb:
 paths:
   models_dir: models
   figures_dir: figures
-  experiment_name: html-logging
-notes: "Added attention maps to numeric log (HTML) for RPE architecture with fixed positional encodings"
+  experiment_name: RPE-decrease-temp
+notes: "Decrease temp (0.00001) for RPE architecture to investigate the almost greedy regime"

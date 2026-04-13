@@ -71,12 +71,17 @@ class ScheduledUnmasker(nn.Module):
                 
                 # Convert to probabilities (x_θ in the paper)
                 if temperature <= 0: # greedy
-                    probs = torch.softmax(logits, dim=-1)
+                    content_probs = torch.softmax(logits[:, :-1], dim=-1)
                 else:
-                    probs = torch.softmax(logits / temperature, dim=-1)
+                    content_probs = torch.softmax(logits[:, :-1] / temperature, dim=-1)
                 
-                probs[:, :-1] *= ((alpha_s - alpha_t) / (1 - alpha_t)).clamp(min=0.0) 
-                probs[:, -1] = ((1 - alpha_s) / (1 - alpha_t)).clamp(min=0.0, max=1.0) # mask prob
+                probs = torch.zeros_like(logits)
+
+                probs[:, :-1] = content_probs * ((alpha_s - alpha_t) / (1 - alpha_t)).clamp(min=0.0) 
+                probs[:, -1] = ((1 - alpha_s) / (1 - alpha_t)).clamp(min=0.0, max=1.0)
+                
+                # probs[:, :-1] *= ((alpha_s - alpha_t) / (1 - alpha_t)).clamp(min=0.0) 
+                # probs[:, -1] = ((1 - alpha_s) / (1 - alpha_t)).clamp(min=0.0, max=1.0) # mask prob
                 
                 # if strategy == 'categorical':
                 #     # sample from the categorical distribution
