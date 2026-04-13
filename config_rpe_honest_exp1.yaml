@@ -1,0 +1,65 @@
+seed: 42
+device: auto
+strategy: None
+temperature: 0.0   # greedy decoding
+
+data:
+  l: 256
+  train_split: 0.9
+  batch_size: 64
+  grammar: anbn
+  masking_type: random          # standard MDLM random masking — full joint P(X) objective
+
+model:
+  architecture: RPE
+  max_len: 258
+  vocab_size: 6
+  n_head: 4
+  n_layers: 6
+  embed_dim: 256
+  dim_feedforward: 1024
+  dropout: 0.1
+  layer_norm_eps: 0.00001
+  T: 500
+  sampling_eps: 0.00001
+  eos_weight: 10.0
+  inverse_t: False
+
+training:
+  epochs: 100000
+  learning_rate: 0.001
+  num_warmup_steps: 1000
+  weight_decay: 0.0
+  loss_type: eq8
+  denoise: "0"                  # standard random-order denoising — honest diffusion
+  ema_decay: 0.9999
+  grad_clip_norm: 1.0
+
+validation:
+  val_every: 500
+
+evaluation:
+  eval_every: 5000
+  n_samples: 561                # full 561-sample complete dataset
+  eval_dataset: complete
+  eval_type: full               # all 561, no random subsampling
+  cutoff: 258
+
+wandb:
+  project: ""
+  group: ""
+
+paths:
+  models_dir: models
+  figures_dir: figures
+  experiment_name: rpe-honest-exp1
+
+notes: >
+  Experiment 1: Honest diffusion baseline.
+  RPE (6L 256d 4H) with:
+  - Standard random Bernoulli masking (MDLM default) — model must learn full P(X)
+  - Random-order denoising at eval — bidirectional diffusion
+  - Additive timestep conditioning (sigma = -log(1-t) parameterisation)
+  - NO sinusoidal absolute PE (removed to prevent absolute-position shortcuts)
+  - EMA 0.9999 + grad_clip 1.0
+  These are the only research-justified changes. No AR tricks.

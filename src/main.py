@@ -257,6 +257,7 @@ def main():
             dropout=cfg.model.dropout,
             layer_norm_eps=cfg.model.layer_norm_eps,
             sampling_eps=cfg.model.sampling_eps,
+            use_adaLN=getattr(cfg.model, 'use_adaLN', False),
         ).to(device)
     elif cfg.model.architecture == "FIRE":
         model = FIRETransformerClassifier(

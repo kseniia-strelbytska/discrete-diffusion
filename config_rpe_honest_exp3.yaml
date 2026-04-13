@@ -1,0 +1,70 @@
+seed: 42
+device: auto
+strategy: None
+temperature: 0.0   # greedy decoding
+
+data:
+  l: 256
+  train_split: 0.9
+  batch_size: 64
+  grammar: anbn
+  masking_type: random          # standard MDLM random masking — full joint P(X) objective
+
+model:
+  architecture: RPE
+  use_adaLN: True               # per-layer AdaLN conditioning (Exp 3 key change)
+  max_len: 258
+  vocab_size: 6
+  n_head: 8
+  n_layers: 8
+  embed_dim: 512
+  dim_feedforward: 2048
+  dropout: 0.1
+  layer_norm_eps: 0.00001
+  T: 500
+  sampling_eps: 0.00001
+  eos_weight: 10.0
+  inverse_t: False
+
+training:
+  epochs: 100000
+  learning_rate: 0.0002          # slightly lower for AdaLN stability (34M params)
+  num_warmup_steps: 3000         # same warmup as Exp 2
+  weight_decay: 0.0
+  loss_type: eq8
+  denoise: "0"                   # standard random-order denoising — honest diffusion
+  ema_decay: 0.9999
+  grad_clip_norm: 1.0
+
+validation:
+  val_every: 500
+
+evaluation:
+  eval_every: 5000
+  n_samples: 561                 # full 561-sample complete dataset
+  eval_dataset: complete
+  eval_type: full                # all 561, no random subsampling
+  cutoff: 258
+
+wandb:
+  project: ""
+  group: ""
+
+paths:
+  models_dir: models
+  figures_dir: figures
+  experiment_name: rpe-honest-exp3
+
+notes: >
+  Experiment 3: Honest diffusion with per-layer AdaLN conditioning (publication-worthy).
+  RPE (8L 512d 8H) with:
+  - Standard random Bernoulli masking (MDLM default) — model must learn full P(X)
+  - Random-order denoising at eval — bidirectional diffusion
+  - Per-layer AdaLN: 4-param (shift_a, scale_a, shift_m, scale_m) modulation of LayerNorms
+    - NO gates: residual stream always flows, avoids gradient vanishing from zero-init
+    - Zero-init: starts unconditional, conditioning activates gradually
+  - Additive timestep injection (same as Exp 1/2) PLUS per-layer modulation
+  - NO sinusoidal absolute PE
+  - EMA 0.9999 + grad_clip 1.0
+  - LR=0.0002 (slightly lower than Exp 2=0.0003 for 34M param model)
+  Research question: does principled per-layer conditioning improve over additive-only (Exp 2)?
