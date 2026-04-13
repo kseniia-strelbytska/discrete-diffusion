@@ -194,7 +194,7 @@ def evaluation_from_generation(model,
             f.write("")
 
     print(f"Evaluation on data, shape: f{evaluation_dataset.data.shape}")
-    unmaskModel = ScheduledUnmasker(model, device, T=T, denoise=denoise)
+    unmaskModel = ScheduledUnmasker(model, device, T=T, denoise=denoise, oracle=model.oracle if hasattr(model, 'oracle') else False)
     
     model.eval()
     with torch.no_grad():
@@ -205,7 +205,7 @@ def evaluation_from_generation(model,
                 if write_steps == False:
                     y_pred = unmaskModel(s, ((s == MASK_token).sum() / torch.numel(s)), strategy, temperature=temperature) # no batch dimension
                 else:
-                    y_pred, steps = unmaskModel(s, ((s == MASK_token).sum() / torch.numel(s)), strategy, temperature=temperature, return_steps=True)
+                    y_pred, steps, timesteps_log, error_message = unmaskModel(s, ((s == MASK_token).sum() / torch.numel(s)), strategy, temperature=temperature, return_steps=True)
             else:
                 y_pred = get_prediction(model, s, max_tokens=cutoff)  # autoregressive generation; no batch dimension
 
@@ -242,12 +242,17 @@ def evaluation_from_generation(model,
                                     f.write(f' zeros={cnt_zeros}, ones={cnt_ones}, masks={masks} \n')
                                     prev = step
                             
+                            if error_message is not None:
+                                f.write(f"Oracle error message: {error_message}\n")
                             f.write('-' * 30 + '\n')
-                    
+                            
             if save_mode and write_steps == True:
                 with open(figures_path / f'IDX={idx}.txt', 'a') as f:
                     ans, output_str = get_timeline(max_len=grammar.l+2, steps=steps, idx=idx)  
                     f.write(output_str)
+                    
+                    if error_message is not None:
+                        f.write(f"Oracle error message: {error_message}\n")
     
     eos_denom = max(total_eos, 1)
     evaluation_log = f"""

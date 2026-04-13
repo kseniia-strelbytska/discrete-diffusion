@@ -1,11 +1,29 @@
 import torch 
+import torch.nn as nn
 import random
 from tqdm import tqdm
 from itertools import product
 import numpy as np
 from constants import SOS_token, EOS_token, PAD_token, MASK_token
+from noise_schedule_unmask import ScheduledUnmasker
 
-def determineTokenDistribution(seq, vocab_size):
+class oracleModel(nn.Module):
+    def __init__(self, vocab_size, device):
+        super(oracleModel, self).__init__()
+        self.vocab_size = vocab_size
+        self.device = device
+        self.architecture = 'diffusion'
+        self.oracle = True
+    
+    def forward(self, X):
+        # X shape: (L,)
+        # output shape: (L, vocab_size)
+        
+        pred = determineTokenDistribution(X, vocab_size=self.vocab_size, device=self.device)
+        
+        return pred
+
+def determineTokenDistribution(seq, vocab_size, device):
     '''
     seq: partially masked sequence
     
@@ -14,7 +32,7 @@ def determineTokenDistribution(seq, vocab_size):
     '''
     
     if seq.ndim != 1:
-        seq = seq.view(seq.shape.max())
+        seq = seq.view(max(seq.shape))
     
     if (seq == SOS_token).sum() != 1 or seq[0] != SOS_token:
         return (None, f'Error: Sequence contains {(seq == SOS_token).sum()} SOS tokens.')
@@ -23,7 +41,7 @@ def determineTokenDistribution(seq, vocab_size):
         return (None, f'Error: Sequence contains {(seq == EOS_token).sum()} EOS tokens.')
     
     EOS_pos = (seq == EOS_token).nonzero(as_tuple=True)[0][0] if (seq == EOS_token).sum() > 0 else None # earliest possible EOS
-    expected_prob = torch.zeros((seq.shape[0], vocab_size))
+    expected_prob = torch.zeros((seq.shape[0], vocab_size), device=device)
     
     pad_first = (seq == PAD_token).nonzero(as_tuple=True)[0][0] if (seq == PAD_token).sum() > 0 else seq.shape[0] # earliest present pad
     zero_last = (seq == 0).nonzero(as_tuple=True)[0][-1] if (seq == 0).sum() > 0 else None # latest present zero
@@ -136,9 +154,9 @@ def check_completion(seq, completion):
             
     return True
 
-def correct_determineTokenDistribution(seq, vocab_size):
+def correct_determineTokenDistribution(seq, vocab_size, device):
     if seq.ndim != 1:
-        seq = seq.view(seq.shape.max())
+        seq = seq.view(max(seq.shape))
     
     expected_prob = torch.zeros((seq.shape[0], vocab_size))
     total = 0
@@ -366,6 +384,27 @@ def main():
     random.seed(seed)
     torch.manual_seed(seed)
     np.random.seed(seed)
+    
+    # model = oracleModel(vocab_size=6, device='cpu')
+    # unmasker = ScheduledUnmasker(model, device='cpu', T=100, denoise="0", oracle=True)
+    
+    # start_seq = torch.tensor([3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5])
+    # seq = torch.tensor([3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 1, 1, 5, 5, 5, 5, 1, 1, 1, 5, 1, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 4, 4, 5, 5, 4, 5, 5, 4, 5, 4, 5, 5, 4, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 5, 5, 5, 4, 5, 4, 5, 4, 5, 4, 5, 5, 5, 4, 5, 5, 5, 5, 5, 4, 4, 4, 5, 4, 5, 5, 5, 4, 5, 5, 5, 4, 5, 4, 5, 4, 5, 5, 5, 4, 5, 4, 5, 5, 5, 4, 4, 5, 4, 4, 5, 5, 5, 5, 5, 4, 5, 4, 4, 4, 5, 5, 5, 4, 5, 4, 5, 5, 5, 5, 5, 4, 5, 5, 5, 5, 5, 5, 4, 5, 5, 5, 5, 4, 5, 5, 5, 4, 5, 4, 5, 5, 4, 5, 5, 4, 4, 5, 5, 4, 5, 4, 5, 4, 4, 4, 5, 5, 5, 5, 5, 5, 4, 5, 5, 4, 5, 5, 4, 5, 4, 5, 4, 5, 5, 4, 4, 5, 4, 5, 4, 5, 5, 5, 5, 4, 5, 5, 5, 5, 4, 5, 5, 4, 5, 4, 4, 5, 5, 5, 4, 5, 5, 4, 5, 5, 4, 4])
+    # next_seq = torch.tensor([3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 1, 1, 5, 5, 5, 5, 1, 1, 1, 5, 1, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 4, 4, 5, 5, 4, 5, 5, 4, 5, 4, 5, 5, 4, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 5, 5, 5, 4, 5, 4, 5, 4, 5, 4, 5, 5, 5, 4, 5, 5, 5, 5, 5, 4, 4, 4, 5, 4, 5, 5, 5, 4, 5, 5, 5, 4, 5, 4, 5, 4, 5, 5, 5, 4, 5, 4, 5, 5, 5, 4, 4, 5, 4, 4, 5, 5, 5, 5, 5, 4, 5, 4, 4, 4, 5, 5, 5, 4, 5, 4, 5, 5, 5, 5, 5, 4, 5, 5, 5, 5, 5, 5, 4, 5, 5, 5, 5, 4, 5, 5, 5, 4, 5, 4, 5, 5, 4, 5, 5, 4, 4, 5, 5, 4, 5, 4, 5, 4, 4, 4, 5, 5, 5, 5, 5, 5, 4, 5, 5, 4, 5, 5, 4, 5, 4, 5, 4, 5, 5, 4, 4, 5, 4, 5, 4, 5, 5, 5, 5, 4, 5, 5, 5, 5, 4, 5, 5, 4, 2, 4, 4, 5, 5, 5, 4, 5, 5, 4, 5, 5, 4, 4])
+    
+    # final, steps, timesteps = unmasker(start_seq, ((start_seq == MASK_token).sum() / torch.numel(start_seq)), 
+    #                                    strategy='none', 
+    #                                    temperature=0.1, 
+    #                                    return_steps=True)
+    
+    # print(final)
+    
+    # print((next_seq==2).nonzero(as_tuple=True)[0])
+    # res = determineTokenDistribution(seq, vocab_size=6, device='cpu')[1]
+    
+    # print(res[:, 2].nonzero(as_tuple=True)[0])
+    
+    exit(0)
     
     tests_no_EOS = [torch.tensor([SOS_token, MASK_token, MASK_token, MASK_token, MASK_token, MASK_token, MASK_token, MASK_token], dtype=torch.long),
              torch.tensor([SOS_token, 0, MASK_token, MASK_token, MASK_token, MASK_token, MASK_token, MASK_token, PAD_token], dtype=torch.long),

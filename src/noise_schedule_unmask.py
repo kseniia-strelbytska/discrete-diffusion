@@ -5,12 +5,13 @@ from constants import EOS_token, SOS_token, PAD_token, MASK_token
 
 # Producing sampled tokens using vectorization
 class ScheduledUnmasker(nn.Module):
-    def __init__(self, model, device, T=100, denoise="0"):
+    def __init__(self, model, device, T=100, denoise="0", oracle=False):
         super().__init__()
         self.model = model
         self.device = device
         self.T = T
         self.denoise = denoise
+        self.oracle = oracle
 
     # fraction (0 <= fr <= 1) specifies the next step 
     def forward(self, init_X, timestep, strategy = 'categorical', temperature=1.0, return_steps=False, eps=1e-5):
@@ -34,7 +35,12 @@ class ScheduledUnmasker(nn.Module):
 
         steps, timesteps_log = [X.clone()], [timestep]
                 
-        self.model.eval()
+        if not self.oracle:
+            self.model.eval()
+        
+        error_message = 'No errors occured.'
+        error_probs, error_logits, error_changed_mask = None, None, None
+        
         with torch.no_grad():            
             for i in range(num_steps):
                 if timesteps[i] <= 0:
@@ -42,9 +48,26 @@ class ScheduledUnmasker(nn.Module):
                 # Linear schedule: α_t = 1 - t
                 alpha_t = 1 - timesteps[i]
                 alpha_s = 1 - (timesteps[i] - dt)
-                                
-                # Get model predictions
-                logits = self.model(X.unsqueeze(0), timesteps[i].unsqueeze(0))[0]  # (L, 6)
+                
+                if not self.oracle:
+                    # Get model predictions
+                    logits = self.model(X.unsqueeze(0), timesteps[i].unsqueeze(0))[0]  # (L, 6)
+                else:
+                    logits = self.model(X)
+                    if logits[0] == None:
+                        # If oracle returns None, it means the input cannot be completed correctly.
+                        
+                        changed_tokens = error_changed_mask.nonzero(as_tuple=True)[0].tolist() if error_changed_mask is not None else []
+                        
+                        error_message = f'''Oracle failed at step {i} with input {X}.
+                        Message:{logits[1]}
+                        Investigating probs and logits:
+                        '''
+                        for token in changed_tokens:
+                            error_message += f'\nToken index {token}\nprob={error_probs[token].cpu().numpy()}\nlogit={error_logits[token].cpu().numpy()}\nChoice: {X[token].item()}\n'
+
+                        break
+                    logits = logits[1]
                 
                 # Convert to probabilities (x_θ in the paper)
                 if temperature <= 0: # greedy
@@ -69,16 +92,19 @@ class ScheduledUnmasker(nn.Module):
                     sampled_X = probs.argmax(dim=-1)
                 else:
                     sampled_X = torch.multinomial(probs, 1).squeeze(-1)
-                                                
+                
                 #sampled_X = torch.distributions.categorical.Categorical(probs=probs).sample()
                 
                 #print(X[X != MASK_token])
                 #print(sampled_X[X != MASK_token])
+                
+                error_probs, error_logits, error_changed_mask = probs, logits, ((X == MASK_token) & (sampled_X != MASK_token))
 
                 X[X == MASK_token] = sampled_X[X == MASK_token]
+                
                 steps.append(X.clone())
                 timesteps_log.append(timesteps[i] - dt)
 
             if return_steps == True:
-                return X, steps, timesteps_log
+                return X, steps, timesteps_log, error_message
             return X 

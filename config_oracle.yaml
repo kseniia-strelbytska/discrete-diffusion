@@ -1,15 +1,15 @@
 seed: 42
 device: auto
 strategy: None # (redundant) categorical or temperature-sampling
-temperature: 0.1 # controls strategy: greedy if temperature <= 0, categorical if temperature = 1.0, tempareture-scaled categorical otherwise.
+temperature: 0.00001 # controls strategy: greedy if temperature <= 0, categorical if temperature = 1.0, tempareture-scaled categorical otherwise.
 data:
   l: 256
   train_split: 0.9
   batch_size: 64
   grammar: anbn
 model:
-  architecture: T5 # classic (torch-native) or v2 (QKV low-level) or RPE or FIRE or T5
-  max_len: 258
+  architecture: oracle # classic (torch-native) or v2 (QKV low-level) or RPE or FIRE or autoregressive or oracle
+  max_len: 258       
   vocab_size: 6
   n_head: 4
   n_layers: 4
@@ -32,18 +32,18 @@ validation:
   val_every: 1000
 evaluation:
   eval_every: 5000
-  n_samples: 200
-  eval_dataset: randomised # limited or randomised or complete
+  n_samples: 0
+  eval_dataset: complete # limited or randomised or complete
   eval_type: full # full or random
   cutoff: 256
 investigation:
   n_first_tokens: 258 # how many first tokens to investigate the distribution of
   store_numeric: True # whether to store numeric logs of the investigation
 wandb:
-  project: "discrete-diffusion"
-  group: "T5-architecture"
+  project: ""
+  group: ""
 paths:
   models_dir: models
   figures_dir: figures
-  experiment_name: T5-architecture
-notes: "Copied from config_RPE and switched architecture to T5"
+  experiment_name: oracle-almost-greedy
+notes: "Oracle almost greedy evaluation (temp 0.00001)"
