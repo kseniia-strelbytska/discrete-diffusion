@@ -216,6 +216,8 @@ def evaluation_from_generation(model,
             stats += y_pred_stats
             seq_str = ''.join([str(i) for i in y_pred_cpu.tolist()])
             sequences.append(seq_str)
+            
+            print(y_pred_stats)
 
             # Track finished sequences (those containing EOS)
             has_eos = (y_pred_cpu == EOS_token).any().item()
@@ -225,7 +227,7 @@ def evaluation_from_generation(model,
                 sequences_eos.append(seq_str)
 
             if save_mode:
-                if y_pred_stats[-1] == 0:
+                if (y_pred_stats == 0).sum() != 0:
                     with open(output_path, 'a') as f:
                         f.write("IDX " + str(idx) + " " + seq_str)
                         is_format_ok = ('True' if y_pred_stats[-1] == 1 else 'False')

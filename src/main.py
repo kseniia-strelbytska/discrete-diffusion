@@ -359,7 +359,7 @@ def main():
     elif args.mode == "investigate":
         model.load_state_dict(
             torch.load(
-                MODELS_DIR / "RPE-architecture-fixed_23032026_204407/model_epochs=40000", map_location=torch.device("cpu")))
+                MODELS_DIR / "RPE-decrease-temp_13042026_131732/model_epochs=95000", map_location=torch.device("cpu")))
         model = model.to(device)
         
         unmasker = ScheduledUnmasker(model, 
@@ -407,7 +407,7 @@ def main():
                 # )
                 
                 torch.load(
-                    PROJECT_ROOT / "models/RPE-architecture-fixed_23032026_204407/model_epochs=40000", map_location=torch.device('cpu')
+                    PROJECT_ROOT / "models/RPE-decrease-temp_13042026_131732/model_epochs=95000", map_location=torch.device('cpu')
                 )
             )
             

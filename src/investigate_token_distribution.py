@@ -84,7 +84,7 @@ def investigate_seq(model, unmasker, device, grammar, seq, figures_dir,
         # Unmasker accepts 1D sequences.
         input_seq = torch.tensor(seq).long() if not isinstance(seq, torch.Tensor) else seq.long()
         timestep_init = ((input_seq == MASK_token).sum() / torch.numel(input_seq))
-        final, steps, timesteps = unmasker(input_seq, timestep_init, return_steps=True)
+        final, steps, timesteps, _ = unmasker(input_seq, timestep_init, return_steps=True)
 
         # Evaluate the final denoised sequence to determine pass / fail.
         final_1d = final if final.dim() == 1 else final.squeeze(0)
