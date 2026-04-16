@@ -45,5 +45,5 @@ wandb:
 paths:
   models_dir: models
   figures_dir: figures
-  experiment_name: RPE-see-log
+  experiment_name: RPE-combined-log
 notes: "Decrease temp (0.00001) for RPE architecture to investigate the almost greedy regime"

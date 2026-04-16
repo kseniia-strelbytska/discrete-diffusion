@@ -18,10 +18,9 @@ class oracleModel(nn.Module):
     def forward(self, X):
         # X shape: (L,)
         # output shape: (L, vocab_size)
-        
         pred = determineTokenDistribution(X, vocab_size=self.vocab_size, device=self.device)
-        
         return pred
+
 
 def determineTokenDistribution(seq, vocab_size, device):
     '''

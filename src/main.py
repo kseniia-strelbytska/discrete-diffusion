@@ -35,7 +35,6 @@ from model_T5 import T5RPETransformerClassifier
 from AR_model_AR import ARTransformerClassifier
 from AR_model_RE import TransformerDecoder
 from model_timestep import TimestepTransformerClassifier
-from deterministic_token_distribution import oracleModel
 
 def dict_to_ns(d):
     return SimpleNamespace(
@@ -317,11 +316,6 @@ def main():
             layer_norm_eps=cfg.model.layer_norm_eps,
             sampling_eps=cfg.model.sampling_eps
         ).to(device)
-    elif cfg.model.architecture == "oracle":
-        model = oracleModel(
-            vocab_size=cfg.model.vocab_size,
-            device=device
-        ).to(device)
     else:
         raise ValueError(f"Invalid model architecture: {cfg.model.architecture}")
 
@@ -398,25 +392,24 @@ def main():
             print(f'Attention maps saved to {attn_dir}')
     
     elif args.mode == "eval":
-        if cfg.model.architecture != 'oracle':
-            model.load_state_dict(
-                # torch.load(
-                #     MODELS_DIR
-                #     / "n_embed=128_ff=1024_drop=0.1_27012026_221030/model_epochs=96500",
-                #     map_location=torch.device("cpu"),
-                # )
-                
-                torch.load(
-                    PROJECT_ROOT / "models/RPE-decrease-temp_13042026_131732/model_epochs=95000", map_location=torch.device('cpu')
-                )
-            )
+        model.load_state_dict(
+            # torch.load(
+            #     MODELS_DIR
+            #     / "n_embed=128_ff=1024_drop=0.1_27012026_221030/model_epochs=96500",
+            #     map_location=torch.device("cpu"),
+            # )
             
-            model = model.to(device)
+            torch.load(
+                PROJECT_ROOT / "models/RPE-decrease-temp_13042026_131732/model_epochs=95000", map_location=torch.device('cpu')
+            )
+        )
+        
+        model = model.to(device)
 
         for iter_eval_dataset in [
             "complete",
-            "randomised",
             "limited",
+            "randomised",
         ]:
             print(f"Evaluation dataset: {iter_eval_dataset}")
             current_evaluation_dataset = EvaluationDataset(
@@ -446,7 +439,8 @@ def main():
                 loss_log_path=dirs.loss_log_path,
                 output_path=iter_output_path,
                 save_mode=args.save,
-                cutoff=cfg.evaluation.cutoff
+                cutoff=cfg.evaluation.cutoff,
+                investigate=True
             )
 
         exit(0)

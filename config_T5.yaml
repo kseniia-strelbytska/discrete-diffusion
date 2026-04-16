@@ -11,10 +11,10 @@ model:
   architecture: T5 # classic (torch-native) or v2 (QKV low-level) or RPE or FIRE or T5
   max_len: 258
   vocab_size: 6
-  n_head: 4
-  n_layers: 4
+  n_head: 8
+  n_layers: 6
   embed_dim: 256
-  dim_feedforward: 1024
+  dim_feedforward: 2048
   dropout: 0.1
   layer_norm_eps: 0.0002
   T: 500

@@ -5,13 +5,16 @@ from constants import EOS_token, SOS_token, PAD_token, MASK_token
 
 # Producing sampled tokens using vectorization
 class ScheduledUnmasker(nn.Module):
-    def __init__(self, model, device, T=100, denoise="0", oracle=False):
+    def __init__(self, model, device, T=100, denoise="0", oracle=False, oracle_model=None):
         super().__init__()
         self.model = model
         self.device = device
         self.T = T
         self.denoise = denoise
         self.oracle = oracle
+        # Optional oracle model for parallel validation when the main model is NOT the oracle.
+        # Must expose a .validate(X) method returning (bool, error_str_or_None).
+        self.oracle_model = oracle_model
 
     # fraction (0 <= fr <= 1) specifies the next step 
     def forward(self, init_X, timestep, strategy = 'categorical', temperature=1.0, return_steps=False, eps=1e-5):
@@ -52,6 +55,18 @@ class ScheduledUnmasker(nn.Module):
                 if not self.oracle:
                     # Get model predictions
                     logits = self.model(X.unsqueeze(0), timesteps[i].unsqueeze(0))[0]  # (L, 6)
+                    
+                    if self.oracle_model is not None:
+                        oracle_result = self.oracle_model.forward(X)
+                        if oracle_result[0] is None:
+                            changed_tokens = error_changed_mask.nonzero(as_tuple=True)[0].tolist()
+                            error_message = f'''Oracle failed at step {i} with input {X}.
+                            Message:{oracle_result[1]}
+                            Investigating probs and logits:
+                            '''
+                            for token in changed_tokens:
+                                error_message += f'\nToken index {token}\nprob={error_probs[token].cpu().numpy()}\nlogit={error_logits[token].cpu().numpy()}\nChoice: {X[token].item()}\n'
+                            break
                 else:
                     logits = self.model(X)
                     if logits[0] == None:
@@ -68,7 +83,7 @@ class ScheduledUnmasker(nn.Module):
 
                         break
                     logits = logits[1]
-                
+
                 # Convert to probabilities (x_θ in the paper)
                 if temperature <= 0: # greedy
                     content_probs = torch.softmax(logits[:, :-1], dim=-1)
@@ -106,7 +121,6 @@ class ScheduledUnmasker(nn.Module):
                 error_probs, error_logits, error_changed_mask = probs, logits, ((X == MASK_token) & (sampled_X != MASK_token))
 
                 X[X == MASK_token] = sampled_X[X == MASK_token]
-                
                 steps.append(X.clone())
                 timesteps_log.append(timesteps[i] - dt)
 

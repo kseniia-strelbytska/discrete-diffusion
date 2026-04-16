@@ -166,7 +166,7 @@ def investigate_seq(model, unmasker, device, grammar, seq, figures_dir,
 
             # determineTokenDistribution expects a 1D sequence.
             dt_seq = seq_step if seq_step.dim() == 1 else seq_step.squeeze(0)
-            expected_distribution = determineTokenDistribution(dt_seq, vocab_size=model.vocab_size)
+            expected_distribution = determineTokenDistribution(dt_seq, vocab_size=model.vocab_size, device=device)
 
             if expected_distribution[0] is None:
                 if store_numeric:
