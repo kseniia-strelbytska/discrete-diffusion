@@ -32,9 +32,9 @@ validation:
   val_every: 1000
 evaluation:
   eval_every: 5000
-  n_samples: 200
-  eval_dataset: complete # limited or randomised or complete
-  eval_type: full # full or random
+  n_samples: 100
+  eval_dataset: unconditional # limited or randomised or complete
+  eval_type: random # full or random
   cutoff: 258
 investigation:
   n_first_tokens: 258 # how many first tokens to investigate the distribution of
@@ -45,5 +45,5 @@ wandb:
 paths:
   models_dir: models
   figures_dir: figures
-  experiment_name: RPE-combined-log
+  experiment_name: RPE-unconditional-evaluation
 notes: "Decrease temp (0.00001) for RPE architecture to investigate the almost greedy regime"

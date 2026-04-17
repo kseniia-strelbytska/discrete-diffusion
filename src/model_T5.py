@@ -26,7 +26,7 @@ class T5MultiheadAttentionLayer(nn.Module):
         layer_norm_eps=2e-4,
         batch_first=True,
         norm_first=False,
-        num_buckets=32,         # number of distance buckets (T5 default: 32)
+        num_buckets=600,         # number of distance buckets (T5 default: 32)
         bidirectional=True,     # True for encoder, False for causal decoder
     ):
         super().__init__()

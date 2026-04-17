@@ -59,7 +59,12 @@ class ScheduledUnmasker(nn.Module):
                     if self.oracle_model is not None:
                         oracle_result = self.oracle_model.forward(X)
                         if oracle_result[0] is None:
-                            changed_tokens = error_changed_mask.nonzero(as_tuple=True)[0].tolist()
+                            
+                            if error_changed_mask is not None:
+                                changed_tokens = error_changed_mask.nonzero(as_tuple=True)[0].tolist()
+                            else:
+                                changed_tokens = []
+                            
                             error_message = f'''Oracle failed at step {i} with input {X}.
                             Message:{oracle_result[1]}
                             Investigating probs and logits:

@@ -30,11 +30,13 @@ from attention_maps import attach_attention_hooks, extract_attention_maps, plot_
 from model import TransformerClassifier
 from model_v2 import v2TransformerClassifier
 from model_RPE import RPETransformerClassifier
+from model_RPE_KQ import RPEKQTransformerClassifier
 from model_FIRE import FIRETransformerClassifier
 from model_T5 import T5RPETransformerClassifier
 from AR_model_AR import ARTransformerClassifier
 from AR_model_RE import TransformerDecoder
 from model_timestep import TimestepTransformerClassifier
+from deterministic_token_distribution import oracleModel
 
 def dict_to_ns(d):
     return SimpleNamespace(
@@ -259,6 +261,18 @@ def main():
             layer_norm_eps=cfg.model.layer_norm_eps,
             sampling_eps=cfg.model.sampling_eps,
         ).to(device)
+    elif cfg.model.architecture == "RPE_KQ":
+        model = RPEKQTransformerClassifier(
+            max_len=cfg.model.max_len,
+            vocab_size=cfg.model.vocab_size,
+            n_head=cfg.model.n_head,
+            n_layers=cfg.model.n_layers,
+            embed_dim=cfg.model.embed_dim,
+            dim_feedforward=cfg.model.dim_feedforward,
+            dropout=cfg.model.dropout,
+            layer_norm_eps=cfg.model.layer_norm_eps,
+            sampling_eps=cfg.model.sampling_eps,
+        ).to(device)
     elif cfg.model.architecture == "FIRE":
         model = FIRETransformerClassifier(
             max_len=cfg.model.max_len,
@@ -282,6 +296,7 @@ def main():
             dropout=cfg.model.dropout,
             layer_norm_eps=cfg.model.layer_norm_eps,
             sampling_eps=cfg.model.sampling_eps,
+            num_buckets=cfg.model.num_buckets,
         ).to(device)
     elif cfg.model.architecture == "autoregressive":
         model = ARTransformerClassifier(
@@ -315,6 +330,11 @@ def main():
             dropout=cfg.model.dropout,
             layer_norm_eps=cfg.model.layer_norm_eps,
             sampling_eps=cfg.model.sampling_eps
+        ).to(device)
+    elif cfg.model.architecture == "oracle":
+        model = oracleModel(
+            vocab_size=cfg.model.vocab_size,
+            device=device
         ).to(device)
     else:
         raise ValueError(f"Invalid model architecture: {cfg.model.architecture}")
@@ -392,21 +412,23 @@ def main():
             print(f'Attention maps saved to {attn_dir}')
     
     elif args.mode == "eval":
-        model.load_state_dict(
-            # torch.load(
-            #     MODELS_DIR
-            #     / "n_embed=128_ff=1024_drop=0.1_27012026_221030/model_epochs=96500",
-            #     map_location=torch.device("cpu"),
-            # )
-            
-            torch.load(
-                PROJECT_ROOT / "models/RPE-decrease-temp_13042026_131732/model_epochs=95000", map_location=torch.device('cpu')
+        if cfg.model.architecture != 'oracle':
+            model.load_state_dict(
+                # torch.load(
+                #     MODELS_DIR
+                #     / "n_embed=128_ff=1024_drop=0.1_27012026_221030/model_epochs=96500",
+                #     map_location=torch.device("cpu"),
+                # )
+                
+                torch.load(
+                    PROJECT_ROOT / "models/RPE-decrease-temp_13042026_131732/model_epochs=95000", map_location=torch.device('cpu')
+                )
             )
-        )
         
-        model = model.to(device)
+            model = model.to(device)
 
         for iter_eval_dataset in [
+            cfg.evaluation.eval_dataset,
             "complete",
             "limited",
             "randomised",
@@ -421,6 +443,8 @@ def main():
                 sampling_eps=cfg.model.sampling_eps,
                 device=device,
             )
+            
+            print(current_evaluation_dataset.data.shape)
             
             iter_output_path = dirs.output_path.parent / f"outputs_{iter_eval_dataset}.txt"
             iter_figure_path = dirs.figure_path.parent / f"figures_{iter_eval_dataset}"

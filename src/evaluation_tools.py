@@ -108,10 +108,11 @@ class EvaluationDataset():
             self._init_complete()
         elif eval_dataset == 'diffusion':
             self._init_diffusion()
+        elif eval_dataset == 'unconditional':
+            self._init_unconditional()
         
         self.sampled_data = self.full_data.clone()[torch.randperm(self.full_data.shape[0])][:n_samples]
         self.data = self.full_data.clone() if eval_type == 'full' else self.sampled_data
-        
          
     def _init_limited(self):
         '''
@@ -146,6 +147,7 @@ class EvaluationDataset():
         
         Total samples: 33 (l0 values) * 34 / 2 = 561
         '''
+        
         for l0 in range(32, 65):
             for l1 in range(0, 64-l0+1):
                 self.full_data.append(torch.tensor([SOS_token] + [0]*l0 + [1]*l1 + [MASK_token] * (self.l + 1 - l0 - l1)).unsqueeze(0))
@@ -165,6 +167,16 @@ class EvaluationDataset():
         fixed_dataset = get_fixed_dataset(dataset, self.device, batch_size=self.l//2)
 
         self.full_data = fixed_dataset[0][0]
+        
+    def _init_unconditional(self):
+        '''
+        Fully masked sequences. 
+        
+        500 samples.
+        
+        '''
+        
+        self.full_data = torch.concat([torch.full((500, 1), SOS_token).long(), torch.full((500, self.l + 1), MASK_token).long()], dim=1)
 
 
 def evaluation_loss(model, dataloader, device):
@@ -277,8 +289,6 @@ def evaluation_from_generation(model,
             stats += y_pred_stats
             seq_str = ''.join([str(i) for i in y_pred_cpu.tolist()])
             sequences.append(seq_str)
-            
-            print(y_pred_stats)
 
             # Track finished sequences (those containing EOS)
             has_eos = (y_pred_cpu == EOS_token).any().item()
