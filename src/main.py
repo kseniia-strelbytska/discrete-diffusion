@@ -22,6 +22,8 @@ from evaluation_tools import EvaluationDataset, evaluation_from_generation
 from initialgrammar import initialGrammar
 from loss import rblb
 from noise_schedule_unmask import ScheduledUnmasker
+from gaussian.gaussian_dataset import GaussianDataset
+from gaussian.gaussian_loss import GaussianLoss
 from dataset import Dataset, get_fixed_dataset
 from trainer import train
 from investigate_token_distribution import investigate_dataset
@@ -193,7 +195,10 @@ def main():
     grammar = get_grammar(cfg.data.grammar, cfg.data.l)
     grammar.generate_seq()  # generates the data and stores in grammar.data
 
-    dataset = Dataset(grammar.data, device, cfg.model.T, sampling_eps=cfg.model.sampling_eps, inverse_t=cfg.model.inverse_t)
+    if cfg.training.gaussian_noise:
+        dataset = GaussianDataset(grammar.data, device, T=cfg.model.T, sigma=cfg.model.sigma, max_l=cfg.model.max_len, sampling_eps=cfg.model.sampling_eps, inverse_t=cfg.model.inverse_t)
+    else:
+        dataset = Dataset(grammar.data, device, cfg.model.T, sampling_eps=cfg.model.sampling_eps, inverse_t=cfg.model.inverse_t)
 
     print(f"Dataset len: {len(dataset)} using inverse_t sampling {cfg.model.inverse_t}")
     
@@ -205,8 +210,12 @@ def main():
     )
     
     test_data = dataset.y_data[test_dataset.indices] # grab only test samples
-    test_dataset = Dataset(test_data, device, cfg.model.T, 
-                       sampling_eps=cfg.model.sampling_eps, inverse_t=cfg.model.inverse_t)
+    if cfg.training.gaussian_noise:
+        test_dataset = GaussianDataset(test_data, device, T=cfg.model.T, sigma=cfg.model.sigma, max_l=cfg.model.max_len, sampling_eps=cfg.model.sampling_eps, inverse_t=cfg.model.inverse_t)
+    else:
+        test_dataset = Dataset(test_data, device, cfg.model.T, 
+                               sampling_eps=cfg.model.sampling_eps, inverse_t=cfg.model.inverse_t)
+    
     fixed_test_dataset = get_fixed_dataset(
         test_dataset, device, batch_size=cfg.data.batch_size
     )  # fixed test dataset
@@ -363,6 +372,8 @@ def main():
             temperature=cfg.temperature,
             wandb=wandb,
             loss_type=cfg.training.loss_type,
+            gaussian_noise=cfg.training.gaussian_noise,
+            sigma=cfg.model.sigma,
             denoise=cfg.training.denoise,
             cutoff=cfg.evaluation.cutoff
         )

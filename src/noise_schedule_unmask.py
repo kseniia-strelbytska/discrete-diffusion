@@ -2,10 +2,11 @@ import torch
 import torch.nn as nn
 import numpy as np
 from constants import EOS_token, SOS_token, PAD_token, MASK_token
+from gaussian.gaussian_noise_schedule import get_gaussian_noise_schedule
 
 # Producing sampled tokens using vectorization
 class ScheduledUnmasker(nn.Module):
-    def __init__(self, model, device, T=100, denoise="0", oracle=False, oracle_model=None):
+    def __init__(self, model, device, T=100, denoise="0", oracle=False, oracle_model=None, gaussian_noise=False):
         super().__init__()
         self.model = model
         self.device = device
@@ -15,6 +16,7 @@ class ScheduledUnmasker(nn.Module):
         # Optional oracle model for parallel validation when the main model is NOT the oracle.
         # Must expose a .validate(X) method returning (bool, error_str_or_None).
         self.oracle_model = oracle_model
+        self.gaussian_noise = gaussian_noise
 
     # fraction (0 <= fr <= 1) specifies the next step 
     def forward(self, init_X, timestep, strategy = 'categorical', temperature=1.0, return_steps=False, eps=1e-5):
@@ -49,8 +51,13 @@ class ScheduledUnmasker(nn.Module):
                 if timesteps[i] <= 0:
                     break
                 # Linear schedule: α_t = 1 - t
-                alpha_t = 1 - timesteps[i]
-                alpha_s = 1 - (timesteps[i] - dt)
+                
+                if self.gaussian_noise:
+                    alpha_t, _ = get_gaussian_noise_schedule(t_i=timesteps[i], sigma=self.model.sigma, max_l=L, device=self.device)
+                    alpha_s, _ = get_gaussian_noise_schedule(t_i=timesteps[i] - dt, sigma=self.model.sigma, max_l=L, device=self.device)
+                else:
+                    alpha_t = 1 - timesteps[i]
+                    alpha_s = 1 - (timesteps[i] - dt)
                 
                 if not self.oracle:
                     # Get model predictions

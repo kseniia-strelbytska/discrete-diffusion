@@ -4,6 +4,7 @@ import numpy as np
 from tqdm import tqdm
 from datetime import datetime
 
+from gaussian.gaussian_loss import GaussianLoss
 from loss import rblb
 from evaluation_tools import evaluation_from_generation
 from transformers.optimization import get_inverse_sqrt_schedule
@@ -33,6 +34,8 @@ def train(
     temperature=1.0,
     wandb=None,
     loss_type="eq8",
+    gaussian_noise=False,
+    sigma=1.0,
     denoise="0",
     cutoff=None
 ):
@@ -41,7 +44,11 @@ def train(
         lr_scheduler = get_inverse_sqrt_schedule(
             optimizer, num_warmup_steps=num_warmup_steps
         )
-    loss_fn = rblb(device, vocab_size=model.vocab_size, T=T, sampling_eps=model.sampling_eps, eos_weight=eos_weight, inverse_t=inverse_t, loss_type=loss_type)
+    
+    if gaussian_noise:
+        loss_fn = GaussianLoss(device, vocab_size=model.vocab_size, T=T, sigma=sigma, sampling_eps=model.sampling_eps, eos_weight=eos_weight, inverse_t=inverse_t)
+    else:
+        loss_fn = rblb(device, vocab_size=model.vocab_size, T=T, sampling_eps=model.sampling_eps, eos_weight=eos_weight, inverse_t=inverse_t, loss_type=loss_type)
 
     stats = [[], [], [], [], []]  # r1, r2, both, format, epochsteps
     test_loss_stats, train_loss_stats = [], []
@@ -118,6 +125,7 @@ def train(
             optimizer.zero_grad()
             model_input = y_batch if model.architecture == 'autoregressive' else x_batch
             logits = model(model_input, timestep)
+            
             loss = loss_fn(model_input, logits, y_batch, timestep)
             loss.backward()
             optimizer.step()
