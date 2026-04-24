@@ -25,7 +25,7 @@ def get_gaussian_noise_schedule(t_i, sigma, max_l, device):
     
     # Derivative of p_mask with respect to timestep t_i
     pdf = dist.log_prob(x).exp()
-    p_mask_dt = -(max_l / sigma) * pdf
+    p_mask_dt = max_l * pdf
 
     return p_mask, p_mask_dt
 

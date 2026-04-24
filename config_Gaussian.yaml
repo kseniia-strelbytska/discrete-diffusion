@@ -19,6 +19,7 @@ model:
   layer_norm_eps: 0.0002
   T: 500
   sampling_eps: 0.00001
+  sigma: 10.0
   eos_weight: 10.0
   inverse_t: False
 training:
@@ -27,6 +28,7 @@ training:
   num_warmup_steps: 1000
   weight_decay: 0.0
   loss_type: eq8 # eq8 or eq9
+  gaussian_noise: True
   denoise: "0" # "0" or eps
 validation:
   val_every: 1000
@@ -40,10 +42,10 @@ investigation:
   n_first_tokens: 258 # how many first tokens to investigate the distribution of
   store_numeric: True # whether to store numeric logs of the investigation
 wandb:
-  project: ""
-  group: ""
+  project: "discrete-diffusion"
+  group: "Gaussian-RPE"
 paths:
   models_dir: models
   figures_dir: figures
-  experiment_name: RPE-unconditional-evaluation
-notes: "Decrease temp (0.00001) for RPE architecture to investigate the almost greedy regime"
+  experiment_name: Gaussian-RPE
+notes: "Unconditional dataset. Use Gaussian gaussian_noise for RPE architecture to investigate the effect of noise on the almost greedy regime"
