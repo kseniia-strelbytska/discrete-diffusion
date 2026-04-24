@@ -45,15 +45,12 @@ class GaussianLoss(nn.Module):
         logits = logits.clone()
         logits = self.subs_parameterisation(logits, xt)
         
-        timestep = timestep.clamp(self.sampling_eps, 1 - self.sampling_eps).unsqueeze(-1)
-
         p_mask, p_mask_dt = get_gaussian_noise_schedule(t_i=timestep, sigma=self.sigma, max_l=logits.shape[1], device=self.device)
-
         p_mask = p_mask.clamp(self.sampling_eps, 1 - self.sampling_eps)
 
         #Extracts the logits corresponding to the true class labels
         log_prob_x = torch.gather(logits, -1, y_true[:, :, None]).squeeze(-1) 
-        loss = p_mask_dt / (1 - p_mask) * log_prob_x
+        loss = -p_mask_dt / p_mask * (-log_prob_x)
         
         # print(f'Sanity check: p_mask_dt={p_mask_dt}, p_mask={p_mask}, log_prob_x={log_prob_x}')
         # print(f'Sanity check: logits contains NaN: {torch.isnan(logits).any()}')

@@ -12,20 +12,17 @@ def get_gaussian_noise_schedule(t_i, sigma, max_l, device):
         max_l (int): The maximum length of the sequence. 
         device (torch.device): The device to place the tensors on.
     """
-    x = torch.arange(max_l, dtype=torch.float32, device=device) # shape (max_l,)
+    x = torch.arange(max_l, dtype=torch.float32, device=device).unsqueeze(0)
     
-    # The mean shifts from max_l to 0 as t_i goes from 0 to 1
-    mean = (1 - t_i) * max_l 
+    mean = t_i * max_l
     
     dist = torch.distributions.Normal(mean, sigma)
     
-    # Probability of being masked
     cdf = dist.cdf(x)
     p_mask = cdf 
     
-    # Derivative of p_mask with respect to timestep t_i
     pdf = dist.log_prob(x).exp()
-    p_mask_dt = max_l * pdf
+    p_mask_dt = -pdf * max_l
 
     return p_mask, p_mask_dt
 
