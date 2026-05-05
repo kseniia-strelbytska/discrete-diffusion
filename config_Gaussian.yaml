@@ -33,7 +33,7 @@ training:
 validation:
   val_every: 1000
 evaluation:
-  eval_every: 1000
+  eval_every: 2000
   n_samples: 100
   eval_dataset: unconditional # limited or randomised or complete
   eval_type: random # full or random
@@ -42,10 +42,8 @@ investigation:
   n_first_tokens: 258 # how many first tokens to investigate the distribution of
   store_numeric: True # whether to store numeric logs of the investigation
 wandb:
-  # project: "discrete-diffusion"
-  # group: "Gaussian-RPE"
-  project: ""
-  group: ""
+  project: "discrete-diffusion"
+  group: "Gaussian-RPE"
 paths:
   models_dir: models
   figures_dir: figures

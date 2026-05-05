@@ -60,6 +60,9 @@ class GaussianLoss(nn.Module):
         token_weight = token_weight.masked_fill(y_true == EOS_token, self.eos_weight)
         loss = loss * token_weight
         
-        loss = loss.sum() / torch.numel(xt) # average over all tokens
+        mask_count = (xt == MASK_token).sum()
+        
+        # loss = loss.sum() / torch.numel(xt) # average over all tokens
+        loss = loss.sum() / mask_count.clamp(min=1) # average over masked tokens only
         
         return loss

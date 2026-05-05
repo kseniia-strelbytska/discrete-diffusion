@@ -396,7 +396,8 @@ def main():
                                      denoise=cfg.training.denoise,
                                      oracle=(cfg.model.architecture == "oracle"),
                                      oracle_model=oracleModel(vocab_size=model.vocab_size, device=device) if cfg.model.architecture != "oracle" else None,
-                                     gaussian_noise=cfg.training.gaussian_noise)
+                                     gaussian_noise=cfg.training.gaussian_noise,
+                                     sigma=cfg.model.sigma)
         
         sample = torch.full((cfg.model.max_len,), MASK_token, dtype=torch.long).to(device)
         res = unmasker(sample, ((sample == MASK_token).sum() / torch.numel(sample)), return_steps=False)
@@ -418,7 +419,8 @@ def main():
                                      denoise=cfg.training.denoise,
                                      oracle=(cfg.model.architecture == "oracle"),
                                      oracle_model=oracleModel(vocab_size=model.vocab_size, device=device) if cfg.model.architecture != "oracle" else None,
-                                     gaussian_noise=cfg.training.gaussian_noise,)
+                                     gaussian_noise=cfg.training.gaussian_noise,
+                                     sigma=cfg.model.sigma)
         
         investigate_dataset(model, 
                             unmasker, 
@@ -503,6 +505,7 @@ def main():
                 output_path=iter_output_path,
                 save_mode=args.save,
                 gaussian_noise=cfg.training.gaussian_noise,
+                sigma=cfg.model.sigma,
                 cutoff=cfg.evaluation.cutoff,
                 investigate=True
             )

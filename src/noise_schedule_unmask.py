@@ -6,7 +6,7 @@ from gaussian.gaussian_noise_schedule import get_gaussian_noise_schedule
 
 # Producing sampled tokens using vectorization
 class ScheduledUnmasker(nn.Module):
-    def __init__(self, model, device, T=100, denoise="0", oracle=False, oracle_model=None, gaussian_noise=False):
+    def __init__(self, model, device, T=100, denoise="0", oracle=False, oracle_model=None, gaussian_noise=False, sigma=1.0):
         super().__init__()
         self.model = model
         self.device = device
@@ -17,6 +17,7 @@ class ScheduledUnmasker(nn.Module):
         # Must expose a .validate(X) method returning (bool, error_str_or_None).
         self.oracle_model = oracle_model
         self.gaussian_noise = gaussian_noise
+        self.sigma = sigma
 
     # fraction (0 <= fr <= 1) specifies the next step 
     def forward(self, init_X, timestep, strategy = 'categorical', temperature=1.0, return_steps=False, eps=1e-5):
@@ -55,8 +56,8 @@ class ScheduledUnmasker(nn.Module):
                 # s < t => α_s > α_t => more content retained at step s than t.
                 
                 if self.gaussian_noise:
-                    p_mask_t, _ = get_gaussian_noise_schedule(t_i=timesteps[i], sigma=self.model.sigma, max_l=L, device=self.device)
-                    p_mask_s, _ = get_gaussian_noise_schedule(t_i=timesteps[i] - dt, sigma=self.model.sigma, max_l=L, device=self.device)
+                    p_mask_t, _ = get_gaussian_noise_schedule(t_i=timesteps[i], sigma=self.sigma, max_l=L, device=self.device)
+                    p_mask_s, _ = get_gaussian_noise_schedule(t_i=timesteps[i] - dt, sigma=self.sigma, max_l=L, device=self.device)
                     
                     alpha_t = 1 - p_mask_t
                     alpha_s = 1 - p_mask_s
@@ -109,10 +110,21 @@ class ScheduledUnmasker(nn.Module):
                 
                 probs = torch.zeros_like(logits)
 
-                probs[:, :-1] = content_probs * ((alpha_s - alpha_t) / (1 - alpha_t)).clamp(min=0.0) 
-                probs[:, -1] = ((1 - alpha_s) / (1 - alpha_t)).clamp(min=0.0, max=1.0)
-                
-                # probs[:, :-1] *= ((alpha_s - alpha_t) / (1 - alpha_t)).clamp(min=0.0) 
+                weight = ((alpha_s - alpha_t) / (1 - alpha_t)).clamp(min=0.0)
+                mask_prob = ((1 - alpha_s) / (1 - alpha_t)).clamp(min=0.0, max=1.0)
+                if self.gaussian_noise:
+                    # alpha tensors are (1, L); reshape for correct broadcast with (L, vocab-1)
+                    weight = weight.squeeze(0).unsqueeze(-1)   # (L, 1)
+                    mask_prob = mask_prob.squeeze()             # (L,)
+                probs[:, :-1] = content_probs * weight
+                probs[:, -1] = mask_prob
+                # Positions where p_mask_t=0 produce 0/0=NaN; they are unmasked in X so
+                # won't be used, but multinomial requires every row to be valid.
+                probs = probs.nan_to_num(nan=0.0, posinf=0.0, neginf=0.0)
+                zero_rows = probs.sum(dim=-1) == 0
+                probs[zero_rows, -1] = 1.0  # fallback: sample MASK (position stays unmasked)
+
+                # probs[:, :-1] *= ((alpha_s - alpha_t) / (1 - alpha_t)).clamp(min=0.0)
                 # probs[:, -1] = ((1 - alpha_s) / (1 - alpha_t)).clamp(min=0.0, max=1.0) # mask prob
                 
                 # if strategy == 'categorical':

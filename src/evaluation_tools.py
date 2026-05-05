@@ -246,6 +246,7 @@ def evaluation_from_generation(model,
                                save_mode=False, 
                                denoise="0",
                                gaussian_noise=False,
+                               sigma=1.0,
                                cutoff=None,
                                investigate=False,
                                n_first_tokens=10**9,
@@ -268,7 +269,7 @@ def evaluation_from_generation(model,
     _is_oracle_model = model.oracle if hasattr(model, 'oracle') else False
     _oracle_for_eval = None if _is_oracle_model else oracleModel(vocab_size=model.vocab_size, device=device)
     unmaskModel = ScheduledUnmasker(model, device, T=T, denoise=denoise,
-                                    oracle=_is_oracle_model, oracle_model=_oracle_for_eval, gaussian_noise=gaussian_noise)
+                                    oracle=_is_oracle_model, oracle_model=_oracle_for_eval, gaussian_noise=gaussian_noise, sigma=sigma)
         
     model.eval()
     with torch.no_grad():

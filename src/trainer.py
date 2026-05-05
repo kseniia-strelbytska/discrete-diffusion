@@ -82,7 +82,9 @@ def train(
                 output_path=dirs.output_path,
                 save_mode=save_mode,
                 denoise=denoise,
-                cutoff=cutoff
+                cutoff=cutoff,
+                gaussian_noise=gaussian_noise,
+                sigma=sigma,
             )
             for i in range(4):
                 stats[i].append(new_stats[i])
@@ -200,7 +202,9 @@ def train(
                 output_path=dirs.output_path,
                 save_mode=save_mode,
                 denoise=denoise,
-                cutoff=cutoff
+                cutoff=cutoff,
+                gaussian_noise=gaussian_noise,
+                sigma=sigma,
             )
             
             for i in range(4):
