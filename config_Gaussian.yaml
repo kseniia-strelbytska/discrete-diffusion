@@ -19,11 +19,11 @@ model:
   layer_norm_eps: 0.0002
   T: 500
   sampling_eps: 0.00001
-  sigma: 10.0
+  sigma: 40.0
   eos_weight: 10.0
   inverse_t: False
 training:
-  epochs: 100000
+  epochs: 1000000
   learning_rate: 0.001
   num_warmup_steps: 1000
   weight_decay: 0.0
@@ -31,9 +31,9 @@ training:
   gaussian_noise: True
   denoise: "0" # "0" or eps
 validation:
-  val_every: 2
+  val_every: 1000
 evaluation:
-  eval_every: 5000
+  eval_every: 1000
   n_samples: 100
   eval_dataset: unconditional # limited or randomised or complete
   eval_type: random # full or random
@@ -42,8 +42,10 @@ investigation:
   n_first_tokens: 258 # how many first tokens to investigate the distribution of
   store_numeric: True # whether to store numeric logs of the investigation
 wandb:
-  project: "discrete-diffusion"
-  group: "Gaussian-RPE"
+  # project: "discrete-diffusion"
+  # group: "Gaussian-RPE"
+  project: ""
+  group: ""
 paths:
   models_dir: models
   figures_dir: figures

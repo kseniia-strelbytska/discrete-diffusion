@@ -50,7 +50,7 @@ class GaussianLoss(nn.Module):
 
         #Extracts the logits corresponding to the true class labels
         log_prob_x = torch.gather(logits, -1, y_true[:, :, None]).squeeze(-1) 
-        loss = -p_mask_dt / p_mask * (-log_prob_x)
+        loss = p_mask_dt / p_mask * (-log_prob_x)
         
         # print(f'Sanity check: p_mask_dt={p_mask_dt}, p_mask={p_mask}, log_prob_x={log_prob_x}')
         # print(f'Sanity check: logits contains NaN: {torch.isnan(logits).any()}')

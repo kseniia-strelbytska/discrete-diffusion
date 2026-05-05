@@ -24,6 +24,7 @@ from loss import rblb
 from noise_schedule_unmask import ScheduledUnmasker
 from gaussian.gaussian_dataset import GaussianDataset
 from gaussian.gaussian_loss import GaussianLoss
+from gaussian.gaussian_noise_schedule import get_gaussian_noise_schedule, plot_gaussian_noise_schedule
 from dataset import Dataset, get_fixed_dataset
 from trainer import train
 from investigate_token_distribution import investigate_dataset
@@ -349,6 +350,17 @@ def main():
         raise ValueError(f"Invalid model architecture: {cfg.model.architecture}")
 
     if args.mode == "train":
+        # output = PROJECT_ROOT / "all_masks.txt"
+        # with open(output, "w") as f:
+        #     for X, y, t in train_dataloader:  # Just check the first batch for sanity
+        #         for i in range(X.shape[0]):
+        #             x_seq = X[i].cpu().numpy()
+        #             x_seq = torch.where(X[i] != MASK_token, torch.tensor(0), X[i]).cpu().numpy() 
+        #             x_seq = ''.join(map(str, x_seq.tolist()))
+        #             f.write(f"{x_seq}\n")
+        #         break
+        # exit(0)
+        
         model = train(
             model,
             grammar,
@@ -378,8 +390,21 @@ def main():
             cutoff=cfg.evaluation.cutoff
         )
         
+        unmasker = ScheduledUnmasker(model, 
+                                     device=device, 
+                                     T=cfg.model.T, 
+                                     denoise=cfg.training.denoise,
+                                     oracle=(cfg.model.architecture == "oracle"),
+                                     oracle_model=oracleModel(vocab_size=model.vocab_size, device=device) if cfg.model.architecture != "oracle" else None,
+                                     gaussian_noise=cfg.training.gaussian_noise)
+        
+        sample = torch.full((cfg.model.max_len,), MASK_token, dtype=torch.long).to(device)
+        res = unmasker(sample, ((sample == MASK_token).sum() / torch.numel(sample)), return_steps=False)
+        
+        print("Res:", res)
+        
         torch.save(
-            model.state_dict(), MODELS_DIR / f"model_final_{cfg.model.architecture}.pt"
+            model.state_dict(), MODELS_DIR / f"Gaussian_model_{cfg.model.architecture}.pt"
         )
     elif args.mode == "investigate":
         model.load_state_dict(
@@ -390,7 +415,10 @@ def main():
         unmasker = ScheduledUnmasker(model, 
                                      device=device, 
                                      T=cfg.model.T, 
-                                     denoise=cfg.training.denoise)
+                                     denoise=cfg.training.denoise,
+                                     oracle=(cfg.model.architecture == "oracle"),
+                                     oracle_model=oracleModel(vocab_size=model.vocab_size, device=device) if cfg.model.architecture != "oracle" else None,
+                                     gaussian_noise=cfg.training.gaussian_noise,)
         
         investigate_dataset(model, 
                             unmasker, 
@@ -432,7 +460,7 @@ def main():
                 # )
                 
                 torch.load(
-                    PROJECT_ROOT / "models/RPE-decrease-temp_13042026_131732/model_epochs=95000", map_location=torch.device('cpu')
+                    PROJECT_ROOT / "models/Gaussian-RPE_27042026_173129/model_epochs=500", map_location=torch.device('cpu')
                 )
             )
         
@@ -474,6 +502,7 @@ def main():
                 loss_log_path=dirs.loss_log_path,
                 output_path=iter_output_path,
                 save_mode=args.save,
+                gaussian_noise=cfg.training.gaussian_noise,
                 cutoff=cfg.evaluation.cutoff,
                 investigate=True
             )

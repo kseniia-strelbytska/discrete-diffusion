@@ -50,11 +50,16 @@ class ScheduledUnmasker(nn.Module):
             for i in range(num_steps):
                 if timesteps[i] <= 0:
                     break
-                # Linear schedule: α_t = 1 - t
+                # Linear schedule: α_t = 1 - t, where α_t is the propotion of original content retained at step t.
+                # t = 0 (clean data) => α_t = 1, t = 1 (fully masked) => α_t = 0
+                # s < t => α_s > α_t => more content retained at step s than t.
                 
                 if self.gaussian_noise:
-                    alpha_t, _ = get_gaussian_noise_schedule(t_i=timesteps[i], sigma=self.model.sigma, max_l=L, device=self.device)
-                    alpha_s, _ = get_gaussian_noise_schedule(t_i=timesteps[i] - dt, sigma=self.model.sigma, max_l=L, device=self.device)
+                    p_mask_t, _ = get_gaussian_noise_schedule(t_i=timesteps[i], sigma=self.model.sigma, max_l=L, device=self.device)
+                    p_mask_s, _ = get_gaussian_noise_schedule(t_i=timesteps[i] - dt, sigma=self.model.sigma, max_l=L, device=self.device)
+                    
+                    alpha_t = 1 - p_mask_t
+                    alpha_s = 1 - p_mask_s
                 else:
                     alpha_t = 1 - timesteps[i]
                     alpha_s = 1 - (timesteps[i] - dt)

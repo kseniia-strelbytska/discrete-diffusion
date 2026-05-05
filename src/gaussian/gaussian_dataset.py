@@ -69,7 +69,7 @@ class GaussianDataset(torch.utils.data.Dataset):
             timesteps = self.stratified_sampling(y_batch.shape[0])
         
         p_mask, _ = get_gaussian_noise_schedule(t_i=timesteps, sigma=self.sigma, max_l=self.max_l, device=self.device)
-                
+        
         mask = torch.rand_like(y_batch, dtype=torch.float, device=self.device) < p_mask
         x_batch = torch.where(mask, torch.full_like(y_batch, MASK_token), y_batch)
                     
