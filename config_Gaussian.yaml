@@ -1,7 +1,7 @@
 seed: 42
 device: auto
 strategy: None # (redundant) categorical or temperature-sampling
-temperature: 0.00001 # controls strategy: greedy if temperature <= 0, categorical if temperature = 1.0, tempareture-scaled categorical otherwise.
+temperature: 0.000001 # controls strategy: greedy if temperature <= 0, categorical if temperature = 1.0, tempareture-scaled categorical otherwise.
 data:
   l: 256
   train_split: 0.9
@@ -20,21 +20,21 @@ model:
   T: 500
   sampling_eps: 0.00001
   sigma: 40.0
-  eos_weight: 10.0
+  eos_weight: 2.0
   inverse_t: False
 training:
   epochs: 1000000
   learning_rate: 0.001
   num_warmup_steps: 1000
-  weight_decay: 0.0
+  weight_decay: 0.01
   loss_type: eq8 # eq8 or eq9
   gaussian_noise: True
   denoise: "0" # "0" or eps
 validation:
   val_every: 1000
 evaluation:
-  eval_every: 2000
-  n_samples: 100
+  eval_every: 4000
+  n_samples: 500
   eval_dataset: unconditional # limited or randomised or complete
   eval_type: random # full or random
   cutoff: 258
@@ -47,5 +47,5 @@ wandb:
 paths:
   models_dir: models
   figures_dir: figures
-  experiment_name: Gaussian-RPE
+  experiment_name: Gaussian-RPE-longer-denoising-evaluation
 notes: "Unconditional dataset. Use Gaussian gaussian_noise for RPE architecture to investigate the effect of noise on the almost greedy regime"

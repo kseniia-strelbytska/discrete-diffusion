@@ -462,7 +462,7 @@ def main():
                 # )
                 
                 torch.load(
-                    PROJECT_ROOT / "models/Gaussian-RPE_27042026_173129/model_epochs=500", map_location=torch.device('cpu')
+                    PROJECT_ROOT / "models/Gaussian-RPE_06052026_061508/model_epochs=144000", map_location=torch.device('cpu')
                 )
             )
         

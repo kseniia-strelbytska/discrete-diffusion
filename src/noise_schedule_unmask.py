@@ -153,6 +153,19 @@ class ScheduledUnmasker(nn.Module):
                 steps.append(X.clone())
                 timesteps_log.append(timesteps[i] - dt)
 
+            # Ensure no more MASK tokens remain (can happen due to numerical issues with the noise schedule)
+            if (X == MASK_token).any():
+                logits = self.model(X.unsqueeze(0), timesteps[i].unsqueeze(0))[0] if not self.oracle else self.model(X)[1]
+                probs = torch.softmax(logits[:, :-1], dim=-1)
+                if temperature <= 0:
+                    # greedy sampling
+                    sampled_X = probs.argmax(dim=-1)
+                else:
+                    sampled_X = torch.multinomial(probs, 1).squeeze(-1)
+                X[X == MASK_token] = sampled_X[X == MASK_token]
+                steps.append(X.clone())
+                timesteps_log.append(timesteps[-1] - dt)
+            
             if return_steps == True:
                 return X, steps, timesteps_log, error_message
             return X 
