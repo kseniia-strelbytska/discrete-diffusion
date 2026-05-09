@@ -410,8 +410,19 @@ def main():
     elif args.mode == "investigate":
         model.load_state_dict(
             torch.load(
-                MODELS_DIR / "RPE-decrease-temp_13042026_131732/model_epochs=95000", map_location=torch.device("cpu")))
+                MODELS_DIR / "Gaussian-RPE_06052026_061508/model_epochs=144000", map_location=torch.device("cpu")))
         model = model.to(device)
+        
+        # Extract and save the attention maps for visualization
+        # all_masks = torch.full((cfg.model.max_len,), MASK_token, dtype=torch.long).to(device)
+        # hooks = attach_attention_hooks(model)
+        # attn_maps = extract_attention_maps(model, all_masks, device=device, timestep=1.0)
+        # remove_hooks(hooks)
+        # # Full-resolution PNG files saved alongside the HTML:
+        # plot_attention_maps(attn_maps, all_masks,
+        #                     save_dir=FIGURES_DIR / f"attn_Gaussian_{0}",
+        #                     title_prefix=f"step{0}_")
+        # exit(0)
         
         unmasker = ScheduledUnmasker(model, 
                                      device=device, 

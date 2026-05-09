@@ -23,7 +23,7 @@ model:
   eos_weight: 2.0
   inverse_t: False
 training:
-  epochs: 1000000
+  epochs: 50000
   learning_rate: 0.001
   num_warmup_steps: 1000
   weight_decay: 0.01
@@ -47,5 +47,5 @@ wandb:
 paths:
   models_dir: models
   figures_dir: figures
-  experiment_name: Gaussian-RPE-longer-denoising-evaluation
+  experiment_name: Gaussian-RPE-investigate
 notes: "Unconditional dataset. Use Gaussian gaussian_noise for RPE architecture to investigate the effect of noise on the almost greedy regime"
