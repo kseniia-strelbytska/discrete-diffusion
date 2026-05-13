@@ -42,7 +42,7 @@ def plot_gaussian_noise_schedule(timesteps, sigma, max_l):
         
         ax = axes[idx]
         ax.plot(p_mask.squeeze(0).numpy(), label='P(Masked) [1 - CDF]')
-        ax.plot(dp_mask_dt.squeeze(0).numpy(), label='Derivative w.r.t time', linestyle='--')
+        # ax.plot(dp_mask_dt.squeeze(0).numpy(), label='Derivative w.r.t time', linestyle='--')
         ax.set_title(f'Timestep t_i = {t_i:.2f}')
         ax.legend()
         
@@ -52,9 +52,9 @@ def plot_gaussian_noise_schedule(timesteps, sigma, max_l):
         
 def main():
     T = 100
-    sigma = 4.0
+    sigma = 20.0
     max_l = 258
-    plot_gaussian_noise_schedule(timesteps=np.linspace(0, 1, 4), sigma=sigma, max_l=max_l)
+    plot_gaussian_noise_schedule(timesteps=[0, 0.2, 0.4, 0.6, 0.8, 1.0], sigma=sigma, max_l=max_l)
     
 if __name__ == "__main__":
     main()

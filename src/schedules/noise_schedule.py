@@ -1,0 +1,60 @@
+from abc import ABC, abstractmethod
+import torch
+from torch import Tensor
+
+
+class NoiseSchedule(ABC):
+    """
+    Abstract base class for discrete diffusion noise schedules.
+
+    All concrete schedules must implement p_mask and dp_mask, which define
+    the per-position masking probability and its time-derivative for a
+    given normalised timestep t ∈ [0, 1].
+
+    Convention
+    ----------
+    t = 0  →  clean data    (p_mask ≈ 0, nothing masked)
+    t = 1  →  fully noisy   (p_mask ≈ 1, everything masked)
+
+    Shape contract
+    --------------
+    t may be:
+      • a Python float or 0-dim tensor  →  returns (1, max_l)
+      • a (B, 1) tensor                 →  returns (B, max_l)
+    """
+
+    @abstractmethod
+    def p_mask(self, t: Tensor, max_l: int, device: torch.device) -> Tensor:
+        """
+        Element-wise masking probability at timestep t.
+
+        Returns a tensor with values in [0, 1] that encodes how likely
+        each sequence position is to be masked at time t.
+
+        Args:
+            t:      Timestep — float, 0-dim tensor, or (B, 1) tensor.
+            max_l:  Sequence length (number of positions).
+            device: Target device for the returned tensor.
+
+        Returns:
+            Tensor of shape (1, max_l) or (B, max_l).
+        """
+        ...
+
+    @abstractmethod
+    def dp_mask(self, t: Tensor, max_l: int, device: torch.device) -> Tensor:
+        """
+        Time-derivative d(p_mask)/dt at timestep t.
+
+        Used in the ELBO loss weight dp/p.  The sign convention matches
+        p_mask: positive values mean masking probability increases with t.
+
+        Args:
+            t:      Timestep — float, 0-dim tensor, or (B, 1) tensor.
+            max_l:  Sequence length (number of positions).
+            device: Target device for the returned tensor.
+
+        Returns:
+            Tensor of shape (1, max_l) or (B, max_l).
+        """
+        ...

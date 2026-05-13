@@ -6,6 +6,7 @@ from datetime import datetime
 
 from gaussian.gaussian_loss import GaussianLoss
 from loss import rblb
+from schedules.noise_schedule_loss import NoiseScheduleLoss
 from evaluation_tools import evaluation_from_generation
 from transformers.optimization import get_inverse_sqrt_schedule
 import wandb
@@ -37,7 +38,8 @@ def train(
     gaussian_noise=False,
     sigma=1.0,
     denoise="0",
-    cutoff=None
+    cutoff=None,
+    schedule=None,
 ):
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
     if num_warmup_steps != 0:
@@ -45,7 +47,10 @@ def train(
             optimizer, num_warmup_steps=num_warmup_steps
         )
     
-    if gaussian_noise:
+    if schedule is not None:
+        loss_fn = NoiseScheduleLoss(device, vocab_size=model.vocab_size, schedule=schedule, T=T,
+                                    sampling_eps=model.sampling_eps, eos_weight=eos_weight)
+    elif gaussian_noise:
         loss_fn = GaussianLoss(device, vocab_size=model.vocab_size, T=T, sigma=sigma, sampling_eps=model.sampling_eps, eos_weight=eos_weight, inverse_t=inverse_t)
     else:
         loss_fn = rblb(device, vocab_size=model.vocab_size, T=T, sampling_eps=model.sampling_eps, eos_weight=eos_weight, inverse_t=inverse_t, loss_type=loss_type)
@@ -83,6 +88,7 @@ def train(
                 save_mode=save_mode,
                 denoise=denoise,
                 cutoff=cutoff,
+                schedule=schedule,
                 gaussian_noise=gaussian_noise,
                 sigma=sigma,
             )
@@ -203,10 +209,11 @@ def train(
                 save_mode=save_mode,
                 denoise=denoise,
                 cutoff=cutoff,
+                schedule=schedule,
                 gaussian_noise=gaussian_noise,
                 sigma=sigma,
             )
-            
+
             for i in range(4):
                 stats[i].append(new_stats[i])
             stats[-1].append(epoch + 1)

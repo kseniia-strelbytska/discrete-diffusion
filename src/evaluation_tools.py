@@ -232,19 +232,20 @@ def get_timeline(max_len=258, steps=None, idx=-1):
 
 # eval_type: diffusion or autoregressive
 # samples_type for anbn: random or full
-def evaluation_from_generation(model, 
-                               grammar, 
-                               evaluation_dataset=None, 
-                               T=500, 
-                               strategy = 'categorical', 
-                               temperature=1.0, 
-                               write_steps=False, 
-                               device='cpu', 
-                               figures_path=None, 
-                               loss_log_path=None, 
-                               output_path=None, 
-                               save_mode=False, 
+def evaluation_from_generation(model,
+                               grammar,
+                               evaluation_dataset=None,
+                               T=500,
+                               strategy = 'categorical',
+                               temperature=1.0,
+                               write_steps=False,
+                               device='cpu',
+                               figures_path=None,
+                               loss_log_path=None,
+                               output_path=None,
+                               save_mode=False,
                                denoise="0",
+                               schedule=None,
                                gaussian_noise=False,
                                sigma=1.0,
                                cutoff=None,
@@ -269,7 +270,8 @@ def evaluation_from_generation(model,
     _is_oracle_model = model.oracle if hasattr(model, 'oracle') else False
     _oracle_for_eval = None if _is_oracle_model else oracleModel(vocab_size=model.vocab_size, device=device)
     unmaskModel = ScheduledUnmasker(model, device, T=T, denoise=denoise,
-                                    oracle=_is_oracle_model, oracle_model=_oracle_for_eval, gaussian_noise=gaussian_noise, sigma=sigma)
+                                    oracle=_is_oracle_model, oracle_model=_oracle_for_eval,
+                                    schedule=schedule, gaussian_noise=gaussian_noise, sigma=sigma)
         
     model.eval()
     with torch.no_grad():

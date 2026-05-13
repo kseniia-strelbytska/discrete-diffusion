@@ -22,10 +22,8 @@ from evaluation_tools import EvaluationDataset, evaluation_from_generation
 from initialgrammar import initialGrammar
 from loss import rblb
 from noise_schedule_unmask import ScheduledUnmasker
-from gaussian.gaussian_dataset import GaussianDataset
-from gaussian.gaussian_loss import GaussianLoss
-from gaussian.gaussian_noise_schedule import get_gaussian_noise_schedule, plot_gaussian_noise_schedule
-from dataset import Dataset, get_fixed_dataset
+from dataset import get_fixed_dataset
+from schedules import GaussianSchedule, CategoricalSchedule, NoiseScheduleDataset
 from trainer import train
 from investigate_token_distribution import investigate_dataset
 from attention_maps import attach_attention_hooks, extract_attention_maps, plot_attention_maps, remove_hooks
@@ -97,8 +95,41 @@ def parse_args():
         choices=["train", "eval", "investigate"],
         help="Mode: train, eval, or investigate.",
     )
+    parser.add_argument(
+        "--schedule",
+        type=str,
+        choices=["categorical", "gaussian"],
+        default=None,
+        help="Noise schedule type. Overrides config.schedule.type.",
+    )
+    parser.add_argument(
+        "--sigma",
+        type=float,
+        default=None,
+        help="Gaussian sigma. Overrides config.schedule.sigma (only used with --schedule gaussian).",
+    )
     args, unknown = parser.parse_known_args()
     return args
+
+
+def get_schedule(cfg, args):
+    """Build a NoiseSchedule from config, with CLI flags taking precedence."""
+    schedule_type = args.schedule or getattr(getattr(cfg, "schedule", None), "type", None)
+    # Legacy fallback for old configs that use cfg.training.gaussian_noise
+    if schedule_type is None:
+        schedule_type = "gaussian" if getattr(cfg.training, "gaussian_noise", False) else "categorical"
+
+    sigma = (
+        args.sigma
+        or getattr(getattr(cfg, "schedule", None), "sigma", None)
+        or getattr(cfg.model, "sigma", 1.0)
+    )
+
+    if schedule_type == "gaussian":
+        return GaussianSchedule(sigma=sigma)
+    if schedule_type == "categorical":
+        return CategoricalSchedule()
+    raise ValueError(f"Unknown schedule type: {schedule_type!r}")
 
 def get_device(cfg_device):
     if cfg_device == "auto":
@@ -196,10 +227,17 @@ def main():
     grammar = get_grammar(cfg.data.grammar, cfg.data.l)
     grammar.generate_seq()  # generates the data and stores in grammar.data
 
-    if cfg.training.gaussian_noise:
-        dataset = GaussianDataset(grammar.data, device, T=cfg.model.T, sigma=cfg.model.sigma, max_l=cfg.model.max_len, sampling_eps=cfg.model.sampling_eps, inverse_t=cfg.model.inverse_t)
-    else:
-        dataset = Dataset(grammar.data, device, cfg.model.T, sampling_eps=cfg.model.sampling_eps, inverse_t=cfg.model.inverse_t)
+    schedule = get_schedule(cfg, args)
+    print(f"Noise schedule: {schedule.__class__.__name__}")
+
+    dataset = NoiseScheduleDataset(
+        grammar.data, device,
+        T=cfg.model.T,
+        schedule=schedule,
+        max_l=cfg.model.max_len,
+        sampling_eps=cfg.model.sampling_eps,
+        inverse_t=cfg.model.inverse_t,
+    )
 
     print(f"Dataset len: {len(dataset)} using inverse_t sampling {cfg.model.inverse_t}")
     
@@ -210,12 +248,15 @@ def main():
         train_dataset, batch_size=cfg.data.batch_size, shuffle=True, collate_fn=dataset.masking_collate_fn
     )
     
-    test_data = dataset.y_data[test_dataset.indices] # grab only test samples
-    if cfg.training.gaussian_noise:
-        test_dataset = GaussianDataset(test_data, device, T=cfg.model.T, sigma=cfg.model.sigma, max_l=cfg.model.max_len, sampling_eps=cfg.model.sampling_eps, inverse_t=cfg.model.inverse_t)
-    else:
-        test_dataset = Dataset(test_data, device, cfg.model.T, 
-                               sampling_eps=cfg.model.sampling_eps, inverse_t=cfg.model.inverse_t)
+    test_data = dataset.y_data[test_dataset.indices]  # grab only test samples
+    test_dataset = NoiseScheduleDataset(
+        test_data, device,
+        T=cfg.model.T,
+        schedule=schedule,
+        max_l=cfg.model.max_len,
+        sampling_eps=cfg.model.sampling_eps,
+        inverse_t=cfg.model.inverse_t,
+    )
     
     fixed_test_dataset = get_fixed_dataset(
         test_dataset, device, batch_size=cfg.data.batch_size
@@ -384,20 +425,20 @@ def main():
             temperature=cfg.temperature,
             wandb=wandb,
             loss_type=cfg.training.loss_type,
-            gaussian_noise=cfg.training.gaussian_noise,
-            sigma=cfg.model.sigma,
+            gaussian_noise=isinstance(schedule, GaussianSchedule),
+            sigma=schedule.sigma if isinstance(schedule, GaussianSchedule) else 1.0,
             denoise=cfg.training.denoise,
-            cutoff=cfg.evaluation.cutoff
+            cutoff=cfg.evaluation.cutoff,
+            schedule=schedule,
         )
-        
-        unmasker = ScheduledUnmasker(model, 
-                                     device=device, 
-                                     T=cfg.model.T, 
+
+        unmasker = ScheduledUnmasker(model,
+                                     device=device,
+                                     T=cfg.model.T,
                                      denoise=cfg.training.denoise,
                                      oracle=(cfg.model.architecture == "oracle"),
                                      oracle_model=oracleModel(vocab_size=model.vocab_size, device=device) if cfg.model.architecture != "oracle" else None,
-                                     gaussian_noise=cfg.training.gaussian_noise,
-                                     sigma=cfg.model.sigma)
+                                     schedule=schedule)
         
         sample = torch.full((cfg.model.max_len,), MASK_token, dtype=torch.long).to(device)
         res = unmasker(sample, ((sample == MASK_token).sum() / torch.numel(sample)), return_steps=False)
@@ -410,18 +451,28 @@ def main():
     elif args.mode == "investigate":
         model.load_state_dict(
             torch.load(
-                MODELS_DIR / "RPE-decrease-temp_13042026_131732/model_epochs=95000", map_location=torch.device("cpu")))
+                MODELS_DIR / "Gaussian-RPE_06052026_061508/model_epochs=144000", map_location=torch.device("cpu")))
         model = model.to(device)
         
-        unmasker = ScheduledUnmasker(model, 
-                                     device=device, 
-                                     T=cfg.model.T, 
+        # Extract and save the attention maps for visualization
+        # all_masks = torch.full((cfg.model.max_len,), MASK_token, dtype=torch.long).to(device)
+        # hooks = attach_attention_hooks(model)
+        # attn_maps = extract_attention_maps(model, all_masks, device=device, timestep=1.0)
+        # remove_hooks(hooks)
+        # # Full-resolution PNG files saved alongside the HTML:
+        # plot_attention_maps(attn_maps, all_masks,
+        #                     save_dir=FIGURES_DIR / f"attn_Gaussian_{0}",
+        #                     title_prefix=f"step{0}_")
+        # exit(0)
+        
+        unmasker = ScheduledUnmasker(model,
+                                     device=device,
+                                     T=cfg.model.T,
                                      denoise=cfg.training.denoise,
                                      oracle=(cfg.model.architecture == "oracle"),
                                      oracle_model=oracleModel(vocab_size=model.vocab_size, device=device) if cfg.model.architecture != "oracle" else None,
-                                     gaussian_noise=cfg.training.gaussian_noise,
-                                     sigma=cfg.model.sigma)
-        
+                                     schedule=schedule)
+
         investigate_dataset(model, 
                             unmasker, 
                             device=device, 
@@ -504,8 +555,9 @@ def main():
                 loss_log_path=dirs.loss_log_path,
                 output_path=iter_output_path,
                 save_mode=args.save,
-                gaussian_noise=cfg.training.gaussian_noise,
-                sigma=cfg.model.sigma,
+                schedule=schedule,
+                gaussian_noise=isinstance(schedule, GaussianSchedule),
+                sigma=schedule.sigma if isinstance(schedule, GaussianSchedule) else 1.0,
                 cutoff=cfg.evaluation.cutoff,
                 investigate=True
             )
