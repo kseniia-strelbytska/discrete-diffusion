@@ -17,13 +17,13 @@ model:
   dim_feedforward: 1024
   dropout: 0.1
   layer_norm_eps: 0.0002
-  T: 500
+  T: 50
   sampling_eps: 0.00001
-  sigma: 40.0
+  sigma: 10.0
   eos_weight: 2.0
   inverse_t: False
 training:
-  epochs: 1000000
+  epochs: 50000
   learning_rate: 0.001
   num_warmup_steps: 1000
   weight_decay: 0.01
@@ -33,8 +33,8 @@ training:
 validation:
   val_every: 1000
 evaluation:
-  eval_every: 4000
-  n_samples: 500
+  eval_every: 5000
+  n_samples: 200
   eval_dataset: unconditional # limited or randomised or complete
   eval_type: random # full or random
   cutoff: 258

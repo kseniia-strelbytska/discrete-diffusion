@@ -1,0 +1,18 @@
+project: discrete-diffusion
+entity: am3049-university-of-cambridge
+metric:
+  goal: maximize
+  name: Rule_Accuracy/eval_both_rules_acc
+method: grid
+parameters:
+  model.T:
+    values: [500, 100, 50]
+  model.sigma:
+    values: [40.0, 20.0, 10.0]
+command:
+  - python
+  - src/main.py
+  - --config
+  - config_Gaussian.yaml
+  - --verbose
+  - --save
