@@ -2,11 +2,19 @@ import torch
 import torch.nn as nn
 import numpy as np
 from constants import EOS_token, SOS_token, PAD_token, MASK_token
-from gaussian.gaussian_noise_schedule import get_gaussian_noise_schedule
 
 # Producing sampled tokens using vectorization
 class ScheduledUnmasker(nn.Module):
-    def __init__(self, model, device, T=100, denoise="0", oracle=False, oracle_model=None, gaussian_noise=False, sigma=1.0):
+    def __init__(self, model, device, T=100, denoise="0", oracle=False, oracle_model=None,
+                 schedule=None, gaussian_noise=False, sigma=1.0):
+        """
+        Args:
+            schedule:      A NoiseSchedule instance.  When provided it is used for
+                           all alpha_t / alpha_s computations and the legacy
+                           gaussian_noise / sigma flags are ignored.
+            gaussian_noise: Legacy flag — kept for backward compatibility.
+            sigma:          Legacy Gaussian sigma — kept for backward compatibility.
+        """
         super().__init__()
         self.model = model
         self.device = device
@@ -16,6 +24,18 @@ class ScheduledUnmasker(nn.Module):
         # Optional oracle model for parallel validation when the main model is NOT the oracle.
         # Must expose a .validate(X) method returning (bool, error_str_or_None).
         self.oracle_model = oracle_model
+
+        # Build schedule from legacy flags when no explicit schedule is provided.
+        if schedule is not None:
+            self._schedule = schedule
+        elif gaussian_noise:
+            from schedules.gaussian_schedule import GaussianSchedule
+            self._schedule = GaussianSchedule(sigma)
+        else:
+            from schedules.categorical_schedule import CategoricalSchedule
+            self._schedule = CategoricalSchedule()
+
+        # Keep legacy attributes so existing code that reads them still works.
         self.gaussian_noise = gaussian_noise
         self.sigma = sigma
 
@@ -55,15 +75,11 @@ class ScheduledUnmasker(nn.Module):
                 # t = 0 (clean data) => α_t = 1, t = 1 (fully masked) => α_t = 0
                 # s < t => α_s > α_t => more content retained at step s than t.
                 
-                if self.gaussian_noise:
-                    p_mask_t, _ = get_gaussian_noise_schedule(t_i=timesteps[i], sigma=self.sigma, max_l=L, device=self.device)
-                    p_mask_s, _ = get_gaussian_noise_schedule(t_i=timesteps[i] - dt, sigma=self.sigma, max_l=L, device=self.device)
-                    
-                    alpha_t = 1 - p_mask_t
-                    alpha_s = 1 - p_mask_s
-                else:
-                    alpha_t = 1 - timesteps[i]
-                    alpha_s = 1 - (timesteps[i] - dt)
+                # Compute retention probabilities via the noise schedule.
+                # Both schedules return (1, L); the categorical schedule
+                # broadcasts the scalar timestep to match position count.
+                alpha_t = 1 - self._schedule.p_mask(timesteps[i], max_l=L, device=self.device)
+                alpha_s = 1 - self._schedule.p_mask(timesteps[i] - dt, max_l=L, device=self.device)
                 
                 if not self.oracle:
                     # Get model predictions
@@ -112,10 +128,9 @@ class ScheduledUnmasker(nn.Module):
 
                 weight = ((alpha_s - alpha_t) / (1 - alpha_t)).clamp(min=0.0)
                 mask_prob = ((1 - alpha_s) / (1 - alpha_t)).clamp(min=0.0, max=1.0)
-                if self.gaussian_noise:
-                    # alpha tensors are (1, L); reshape for correct broadcast with (L, vocab-1)
-                    weight = weight.squeeze(0).unsqueeze(-1)   # (L, 1)
-                    mask_prob = mask_prob.squeeze()             # (L,)
+                # alpha tensors are (1, L); reshape for correct broadcast with (L, vocab-1)
+                weight = weight.squeeze(0).unsqueeze(-1)   # (L, 1)
+                mask_prob = mask_prob.squeeze(0)            # (L,)
                 probs[:, :-1] = content_probs * weight
                 probs[:, -1] = mask_prob
                 # Positions where p_mask_t=0 produce 0/0=NaN; they are unmasked in X so

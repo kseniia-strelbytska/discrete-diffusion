@@ -30,6 +30,9 @@ training:
   loss_type: eq8 # eq8 or eq9
   gaussian_noise: True
   denoise: "0" # "0" or eps
+schedule:
+  type: gaussian  # categorical or gaussian
+  sigma: 1.0         # Gaussian width parameter; ignored when type=categorical
 validation:
   val_every: 1000
 evaluation:
