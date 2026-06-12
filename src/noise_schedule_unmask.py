@@ -86,43 +86,36 @@ class ScheduledUnmasker(nn.Module):
                     logits = self.model(X.unsqueeze(0), timesteps[i].unsqueeze(0))[0]  # (L, 6)
                     
                     if self.oracle_model is not None:
-                        oracle_result = self.oracle_model.forward(X)
-                        if oracle_result[0] is None:
-                            
-                            if error_changed_mask is not None:
-                                changed_tokens = error_changed_mask.nonzero(as_tuple=True)[0].tolist()
-                            else:
-                                changed_tokens = []
-                            
+                        try:
+                            self.oracle_model.forward(X)
+                        except ValueError as e:
+                            changed_tokens = error_changed_mask.nonzero(as_tuple=True)[0].tolist() if error_changed_mask is not None else []
                             error_message = f'''Oracle failed at step {i} with input {X}.
-                            Message:{oracle_result[1]}
+                            Message:{e}
                             Investigating probs and logits:
                             '''
                             for token in changed_tokens:
                                 error_message += f'\nToken index {token}\nprob={error_probs[token].cpu().numpy()}\nlogit={error_logits[token].cpu().numpy()}\nChoice: {X[token].item()}\n'
                             break
                 else:
-                    logits = self.model(X)
-                    if logits[0] == None:
-                        # If oracle returns None, it means the input cannot be completed correctly.
-                        
+                    try:
+                        logits = self.model(X)
+                    except ValueError as e:
                         changed_tokens = error_changed_mask.nonzero(as_tuple=True)[0].tolist() if error_changed_mask is not None else []
-                        
                         error_message = f'''Oracle failed at step {i} with input {X}.
-                        Message:{logits[1]}
+                        Message:{e}
                         Investigating probs and logits:
                         '''
                         for token in changed_tokens:
                             error_message += f'\nToken index {token}\nprob={error_probs[token].cpu().numpy()}\nlogit={error_logits[token].cpu().numpy()}\nChoice: {X[token].item()}\n'
-
                         break
-                    logits = logits[1]
-
+                
                 # Convert to probabilities (x_θ in the paper)
-                if temperature <= 0: # greedy
-                    content_probs = torch.softmax(logits[:, :-1], dim=-1)
+                scaled_logits = logits[:, :-1] / temperature if temperature > 0 else logits[:, :-1]
+                if self.oracle:
+                    content_probs = scaled_logits  # already probabilities
                 else:
-                    content_probs = torch.softmax(logits[:, :-1] / temperature, dim=-1)
+                    content_probs = torch.softmax(scaled_logits, dim=-1)
                 
                 probs = torch.zeros_like(logits)
 
@@ -138,29 +131,12 @@ class ScheduledUnmasker(nn.Module):
                 probs = probs.nan_to_num(nan=0.0, posinf=0.0, neginf=0.0)
                 zero_rows = probs.sum(dim=-1) == 0
                 probs[zero_rows, -1] = 1.0  # fallback: sample MASK (position stays unmasked)
-
-                # probs[:, :-1] *= ((alpha_s - alpha_t) / (1 - alpha_t)).clamp(min=0.0)
-                # probs[:, -1] = ((1 - alpha_s) / (1 - alpha_t)).clamp(min=0.0, max=1.0) # mask prob
-                
-                # if strategy == 'categorical':
-                #     # sample from the categorical distribution
-                #     sampled_X = torch.multinomial(probs, 1).squeeze(-1)
-                # elif strategy == 'greedy':
-                #     #greedy sampling
-                #     sampled_X = probs.argmax(dim=-1)
-                # else:
-                #     raise ValueError(f"Unknown sampling strategy: {strategy}")
                 
                 if temperature <= 0:
                     # greedy sampling
                     sampled_X = probs.argmax(dim=-1)
                 else:
                     sampled_X = torch.multinomial(probs, 1).squeeze(-1)
-                
-                #sampled_X = torch.distributions.categorical.Categorical(probs=probs).sample()
-                
-                #print(X[X != MASK_token])
-                #print(sampled_X[X != MASK_token])
                 
                 error_probs, error_logits, error_changed_mask = probs, logits, ((X == MASK_token) & (sampled_X != MASK_token))
 
@@ -170,16 +146,25 @@ class ScheduledUnmasker(nn.Module):
 
             # Ensure no more MASK tokens remain (can happen due to numerical issues with the noise schedule)
             if (X == MASK_token).any():
-                logits = self.model(X.unsqueeze(0), timesteps[i].unsqueeze(0))[0] if not self.oracle else self.model(X)[1]
-                probs = torch.softmax(logits[:, :-1], dim=-1)
-                if temperature <= 0:
-                    # greedy sampling
-                    sampled_X = probs.argmax(dim=-1)
+                if self.oracle:
+                    try:
+                        logits = self.model(X)
+                        do_mopup = True
+                    except ValueError:
+                        do_mopup = False
                 else:
-                    sampled_X = torch.multinomial(probs, 1).squeeze(-1)
-                X[X == MASK_token] = sampled_X[X == MASK_token]
-                steps.append(X.clone())
-                timesteps_log.append(timesteps[-1] - dt)
+                    do_mopup = True
+                    logits = self.model(X.unsqueeze(0), timesteps[i].unsqueeze(0))[0]
+
+                if do_mopup:
+                    probs = torch.softmax(logits[:, :-1], dim=-1)
+                    if temperature <= 0:
+                        sampled_X = probs.argmax(dim=-1)
+                    else:
+                        sampled_X = torch.multinomial(probs, 1).squeeze(-1)
+                    X[X == MASK_token] = sampled_X[X == MASK_token]
+                    steps.append(X.clone())
+                    timesteps_log.append(timesteps[-1] - dt)
             
             if return_steps == True:
                 return X, steps, timesteps_log, error_message

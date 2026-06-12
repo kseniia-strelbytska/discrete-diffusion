@@ -1,7 +1,7 @@
 seed: 42
 device: auto
 strategy: None # (redundant) categorical or temperature-sampling
-temperature: 0.1 # controls strategy: greedy if temperature <= 0, categorical if temperature = 1.0, tempareture-scaled categorical otherwise.
+temperature: 1.0 # controls strategy: greedy if temperature <= 0, categorical if temperature = 1.0, tempareture-scaled categorical otherwise.
 data:
   l: 256
   train_split: 0.9
@@ -17,7 +17,7 @@ model:
   dim_feedforward: 1024
   dropout: 0.1
   layer_norm_eps: 0.0002
-  T: 500
+  T: 256
   sampling_eps: 0.00001
   eos_weight: 10.0
   inverse_t: False
@@ -32,9 +32,9 @@ validation:
   val_every: 1000
 evaluation:
   eval_every: 5000
-  n_samples: 0
-  eval_dataset: complete # limited or randomised or complete
-  eval_type: full # full or random
+  n_samples: 1
+  eval_dataset: unconditional # limited or randomised or complete
+  eval_type: random # full or random
   cutoff: 256
 investigation:
   n_first_tokens: 258 # how many first tokens to investigate the distribution of
@@ -45,5 +45,5 @@ wandb:
 paths:
   models_dir: models
   figures_dir: figures
-  experiment_name: oracle-update-high-temp
+  experiment_name: oracle-eval-june
 notes: "Oracle full categorical evaluation (temp 1.0)"

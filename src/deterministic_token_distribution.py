@@ -15,11 +15,12 @@ class oracleModel(nn.Module):
         self.architecture = 'diffusion'
         self.oracle = True
     
-    def forward(self, X):
-        # X shape: (L,)
-        # output shape: (L, vocab_size)
-        pred = determineTokenDistribution(X, vocab_size=self.vocab_size, device=self.device)
-        return pred
+    def forward(self, X, timestep=None):
+        # X shape: (L,) or (1, L); output shape: (L, vocab_size) or (1, L, vocab_size)
+        status, result = determineTokenDistribution(X, vocab_size=self.vocab_size, device=self.device)
+        if status is None:
+            raise ValueError(result)
+        return result
 
 
 def determineTokenDistribution(seq, vocab_size, device):
@@ -120,7 +121,7 @@ def determineTokenDistribution(seq, vocab_size, device):
     if expected_prob.sum(-1).min() != total or expected_prob.sum(-1).max() != total:
         print('Error in implementation! This should not happen. The expected probabilities should sum to the total number of valid completions for each token position.')
         exit(1)
-    
+            
     expected_prob /= total
     return ('expected_prob', expected_prob)
     

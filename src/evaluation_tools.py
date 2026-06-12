@@ -278,7 +278,7 @@ def evaluation_from_generation(model,
         for idx, s in enumerate(tqdm(evaluation_dataset.data)):
             total += 1
             
-            if model.architecture == 'diffusion':
+            if model.architecture not in ('autoregressive', 'RE'):
                 if write_steps == False:
                     y_pred = unmaskModel(s, ((s == MASK_token).sum() / torch.numel(s)), strategy, temperature=temperature) # no batch dimension
                 else:
