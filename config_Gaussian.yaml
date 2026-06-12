@@ -1,7 +1,7 @@
 seed: 42
 device: auto
 strategy: None # (redundant) categorical or temperature-sampling
-temperature: 0.000001 # controls strategy: greedy if temperature <= 0, categorical if temperature = 1.0, tempareture-scaled categorical otherwise.
+temperature: 0 # controls strategy: greedy if temperature <= 0, categorical if temperature = 1.0, tempareture-scaled categorical otherwise.
 data:
   l: 256
   train_split: 0.9
@@ -31,13 +31,13 @@ training:
   gaussian_noise: True
   denoise: "0" # "0" or eps
 schedule:
-  type: gaussian  # categorical or gaussian
-  sigma: 1.0         # Gaussian width parameter; ignored when type=categorical
+  type: categorical  # categorical or gaussian
+  sigma: 20.0         # Gaussian width parameter; ignored when type=categorical
 validation:
   val_every: 1
 evaluation:
   eval_every: 1
-  n_samples: 10
+  n_samples: 100
   eval_dataset: unconditional # limited or randomised or complete
   eval_type: random # full or random
   cutoff: 258

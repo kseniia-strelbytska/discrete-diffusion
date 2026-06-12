@@ -229,6 +229,7 @@ def main():
 
     schedule = get_schedule(cfg, args)
     print(f"Noise schedule: {schedule.__class__.__name__}")
+    schedule.plot(cfg.model.max_len, device, PROJECT_ROOT / "noise_schedule.png")
 
     dataset = NoiseScheduleDataset(
         grammar.data, device,
@@ -520,10 +521,7 @@ def main():
             model = model.to(device)
 
         for iter_eval_dataset in [
-            cfg.evaluation.eval_dataset,
-            "complete",
-            "limited",
-            "randomised",
+            cfg.evaluation.eval_dataset
         ]:
             print(f"Evaluation dataset: {iter_eval_dataset}")
             current_evaluation_dataset = EvaluationDataset(

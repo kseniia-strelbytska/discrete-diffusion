@@ -8,9 +8,10 @@ metric:
 method: grid
 parameters:
   model.T:
-    values: [10, 50, 100, 200]
+    values: [8, 32, 64, 128, 256, 512, 768, 1024, 1280, 1792, 2048]
 command:
   - python
   - src/eval_oracle_T.py
   - --config
   - config_oracle_T_sweep.yaml
+  - --save

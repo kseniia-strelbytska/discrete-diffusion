@@ -116,11 +116,13 @@ class ScheduledUnmasker(nn.Module):
                     content_probs = scaled_logits  # already probabilities
                 else:
                     content_probs = torch.softmax(scaled_logits, dim=-1)
-                
+                            
+                indices = (X != MASK_token).nonzero()                
                 probs = torch.zeros_like(logits)
 
                 weight = ((alpha_s - alpha_t) / (1 - alpha_t)).clamp(min=0.0)
                 mask_prob = ((1 - alpha_s) / (1 - alpha_t)).clamp(min=0.0, max=1.0)
+                                
                 # alpha tensors are (1, L); reshape for correct broadcast with (L, vocab-1)
                 weight = weight.squeeze(0).unsqueeze(-1)   # (L, 1)
                 mask_prob = mask_prob.squeeze(0)            # (L,)
