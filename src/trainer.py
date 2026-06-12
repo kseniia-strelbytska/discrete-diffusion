@@ -4,7 +4,6 @@ import numpy as np
 from tqdm import tqdm
 from datetime import datetime
 
-from gaussian.gaussian_loss import GaussianLoss
 from loss import rblb
 from schedules.noise_schedule_loss import NoiseScheduleLoss
 from evaluation_tools import evaluation_from_generation
@@ -50,8 +49,6 @@ def train(
     if schedule is not None:
         loss_fn = NoiseScheduleLoss(device, vocab_size=model.vocab_size, schedule=schedule, T=T,
                                     sampling_eps=model.sampling_eps, eos_weight=eos_weight)
-    elif gaussian_noise:
-        loss_fn = GaussianLoss(device, vocab_size=model.vocab_size, T=T, sigma=sigma, sampling_eps=model.sampling_eps, eos_weight=eos_weight, inverse_t=inverse_t)
     else:
         loss_fn = rblb(device, vocab_size=model.vocab_size, T=T, sampling_eps=model.sampling_eps, eos_weight=eos_weight, inverse_t=inverse_t, loss_type=loss_type)
 

@@ -23,7 +23,7 @@ model:
   eos_weight: 2.0
   inverse_t: False
 training:
-  epochs: 50000
+  epochs: 10
   learning_rate: 0.001
   num_warmup_steps: 1000
   weight_decay: 0.01
@@ -34,10 +34,10 @@ schedule:
   type: gaussian  # categorical or gaussian
   sigma: 1.0         # Gaussian width parameter; ignored when type=categorical
 validation:
-  val_every: 1000
+  val_every: 1
 evaluation:
-  eval_every: 5000
-  n_samples: 200
+  eval_every: 1
+  n_samples: 10
   eval_dataset: unconditional # limited or randomised or complete
   eval_type: random # full or random
   cutoff: 258
