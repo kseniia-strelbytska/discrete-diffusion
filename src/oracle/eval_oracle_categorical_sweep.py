@@ -67,7 +67,7 @@ if str(_SRC) not in sys.path:
     sys.path.insert(0, str(_SRC))
 
 from datasets.anbn import anbnGrammar
-from oracle.deterministic_token_distribution import oracleModel
+from oracle.grammar_oracles import oracleModel
 from evaluation_tools import EvaluationDataset, evaluation_from_generation
 from schedules import GaussianSchedule
 
@@ -367,7 +367,7 @@ def _run(args, device, out_dir):
     print(f"  actual samples: {eval_ds.data.shape[0]}")
 
     # Oracle is stateless — one instance reused across all cells.
-    oracle = oracleModel(vocab_size=VOCAB_SIZE, device=device)
+    oracle = oracleModel(grammar_name='anbn', vocab_size=VOCAB_SIZE, device=device)
 
     results = {}
     total_cells = len(T_VALUES) * len(SIGMA_VALUES)

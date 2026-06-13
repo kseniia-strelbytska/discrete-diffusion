@@ -13,7 +13,8 @@ from noise_schedule_unmask import ScheduledUnmasker
 from datasets.constants import EOS_token, SOS_token, PAD_token, MASK_token
 from datasets.evaluation_dataset import EvaluationDataset  # re-exported for backward compat
 from AR_generation_and_predictions import get_prediction
-from oracle.deterministic_token_distribution import oracleModel, determineTokenDistribution
+from oracle.grammar_oracles import oracleModel
+from oracle.deterministic_token_distribution import determineTokenDistribution
 from attention_maps import attach_attention_hooks, extract_attention_maps, remove_hooks
 
 def _attention_grid_to_base64(attn_maps, seq_tokens, max_tokens=24):
@@ -151,7 +152,8 @@ def evaluation_from_generation(model,
 
     print(f"Evaluation on data, shape: f{evaluation_dataset.data.shape}")
     _is_oracle_model = model.oracle if hasattr(model, 'oracle') else False
-    _oracle_for_eval = None if _is_oracle_model else oracleModel(vocab_size=model.vocab_size, device=device)
+    _grammar_name = getattr(grammar, 'grammar_name', 'anbn')
+    _oracle_for_eval = None if _is_oracle_model else oracleModel(grammar_name=_grammar_name, vocab_size=model.vocab_size, device=device)
     unmaskModel = ScheduledUnmasker(model, device, T=T, denoise=denoise,
                                     oracle=_is_oracle_model, oracle_model=_oracle_for_eval,
                                     schedule=schedule, gaussian_noise=gaussian_noise, sigma=sigma)

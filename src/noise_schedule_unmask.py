@@ -71,6 +71,7 @@ class ScheduledUnmasker(nn.Module):
             for i in range(num_steps):
                 if timesteps[i] <= 0:
                     break
+                
                 # Linear schedule: α_t = 1 - t, where α_t is the propotion of original content retained at step t.
                 # t = 0 (clean data) => α_t = 1, t = 1 (fully masked) => α_t = 0
                 # s < t => α_s > α_t => more content retained at step s than t.
@@ -111,35 +112,41 @@ class ScheduledUnmasker(nn.Module):
                         break
                 
                 # Convert to probabilities (x_θ in the paper)
-                scaled_logits = logits[:, :-1] / temperature if temperature > 0 else logits[:, :-1]
+                # MASK_token (=5) is not the last token for grammars with vocab_size > 6,
+                # so index by position rather than assuming MASK is at :-1.
+                V = logits.shape[-1]
+                content_idx = torch.tensor([i for i in range(V) if i != MASK_token],
+                                           device=logits.device, dtype=torch.long)
+                raw_content = logits[:, content_idx]  # (L, V-1)
+                scaled_logits = raw_content / temperature if temperature > 0 else raw_content
                 if self.oracle:
                     content_probs = scaled_logits  # already probabilities
                 else:
                     content_probs = torch.softmax(scaled_logits, dim=-1)
-                            
-                indices = (X != MASK_token).nonzero()                
+
+                indices = (X != MASK_token).nonzero()
                 probs = torch.zeros_like(logits)
 
                 weight = ((alpha_s - alpha_t) / (1 - alpha_t)).clamp(min=0.0)
                 mask_prob = ((1 - alpha_s) / (1 - alpha_t)).clamp(min=0.0, max=1.0)
-                                
-                # alpha tensors are (1, L); reshape for correct broadcast with (L, vocab-1)
+
+                # alpha tensors are (1, L); reshape for correct broadcast with (L, V-1)
                 weight = weight.squeeze(0).unsqueeze(-1)   # (L, 1)
                 mask_prob = mask_prob.squeeze(0)            # (L,)
-                probs[:, :-1] = content_probs * weight
-                probs[:, -1] = mask_prob
-                
+                probs[:, content_idx] = content_probs * weight
+                probs[:, MASK_token] = mask_prob
+
                 # Positions where p_mask_t=0 produce 0/0=NaN; they are unmasked in X so
                 # won't be used, but multinomial requires every row to be valid.
                 probs = probs.nan_to_num(nan=0.0, posinf=0.0, neginf=0.0)
                 zero_rows = probs.sum(dim=-1) == 0
-                probs[zero_rows, -1] = 1.0  # fallback: sample MASK (position stays unmasked)
-                
+                probs[zero_rows, MASK_token] = 1.0  # fallback: stay masked
+
                 if temperature <= 0:
                     # Schedule still decides WHICH positions unmask (stochastic);
                     # greedy only picks the content token for those that do.
                     unmask = torch.rand(L, device=self.device) < (1 - mask_prob)   # mask_prob is (L,)
-                    greedy_tok = content_probs.argmax(dim=-1)                       # argmax over content only
+                    greedy_tok = content_idx[content_probs.argmax(dim=-1)]          # map argmax back to vocab IDs
                     sampled_X = torch.where(unmask, greedy_tok, torch.full_like(greedy_tok, MASK_token))
                 else:
                     sampled_X = torch.multinomial(probs, 1).squeeze(-1)
@@ -163,11 +170,16 @@ class ScheduledUnmasker(nn.Module):
                     logits = self.model(X.unsqueeze(0), timesteps[i].unsqueeze(0))[0]
 
                 if do_mopup:
-                    probs = torch.softmax(logits[:, :-1], dim=-1)
+                    V_mu = logits.shape[-1]
+                    content_idx_mu = torch.tensor([i for i in range(V_mu) if i != MASK_token],
+                                                  device=logits.device, dtype=torch.long)
+                    probs_content = torch.softmax(logits[:, content_idx_mu], dim=-1)
                     if temperature <= 0:
-                        sampled_X = probs.argmax(dim=-1)
+                        sampled_X = content_idx_mu[probs_content.argmax(dim=-1)]
                     else:
-                        sampled_X = torch.multinomial(probs, 1).squeeze(-1)
+                        probs_full = torch.zeros_like(logits)
+                        probs_full[:, content_idx_mu] = probs_content
+                        sampled_X = torch.multinomial(probs_full, 1).squeeze(-1)
                     X[X == MASK_token] = sampled_X[X == MASK_token]
                     steps.append(X.clone())
                     timesteps_log.append(timesteps[-1] - dt)

@@ -39,7 +39,7 @@ from models.model_T5 import T5RPETransformerClassifier
 from models.AR_model_AR import ARTransformerClassifier
 from models.AR_model_RE import TransformerDecoder
 from models.model_timestep import TimestepTransformerClassifier
-from oracle.deterministic_token_distribution import oracleModel
+from oracle.grammar_oracles import oracleModel
 
 def dict_to_ns(d):
     return SimpleNamespace(
@@ -233,6 +233,8 @@ def main():
 
     grammar = get_grammar(cfg.data.grammar, cfg.data.l)
     grammar.generate_seq()  # generates the data and stores in grammar.data
+    
+    print(f'Sample of generated grammar data:\n{grammar.data[0:5, 0:20]}')
 
     schedule = get_schedule(cfg, args)
     print(f"Noise schedule: {schedule.__class__.__name__}")
@@ -392,8 +394,9 @@ def main():
         ).to(device)
     elif cfg.model.architecture == "oracle":
         model = oracleModel(
+            grammar_name=cfg.data.grammar,
             vocab_size=cfg.model.vocab_size,
-            device=device
+            device=device,
         ).to(device)
     else:
         raise ValueError(f"Invalid model architecture: {cfg.model.architecture}")
@@ -445,7 +448,7 @@ def main():
                                      T=cfg.model.T,
                                      denoise=cfg.training.denoise,
                                      oracle=(cfg.model.architecture == "oracle"),
-                                     oracle_model=oracleModel(vocab_size=model.vocab_size, device=device) if cfg.model.architecture != "oracle" else None,
+                                     oracle_model=oracleModel(grammar_name=cfg.data.grammar, vocab_size=model.vocab_size, device=device) if cfg.model.architecture != "oracle" else None,
                                      schedule=schedule)
         
         sample = torch.full((cfg.model.max_len,), MASK_token, dtype=torch.long).to(device)
@@ -478,7 +481,7 @@ def main():
                                      T=cfg.model.T,
                                      denoise=cfg.training.denoise,
                                      oracle=(cfg.model.architecture == "oracle"),
-                                     oracle_model=oracleModel(vocab_size=model.vocab_size, device=device) if cfg.model.architecture != "oracle" else None,
+                                     oracle_model=oracleModel(grammar_name=cfg.data.grammar, vocab_size=model.vocab_size, device=device) if cfg.model.architecture != "oracle" else None,
                                      schedule=schedule)
 
         investigate_dataset(model, 

@@ -5,3 +5,4 @@ tqdm
 pyyaml
 transformers
 wandb
+pytest

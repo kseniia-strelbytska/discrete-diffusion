@@ -7,6 +7,8 @@ from .constants import EOS_token, SOS_token, PAD_token, MASK_token
 
 
 class initialGrammar(FormalGrammar):
+    grammar_name = 'initial'
+
     def __init__(self, l):
         super().__init__(l)
         self.data = None

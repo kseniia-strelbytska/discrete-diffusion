@@ -35,7 +35,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from datasets.anbn import anbnGrammar
 from datasets.initialgrammar import initialGrammar
-from oracle.deterministic_token_distribution import oracleModel
+from oracle.grammar_oracles import oracleModel
 from evaluation_tools import EvaluationDataset, evaluation_from_generation
 from schedules import CategoricalSchedule, GaussianSchedule
 
@@ -96,7 +96,7 @@ def setup_dirs(PROJECT_ROOT, cfg, config_path, save_mode):
 
 def eval_one_T(cfg, device, grammar, schedule, dirs=None, save_mode=False):
     """Run evaluation for a single T value (cfg.model.T). Returns a metrics dict."""
-    model = oracleModel(vocab_size=cfg.model.vocab_size, device=device)
+    model = oracleModel(grammar_name=cfg.data.grammar, vocab_size=cfg.model.vocab_size, device=device)
 
     dataset = EvaluationDataset(
         l=cfg.data.l,

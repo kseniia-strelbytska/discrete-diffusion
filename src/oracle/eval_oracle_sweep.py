@@ -58,7 +58,7 @@ if str(_SRC) not in sys.path:
     sys.path.insert(0, str(_SRC))
 
 from datasets.anbn import anbnGrammar
-from oracle.deterministic_token_distribution import oracleModel
+from oracle.grammar_oracles import oracleModel
 from evaluation_tools import EvaluationDataset, evaluation_from_generation
 from schedules import CategoricalSchedule, GaussianSchedule
 
@@ -348,7 +348,7 @@ def _run(args, device, out_dir):
         print(f"  T={cfg.model.T}, label={label!r}")
 
         # The oracle model is stateless — one instance suffices for all evals.
-        oracle = oracleModel(vocab_size=cfg.model.vocab_size, device=device)
+        oracle = oracleModel(grammar_name=cfg.data.grammar, vocab_size=cfg.model.vocab_size, device=device)
 
         for ds_type in DATASET_TYPES:
             eval_ds = eval_datasets[ds_type]
