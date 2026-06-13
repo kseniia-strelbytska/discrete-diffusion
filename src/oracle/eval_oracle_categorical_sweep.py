@@ -66,10 +66,27 @@ _SRC = Path(__file__).resolve().parent.parent
 if str(_SRC) not in sys.path:
     sys.path.insert(0, str(_SRC))
 
-from datasets.anbn import anbnGrammar
 from oracle.grammar_oracles import oracleModel
 from evaluation_tools import EvaluationDataset, evaluation_from_generation
 from schedules import GaussianSchedule
+
+# ---------------------------------------------------------------------------
+# Supported oracle grammars and grammar factory
+# ---------------------------------------------------------------------------
+
+ORACLE_GRAMMARS = [
+    'anbn', 'baN', 'bbaN', 'aNbNcN',
+    'not_nested_parentheses_and_brackets', 'parentheses_and_brackets',
+]
+
+
+def make_grammar(grammar_name, l):
+    if grammar_name == 'anbn':
+        from datasets.anbn import anbnGrammar
+        return anbnGrammar(l)
+    from datasets.re_grammar import REGrammar
+    return REGrammar(grammar_name, l)
+
 
 # ---------------------------------------------------------------------------
 # Experiment grid
@@ -79,9 +96,6 @@ SIGMA_VALUES = [1, 5, 20, 40, 160]
 
 TEMPERATURE  = 1.0      # categorical only
 DATASET_TYPE = 'unconditional'
-GRAMMAR_L    = 256      # a^n b^n max n; max_len = L+2 = 258
-VOCAB_SIZE   = 6
-CUTOFF       = GRAMMAR_L + 2   # = 258
 
 
 # ---------------------------------------------------------------------------
@@ -104,7 +118,7 @@ def get_device():
     return torch.device('cpu')
 
 
-def evaluate_one(oracle, grammar, eval_dataset, T, schedule, device):
+def evaluate_one(oracle, grammar, eval_dataset, T, schedule, device, cutoff):
     """Single evaluation pass. Returns both_rules_acc (float)."""
     stats, _, _, _, _ = evaluation_from_generation(
         oracle,
@@ -123,7 +137,7 @@ def evaluate_one(oracle, grammar, eval_dataset, T, schedule, device):
         gaussian_noise=True,
         sigma=schedule.sigma,
         denoise='0',
-        cutoff=CUTOFF,
+        cutoff=cutoff,
     )
     return float(stats[2])  # both_rules_acc
 
@@ -132,7 +146,7 @@ def evaluate_one(oracle, grammar, eval_dataset, T, schedule, device):
 # Output formatting
 # ---------------------------------------------------------------------------
 
-def make_2d_table(results, n_samples, n_evals):
+def make_2d_table(results, n_samples, n_evals, grammar_name):
     """
     Build an aligned 2-D text table.
     results: dict keyed by (T, sigma) -> (mean, std)
@@ -151,7 +165,7 @@ def make_2d_table(results, n_samples, n_evals):
     lines = [
         f"\n=== Oracle categorical (temp={TEMPERATURE}) — both_rules_acc  "
         f"mean ± std  (n_evals={n_evals}, n_samples={n_samples}) ===",
-        f"=== Dataset: {DATASET_TYPE} ===",
+        f"=== Grammar: {grammar_name}  Dataset: {DATASET_TYPE} ===",
         "",
         header,
         sep,
@@ -187,7 +201,7 @@ def save_csv(results, n_evals, out_dir):
     print(f"\nCSV saved to: {out_path}")
 
 
-def write_description(out_dir, args):
+def write_description(out_dir, args, grammar_name, grammar_l, cutoff):
     path = Path(out_dir) / 'experiment_description.txt'
     lines = [
         "Experiment: Oracle model — categorical decoding — T × sigma sweep",
@@ -195,9 +209,9 @@ def write_description(out_dir, args):
         "",
         "Purpose",
         "-------",
-        "Establish a theoretical upper bound on both-rules accuracy for the",
-        "a^n b^n discrete-diffusion task as a function of the number of",
-        "denoising steps T and the Gaussian schedule width sigma.",
+        "Establish a theoretical upper bound on both-rules accuracy for a",
+        "discrete-diffusion grammar task as a function of denoising steps T",
+        "and Gaussian schedule width sigma.",
         "",
         "The oracle computes the exact valid-token probability distribution at",
         "every step, so its results are not limited by model approximation error.",
@@ -235,7 +249,7 @@ def write_description(out_dir, args):
         "-------",
         f"  Type   : {DATASET_TYPE}",
         f"  Samples: {args.n_samples}",
-        f"  Grammar: a^n b^n, n up to {GRAMMAR_L // 2}, max_len={CUTOFF}",
+        f"  Grammar: {grammar_name}, l={grammar_l}, max_len={cutoff}",
         "",
         "Reproducibility",
         "---------------",
@@ -311,7 +325,15 @@ def parse_args():
     )
     parser.add_argument(
         '--out-dir', type=str, default='results/oracle_categorical_eval',
-        help='Output directory (default: results/oracle_categorical_eval).',
+        help='Output directory root (default: results/oracle_categorical_eval). Results saved under <out-dir>/<grammar>/.',
+    )
+    parser.add_argument(
+        '--grammar', type=str, default='anbn', choices=ORACLE_GRAMMARS,
+        help='Grammar to evaluate (default: anbn).',
+    )
+    parser.add_argument(
+        '--grammar-l', type=int, default=256,
+        help='Max content length for the grammar (default: 256).',
     )
     return parser.parse_args()
 
@@ -325,7 +347,7 @@ def main():
 
     device = get_device()
 
-    out_dir = Path(args.out_dir)
+    out_dir = Path(args.out_dir) / args.grammar
     out_dir.mkdir(parents=True, exist_ok=True)
 
     log_path = out_dir / 'run.log'
@@ -344,18 +366,25 @@ def main():
 
 
 def _run(args, device, out_dir):
+    grammar_l = args.grammar_l
+    cutoff    = grammar_l + 2
+
     print(f"Device: {device}")
+    print(f"Grammar: {args.grammar}  l={grammar_l}  cutoff={cutoff}")
     print(f"Grid: T={T_VALUES}  sigma={SIGMA_VALUES}")
     print(f"Temperature: {TEMPERATURE} (categorical)  n_evals: {args.n_evals}  n_samples: {args.n_samples}")
 
     set_seed(args.seed)
-    grammar = anbnGrammar(GRAMMAR_L)
+    grammar = make_grammar(args.grammar, grammar_l)
     grammar.generate_seq()
+    vocab_size = getattr(grammar, 'vocab_size', 6)
+    oracle = oracleModel(grammar_name=args.grammar, vocab_size=vocab_size, device=device)
+    print(f"vocab_size={oracle.vocab_size}")
 
     print(f"\nBuilding {DATASET_TYPE} dataset ({args.n_samples} samples)...")
     set_seed(args.seed)
     eval_ds = EvaluationDataset(
-        l=GRAMMAR_L,
+        l=grammar_l,
         eval_dataset=DATASET_TYPE,
         eval_type='random',
         n_samples=args.n_samples,
@@ -365,9 +394,6 @@ def _run(args, device, out_dir):
     )
     eval_ds.data = eval_ds.data.to(device)
     print(f"  actual samples: {eval_ds.data.shape[0]}")
-
-    # Oracle is stateless — one instance reused across all cells.
-    oracle = oracleModel(grammar_name='anbn', vocab_size=VOCAB_SIZE, device=device)
 
     results = {}
     total_cells = len(T_VALUES) * len(SIGMA_VALUES)
@@ -384,7 +410,7 @@ def _run(args, device, out_dir):
                 # Unique seed per (T, sigma, eval_i)
                 cell_seed = args.seed + T_idx * 100_000 + sigma_idx * 1_000 + eval_i
                 set_seed(cell_seed)
-                acc = evaluate_one(oracle, grammar, eval_ds, T, schedule, device)
+                acc = evaluate_one(oracle, grammar, eval_ds, T, schedule, device, cutoff)
                 accs.append(acc)
                 print(f"  eval {eval_i + 1:>2}/{args.n_evals}  seed={cell_seed}  acc={acc:.4f}")
 
@@ -400,7 +426,7 @@ def _run(args, device, out_dir):
     print('RESULTS')
     print('=' * 60)
 
-    table = make_2d_table(results, eval_ds.data.shape[0], args.n_evals)
+    table = make_2d_table(results, eval_ds.data.shape[0], args.n_evals, args.grammar)
     print(table)
 
     save_csv(results, args.n_evals, out_dir)
@@ -409,7 +435,7 @@ def _run(args, device, out_dir):
     table_path.write_text(table + '\n')
     print(f"Table saved to: {table_path}")
 
-    write_description(out_dir, args)
+    write_description(out_dir, args, args.grammar, grammar_l, cutoff)
 
 
 if __name__ == '__main__':

@@ -33,8 +33,6 @@ import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from datasets.anbn import anbnGrammar
-from datasets.initialgrammar import initialGrammar
 from oracle.grammar_oracles import oracleModel
 from evaluation_tools import EvaluationDataset, evaluation_from_generation
 from schedules import CategoricalSchedule, GaussianSchedule
@@ -61,9 +59,14 @@ def get_device(cfg_device):
 
 def get_grammar(grammar_type, l):
     if grammar_type == "anbn":
+        from datasets.anbn import anbnGrammar
         return anbnGrammar(l)
     if grammar_type == "initial":
+        from datasets.initialgrammar import initialGrammar
         return initialGrammar(l)
+    from datasets.re_grammar import REGrammar
+    if grammar_type in REGrammar.SUPPORTED:
+        return REGrammar(grammar_type, l)
     raise ValueError(f"Unknown grammar: {grammar_type!r}")
 
 
@@ -80,7 +83,7 @@ def setup_dirs(PROJECT_ROOT, cfg, config_path, save_mode):
     """Mirror main.py's setup_experiment_dirs for this script."""
     FIGURES_DIR = PROJECT_ROOT / cfg.paths.figures_dir
     experiment_path = cfg.paths.experiment_name + f'_{datetime.now().strftime("%d%m%Y_%H%M%S")}/'
-    figure_path = FIGURES_DIR / experiment_path
+    figure_path = FIGURES_DIR / cfg.data.grammar / experiment_path
     loss_log_path = figure_path / "loss_log.txt"
     output_path = figure_path / "outputs.txt"
     if save_mode:
@@ -242,6 +245,10 @@ def main():
         help="Run all listed T values in one wandb run and produce a comparison plot",
     )
     parser.add_argument("--save", action="store_true", help="Save outputs and figures to disk")
+    parser.add_argument(
+        "--grammar", type=str, default=None,
+        help="Override cfg.data.grammar (e.g. baN, aNbNcN, parentheses_and_brackets).",
+    )
     args = parser.parse_args()
 
     base_config = load_config(args.config)
@@ -249,6 +256,8 @@ def main():
 
     if args.T is not None:
         cfg.model.T = args.T
+    if args.grammar is not None:
+        cfg.data.grammar = args.grammar
 
     # W&B sweep: one agent = one T value
     in_sweep = os.getenv("WANDB_SWEEP_ID") is not None

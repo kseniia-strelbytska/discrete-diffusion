@@ -34,9 +34,7 @@ Usage example
   python src/eval_oracle_sweep.py
 
   # Custom options:
-  python src/eval_oracle_sweep.py \\
-      --n-samples 500 --n-evals 20 --seed 2024 \\
-      --out-dir results/oracle_eval
+  python src/oracle/eval_oracle_sweep.py --n-samples 500 --n-evals 20 --seed 2024 --out-dir results/oracle_eval
 """
 
 import argparse
@@ -57,10 +55,27 @@ _SRC = Path(__file__).resolve().parent.parent
 if str(_SRC) not in sys.path:
     sys.path.insert(0, str(_SRC))
 
-from datasets.anbn import anbnGrammar
 from oracle.grammar_oracles import oracleModel
 from evaluation_tools import EvaluationDataset, evaluation_from_generation
 from schedules import CategoricalSchedule, GaussianSchedule
+
+# ---------------------------------------------------------------------------
+# Supported oracle grammars and grammar factory
+# ---------------------------------------------------------------------------
+
+ORACLE_GRAMMARS = [
+    'anbn', 'baN', 'bbaN', 'aNbNcN',
+    'not_nested_parentheses_and_brackets', 'parentheses_and_brackets',
+]
+
+
+def make_grammar(grammar_name, l):
+    if grammar_name == 'anbn':
+        from datasets.anbn import anbnGrammar
+        return anbnGrammar(l)
+    from datasets.re_grammar import REGrammar
+    return REGrammar(grammar_name, l)
+
 
 # ---------------------------------------------------------------------------
 # Sweep config directories — read T and schedule from each run's saved config
@@ -79,7 +94,6 @@ MODES = {
     'greedy':      0,
     'categorical': 1.0,
 }
-
 
 # ---------------------------------------------------------------------------
 # Helpers (mirror eval_sweep_checkpoints.py)
@@ -266,7 +280,15 @@ def parse_args():
     )
     parser.add_argument(
         '--out-dir', type=str, default='results/oracle_eval',
-        help='Output directory for CSV, table, and run.log (default: results/oracle_eval).',
+        help='Output directory root (default: results/oracle_eval). Results are saved under <out-dir>/<grammar>/.',
+    )
+    parser.add_argument(
+        '--grammar', type=str, default='anbn', choices=ORACLE_GRAMMARS,
+        help='Grammar to evaluate (default: anbn).',
+    )
+    parser.add_argument(
+        '--grammar-l', type=int, default=256,
+        help='Max content length for the grammar (default: 256).',
     )
     return parser.parse_args()
 
@@ -280,7 +302,7 @@ def main():
 
     device = get_device()
 
-    out_dir = Path(args.out_dir)
+    out_dir = Path(args.out_dir) / args.grammar
     out_dir.mkdir(parents=True, exist_ok=True)
 
     log_path = out_dir / 'run.log'
@@ -303,15 +325,18 @@ def _run(args, device, out_dir):
     print(f"Oracle model — no training required.")
 
     set_seed(args.seed)
-    grammar = anbnGrammar(256)
+    grammar = make_grammar(args.grammar, args.grammar_l)
     grammar.generate_seq()
+    vocab_size = getattr(grammar, 'vocab_size', 6)
+    oracle = oracleModel(grammar_name=args.grammar, vocab_size=vocab_size, device=device)
+    print(f"Grammar: {args.grammar}  l={args.grammar_l}  vocab_size={oracle.vocab_size}")
 
     print("\nBuilding evaluation datasets...")
     eval_datasets = {}
     for ds_type in DATASET_TYPES:
         set_seed(args.seed)
         ds = EvaluationDataset(
-            l=256,
+            l=args.grammar_l,
             eval_dataset=ds_type,
             eval_type='random',
             n_samples=args.n_samples,
@@ -346,9 +371,6 @@ def _run(args, device, out_dir):
         label = sweep_label(cfg)
         schedule = get_schedule(cfg)
         print(f"  T={cfg.model.T}, label={label!r}")
-
-        # The oracle model is stateless — one instance suffices for all evals.
-        oracle = oracleModel(grammar_name=cfg.data.grammar, vocab_size=cfg.model.vocab_size, device=device)
 
         for ds_type in DATASET_TYPES:
             eval_ds = eval_datasets[ds_type]
