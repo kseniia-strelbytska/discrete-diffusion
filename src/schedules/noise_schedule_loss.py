@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from torch import Tensor
 
-from constants import EOS_token, MASK_token
+from datasets.constants import EOS_token, MASK_token
 from schedules.noise_schedule import NoiseSchedule
 
 

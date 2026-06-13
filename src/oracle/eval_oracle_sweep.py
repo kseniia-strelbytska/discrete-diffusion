@@ -53,12 +53,12 @@ import torch
 import yaml
 
 # Add src/ to path so all project imports resolve regardless of CWD
-_SRC = Path(__file__).resolve().parent
+_SRC = Path(__file__).resolve().parent.parent
 if str(_SRC) not in sys.path:
     sys.path.insert(0, str(_SRC))
 
-from anbn import anbnGrammar
-from deterministic_token_distribution import oracleModel
+from datasets.anbn import anbnGrammar
+from oracle.deterministic_token_distribution import oracleModel
 from evaluation_tools import EvaluationDataset, evaluation_from_generation
 from schedules import CategoricalSchedule, GaussianSchedule
 

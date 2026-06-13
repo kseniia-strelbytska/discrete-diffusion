@@ -31,11 +31,11 @@ import torch
 import wandb
 import yaml
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from anbn import anbnGrammar
-from initialgrammar import initialGrammar
-from deterministic_token_distribution import oracleModel
+from datasets.anbn import anbnGrammar
+from datasets.initialgrammar import initialGrammar
+from oracle.deterministic_token_distribution import oracleModel
 from evaluation_tools import EvaluationDataset, evaluation_from_generation
 from schedules import CategoricalSchedule, GaussianSchedule
 

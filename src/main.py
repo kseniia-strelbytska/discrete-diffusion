@@ -16,28 +16,30 @@ from tqdm import tqdm
 from transformers.optimization import get_inverse_sqrt_schedule
 import wandb
 
-from anbn import anbnGrammar
-from constants import EOS_token, MASK_token, PAD_token, SOS_token
-from evaluation_tools import EvaluationDataset, evaluation_from_generation
-from initialgrammar import initialGrammar
+from datasets.anbn import anbnGrammar
+from datasets.initialgrammar import initialGrammar
+from datasets.re_grammar import REGrammar
+from datasets.constants import EOS_token, MASK_token, PAD_token, SOS_token
+from datasets.dataset import get_fixed_dataset
+from evaluation_tools import evaluation_from_generation
+from datasets.evaluation_dataset import EvaluationDataset
 from loss import rblb
 from noise_schedule_unmask import ScheduledUnmasker
-from dataset import get_fixed_dataset
 from schedules import GaussianSchedule, CategoricalSchedule, NoiseScheduleDataset
 from trainer import train
-from investigate_token_distribution import investigate_dataset
+from eval_scripts.investigate_token_distribution import investigate_dataset
 from attention_maps import attach_attention_hooks, extract_attention_maps, plot_attention_maps, remove_hooks
 
-from model import TransformerClassifier
-from model_v2 import v2TransformerClassifier
-from model_RPE import RPETransformerClassifier
-from model_RPE_KQ import RPEKQTransformerClassifier
-from model_FIRE import FIRETransformerClassifier
-from model_T5 import T5RPETransformerClassifier
-from AR_model_AR import ARTransformerClassifier
-from AR_model_RE import TransformerDecoder
-from model_timestep import TimestepTransformerClassifier
-from deterministic_token_distribution import oracleModel
+from models.model import TransformerClassifier
+from models.model_v2 import v2TransformerClassifier
+from models.model_RPE import RPETransformerClassifier
+from models.model_RPE_KQ import RPEKQTransformerClassifier
+from models.model_FIRE import FIRETransformerClassifier
+from models.model_T5 import T5RPETransformerClassifier
+from models.AR_model_AR import ARTransformerClassifier
+from models.AR_model_RE import TransformerDecoder
+from models.model_timestep import TimestepTransformerClassifier
+from oracle.deterministic_token_distribution import oracleModel
 
 def dict_to_ns(d):
     return SimpleNamespace(
@@ -83,7 +85,7 @@ def parse_args():
     parser.add_argument(
         "--config",
         type=str,
-        default="./config.yaml",
+        default="../configs/config.yaml",
         help="Path to the configuration file.",
     )
     parser.add_argument("--verbose", action="store_true", help="Enable verbose output.")
@@ -147,8 +149,13 @@ def get_grammar(cfg_data_grammar, cfg_data_l):
         return anbnGrammar(cfg_data_l)
     if cfg_data_grammar == "initial":
         return initialGrammar(cfg_data_l)
+    if cfg_data_grammar in REGrammar.SUPPORTED:
+        return REGrammar(cfg_data_grammar, cfg_data_l)
 
-    raise ValueError(f"Invalid grammar type: {cfg_data_grammar}")
+    raise ValueError(
+        f"Invalid grammar type: {cfg_data_grammar!r}. "
+        f"Valid options: 'anbn', 'initial', or any of {sorted(REGrammar.SUPPORTED)}"
+    )
 
 
 def main():
@@ -535,6 +542,7 @@ def main():
             )
             
             print(current_evaluation_dataset.data.shape)
+            print(f'Sample of evaluation data: {current_evaluation_dataset.data[:5]}')
             
             iter_output_path = dirs.output_path.parent / f"outputs_{iter_eval_dataset}.txt"
             iter_figure_path = dirs.figure_path.parent / f"figures_{iter_eval_dataset}"

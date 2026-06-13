@@ -55,20 +55,20 @@ import torch
 import yaml
 
 # Add src/ to path so all project imports resolve regardless of CWD
-_SRC = Path(__file__).resolve().parent
+_SRC = Path(__file__).resolve().parent.parent
 if str(_SRC) not in sys.path:
     sys.path.insert(0, str(_SRC))
 
-from anbn import anbnGrammar
+from datasets.anbn import anbnGrammar
 from evaluation_tools import EvaluationDataset, evaluation_from_generation
 from schedules import CategoricalSchedule, GaussianSchedule
-from model_RPE import RPETransformerClassifier
-from model import TransformerClassifier
-from model_v2 import v2TransformerClassifier
-from model_RPE_KQ import RPEKQTransformerClassifier
-from model_FIRE import FIRETransformerClassifier
-from model_T5 import T5RPETransformerClassifier
-from model_timestep import TimestepTransformerClassifier
+from models.model_RPE import RPETransformerClassifier
+from models.model import TransformerClassifier
+from models.model_v2 import v2TransformerClassifier
+from models.model_RPE_KQ import RPEKQTransformerClassifier
+from models.model_FIRE import FIRETransformerClassifier
+from models.model_T5 import T5RPETransformerClassifier
+from models.model_timestep import TimestepTransformerClassifier
 
 # ---------------------------------------------------------------------------
 # Sweep checkpoint directories (absolute paths)

@@ -9,10 +9,14 @@ import html
 from pathlib import Path
 from tqdm import tqdm
 
-from constants import MASK_token, PAD_token, SOS_token, EOS_token
-from deterministic_token_distribution import determineTokenDistribution
-from model_RPE import RPETransformerClassifier
-from anbn import anbnGrammar
+import sys
+from pathlib import Path as _Path
+sys.path.insert(0, str(_Path(__file__).resolve().parent.parent))
+
+from datasets.constants import MASK_token, PAD_token, SOS_token, EOS_token
+from oracle.deterministic_token_distribution import determineTokenDistribution
+from models.model_RPE import RPETransformerClassifier
+from datasets.anbn import anbnGrammar
 from evaluation_tools import EvaluationDataset, evaluation_from_generation
 from attention_maps import attach_attention_hooks, extract_attention_maps, remove_hooks
 

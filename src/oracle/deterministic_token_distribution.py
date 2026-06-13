@@ -4,7 +4,7 @@ import random
 from tqdm import tqdm
 from itertools import product
 import numpy as np
-from constants import SOS_token, EOS_token, PAD_token, MASK_token
+from datasets.constants import SOS_token, EOS_token, PAD_token, MASK_token
 from noise_schedule_unmask import ScheduledUnmasker
 
 class oracleModel(nn.Module):

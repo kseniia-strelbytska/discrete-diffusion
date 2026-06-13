@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import numpy as np
-from constants import EOS_token, SOS_token, PAD_token, MASK_token
+from datasets.constants import EOS_token, SOS_token, PAD_token, MASK_token
 
 # Producing sampled tokens using vectorization
 class ScheduledUnmasker(nn.Module):

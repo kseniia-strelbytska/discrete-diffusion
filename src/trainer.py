@@ -6,7 +6,7 @@ from datetime import datetime
 
 from loss import rblb
 from schedules.noise_schedule_loss import NoiseScheduleLoss
-from evaluation_tools import evaluation_from_generation
+from evaluation_tools import evaluation_from_generation  # noqa: F401 (re-exported from evaluation_tools)
 from transformers.optimization import get_inverse_sqrt_schedule
 import wandb
 

@@ -10,11 +10,10 @@ import io
 import html
 from tqdm import tqdm
 from noise_schedule_unmask import ScheduledUnmasker
-from constants import EOS_token, SOS_token, PAD_token, MASK_token
-from anbn import anbnGrammar
-from dataset import Dataset, get_fixed_dataset
+from datasets.constants import EOS_token, SOS_token, PAD_token, MASK_token
+from datasets.evaluation_dataset import EvaluationDataset  # re-exported for backward compat
 from AR_generation_and_predictions import get_prediction
-from deterministic_token_distribution import oracleModel, determineTokenDistribution
+from oracle.deterministic_token_distribution import oracleModel, determineTokenDistribution
 from attention_maps import attach_attention_hooks, extract_attention_maps, remove_hooks
 
 def _attention_grid_to_base64(attn_maps, seq_tokens, max_tokens=24):
@@ -61,122 +60,6 @@ def _attention_grid_to_base64(attn_maps, seq_tokens, max_tokens=24):
     buffer.seek(0)
     return base64.b64encode(buffer.read()).decode('utf-8')
 
-
-class EvaluationDataset():
-    '''
-    Expected init parameters:
-        l: Length of strings (excluding SOS/EOS)
-        eval_dataset: Type of dataset (see below)
-        eval_type: Eval type is either 'full' or 'random'
-        n_samples: number of samples to take if eval_type='random'
-        
-    The class holds:
-        self.full_data: full dataset of eval_dataset type 
-        self.sampled_data: n_samples random samples (without repetition) from full_data
-        self.data: data to use, self.full_data if eval_type if full, otherwise is self.sampled_data
-    
-    Three types of datasets are available.
-    All prompts are autoregressive prompts, prepened with SOS 
-    -- limited:
-        Contains l samples. l is the maximum string length (exlusing SOS/EOS) seen during training. 
-        Consider 1 <= l0 <= l / 2. For each, add inputs:
-        000...0 (l0 zeros) and 
-        000...01 (l0 zeros and one '1')
-    -- randomised
-        Contains 100 samples.
-        Consider 8 <= l0 <= 32. For each, make 4 samples of l1, s.t. 1 <= l1 <= l0:
-        000...011..1 (l0 zeros and l1 ones)
-    -- complete
-        All sequences of length 64 that can be completed according to the grammar
-    '''
-    
-    def __init__(self, l, eval_dataset, eval_type='full', n_samples=100, T=None, sampling_eps=None, device=None):
-        self.l = l
-        self.eval_dataset = eval_dataset
-        self.eval_type = eval_type
-        self.n_samples = n_samples
-        self.T = T
-        self.sampling_eps = sampling_eps
-        self.device = device
-        
-        self.full_data = []
-        if eval_dataset == 'limited':
-            self._init_limited()
-        elif eval_dataset == 'randomised':
-            self._init_randomised()
-        elif eval_dataset == 'complete':
-            self._init_complete()
-        elif eval_dataset == 'diffusion':
-            self._init_diffusion()
-        elif eval_dataset == 'unconditional':
-            self._init_unconditional()
-        
-        self.sampled_data = self.full_data.clone()[torch.randperm(self.full_data.shape[0])][:n_samples]
-        self.data = self.full_data.clone() if eval_type == 'full' else self.sampled_data
-         
-    def _init_limited(self):
-        '''
-        For each l0 in [1, l//2], we add two sequences: 
-        000...0 (l0 zeros) and 
-        000...01 (l0 zeros and one '1')
-        
-        Total samples: l//2 (l0 values) * 2 (sequences per l0) = l samples
-        '''
-        for l0 in range(1, self.l // 2 + 1):
-            self.full_data.append(torch.tensor([SOS_token] + [0]*l0 + [MASK_token]*(self.l + 1 - l0)).unsqueeze(0))
-            self.full_data.append(torch.tensor([SOS_token] + [0]*l0 + [1] + [MASK_token]*(self.l - l0)).unsqueeze(0))
-        
-        self.full_data = torch.cat(self.full_data, dim=0)
-        
-    def _init_randomised(self):
-        '''
-        For each l0 (# of zeros) in [8, 32], we sample 4 values of l1 (# of ones) in [1, l0], 
-        and add the corresponding sequence.
-        '''
-        for l0 in range(8, 33):
-            # range [1, l0]
-            sampled_l1 = torch.randperm(l0)[:4] + 1 
-            for l1 in sampled_l1:
-                self.full_data.append(torch.tensor([SOS_token] + [0]*l0 + [1]*l1 + [MASK_token] * (self.l + 1 - l0 - l1)).unsqueeze(0))
-                
-        self.full_data = torch.cat(self.full_data, dim=0)
-        
-    def _init_complete(self):
-        '''
-        For each l0 in [32, 64], we add the sequence with l0 zeros and l1 ones, where l1 = 64 - l0.
-        
-        Total samples: 33 (l0 values) * 34 / 2 = 561
-        '''
-        
-        for l0 in range(32, 65):
-            for l1 in range(0, 64-l0+1):
-                self.full_data.append(torch.tensor([SOS_token] + [0]*l0 + [1]*l1 + [MASK_token] * (self.l + 1 - l0 - l1)).unsqueeze(0))
-        
-        self.full_data = torch.cat(self.full_data, dim=0)
-    
-    def _init_diffusion(self):
-        grammar = anbnGrammar(self.l)
-        grammar.generate_seq()  # generates the data and stores in grammar.data
-        grammar.data = grammar.data[torch.randperm(grammar.data.shape[0])]
-        dataset = Dataset(
-            grammar.data, 
-            self.device,
-            self.T,
-            self.sampling_eps
-            )
-        fixed_dataset = get_fixed_dataset(dataset, self.device, batch_size=self.l//2)
-
-        self.full_data = fixed_dataset[0][0]
-        
-    def _init_unconditional(self):
-        '''
-        Fully masked sequences. 
-        
-        500 samples.
-        
-        '''
-        
-        self.full_data = torch.concat([torch.full((500, 1), SOS_token).long(), torch.full((500, self.l + 1), MASK_token).long()], dim=1)
 
 
 def evaluation_loss(model, dataloader, device):

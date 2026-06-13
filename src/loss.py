@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from constants import EOS_token, SOS_token, PAD_token, MASK_token
+from datasets.constants import EOS_token, SOS_token, PAD_token, MASK_token
 
 class rblb(nn.Module):
     def __init__(self, device, vocab_size, T, sampling_eps=1e-5, eos_weight=10.0, inverse_t=False, loss_type="eq8"):

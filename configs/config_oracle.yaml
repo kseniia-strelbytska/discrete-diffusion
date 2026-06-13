@@ -6,7 +6,7 @@ data:
   l: 500
   train_split: 0.9
   batch_size: 64
-  grammar: anbn
+  grammar: aNbNcN
 model:
   architecture: oracle # classic (torch-native) or v2 (QKV low-level) or RPE or FIRE
   max_len: 502       
