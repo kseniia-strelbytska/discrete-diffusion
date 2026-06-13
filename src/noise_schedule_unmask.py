@@ -128,6 +128,7 @@ class ScheduledUnmasker(nn.Module):
                 mask_prob = mask_prob.squeeze(0)            # (L,)
                 probs[:, :-1] = content_probs * weight
                 probs[:, -1] = mask_prob
+                
                 # Positions where p_mask_t=0 produce 0/0=NaN; they are unmasked in X so
                 # won't be used, but multinomial requires every row to be valid.
                 probs = probs.nan_to_num(nan=0.0, posinf=0.0, neginf=0.0)
@@ -135,8 +136,11 @@ class ScheduledUnmasker(nn.Module):
                 probs[zero_rows, -1] = 1.0  # fallback: sample MASK (position stays unmasked)
                 
                 if temperature <= 0:
-                    # greedy sampling
-                    sampled_X = probs.argmax(dim=-1)
+                    # Schedule still decides WHICH positions unmask (stochastic);
+                    # greedy only picks the content token for those that do.
+                    unmask = torch.rand(L, device=self.device) < (1 - mask_prob)   # mask_prob is (L,)
+                    greedy_tok = content_probs.argmax(dim=-1)                       # argmax over content only
+                    sampled_X = torch.where(unmask, greedy_tok, torch.full_like(greedy_tok, MASK_token))
                 else:
                     sampled_X = torch.multinomial(probs, 1).squeeze(-1)
                 

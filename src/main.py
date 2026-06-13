@@ -514,7 +514,7 @@ def main():
                 # )
                 
                 torch.load(
-                    PROJECT_ROOT / "models/Gaussian-RPE_06052026_061508/model_epochs=144000", map_location=torch.device('cpu')
+                    PROJECT_ROOT / "models/sweep1-RPE-uniform-T100_12062026_214734/model_epochs=80000", map_location=torch.device('cpu')
                 )
             )
         
