@@ -1,5 +1,5 @@
 
-=== Dataset: unconditional  (n_samples=100) Model: oracle ===
+=== Dataset: unconditional  (n_samples=100) Model: oracle L=256 ===
 Sweep                    Greedy (temp=0)         Categorical (temp=1)    Gap (G−C)
 ──────────────────────────────────────────────────────────────────────────────────
 uniform T=100            0.9540 ± 0.0237         0.6855 ± 0.0394         +0.2685
