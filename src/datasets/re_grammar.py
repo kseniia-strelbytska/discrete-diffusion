@@ -1,3 +1,5 @@
+## Taken from https://github.com/meszarosanna/rule_extrapolation/tree/main/rule_extrapolation
+
 """
 REGrammar: wraps RE_data generators into the FormalGrammar interface.
 

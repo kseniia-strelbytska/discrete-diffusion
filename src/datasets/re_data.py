@@ -1,3 +1,5 @@
+## Taken from https://github.com/meszarosanna/rule_extrapolation/tree/main/rule_extrapolation
+
 import numpy as np
 import torch
 import random
