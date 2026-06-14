@@ -530,8 +530,9 @@ class oracleModel(nn.Module):
         if not squeeze:
             X = X.view(-1)
 
-        status, result = get_marginals(self.grammar_name, X, self.vocab_size)
+        status, result = get_marginals(self.grammar_name, X.cpu(), self.vocab_size)
         if status is None:
             raise ValueError(result)
 
+        result = result.to(self.device)
         return result if squeeze else result.unsqueeze(0)

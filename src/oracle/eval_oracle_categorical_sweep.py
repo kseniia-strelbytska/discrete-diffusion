@@ -44,9 +44,7 @@ Usage example
   python src/eval_oracle_categorical_sweep.py
 
   # Custom options:
-  python src/eval_oracle_categorical_sweep.py \\
-      --n-samples 500 --n-evals 20 --seed 2024 \\
-      --out-dir results/oracle_categorical_eval
+  python src/oracle/eval_oracle_categorical_sweep.py --n-samples 100 --n-evals 2 --out-dir results/oracle_categorical_T_sigma_extended --device mps
 """
 
 import argparse
@@ -75,10 +73,10 @@ from schedules import GaussianSchedule
 # ---------------------------------------------------------------------------
 
 ORACLE_GRAMMARS = [
-    'anbn', 'baN', 'bbaN', 'aNbNcN',
-    'not_nested_parentheses_and_brackets', 'parentheses_and_brackets',
+    'anbn'
 ]
-
+# , 'baN', 'bbaN', 'aNbNcN',
+#   'not_nested_parentheses_and_brackets', 'parentheses_and_brackets',
 
 def make_grammar(grammar_name, l):
     if grammar_name == 'anbn':
@@ -91,8 +89,9 @@ def make_grammar(grammar_name, l):
 # ---------------------------------------------------------------------------
 # Experiment grid
 # ---------------------------------------------------------------------------
-T_VALUES     = [128, 256, 512]
-SIGMA_VALUES = [1, 5, 20, 40, 160]
+T_VALUES     = [128, 256]
+SIGMA_VALUES = [0.2, 10, 30, 60, 80, 100]
+# T \ σ           σ=1       σ=5    σ=20               σ=40               σ=160      
 
 TEMPERATURE  = 1.0      # categorical only
 DATASET_TYPE = 'unconditional'
@@ -110,7 +109,9 @@ def set_seed(seed):
         torch.cuda.manual_seed_all(seed)
 
 
-def get_device():
+def get_device(device_arg='auto'):
+    if device_arg and device_arg != 'auto':
+        return torch.device(device_arg)
     if torch.backends.mps.is_available():
         return torch.device('mps')
     if torch.cuda.is_available():
@@ -253,8 +254,7 @@ def write_description(out_dir, args, grammar_name, grammar_l, cutoff):
         "",
         "Reproducibility",
         "---------------",
-        f"  Base seed: {args.seed}",
-        "  Per-cell seed: base_seed + T_idx * 100_000 + sigma_idx * 1_000 + eval_i",
+        "  Seeds: drawn fresh from system entropy at run start (printed to run.log).",
         "",
         "Files",
         "-----",
@@ -306,8 +306,8 @@ def parse_args():
         epilog=(
             "Example:\n"
             "  cd /home/superuser/discrete-diffusion\n"
-            "  python src/eval_oracle_categorical_sweep.py \\\n"
-            "      --n-samples 500 --n-evals 20 --seed 2024 \\\n"
+            "  python src/oracle/eval_oracle_categorical_sweep.py \\\n"
+            "      --n-samples 500 --n-evals 20 \\\n"
             "      --out-dir results/oracle_categorical_eval\n"
         ),
     )
@@ -317,11 +317,7 @@ def parse_args():
     )
     parser.add_argument(
         '--n-evals', type=int, default=20,
-        help='Independent seed evaluations per (T, sigma) cell (default: 20).',
-    )
-    parser.add_argument(
-        '--seed', type=int, default=2024,
-        help='Base random seed (default: 2024).',
+        help='Independent evaluations per (T, sigma) cell (default: 20). Each uses a fresh random seed.',
     )
     parser.add_argument(
         '--out-dir', type=str, default='results/oracle_categorical_eval',
@@ -335,6 +331,10 @@ def parse_args():
         '--grammar-l', type=int, default=256,
         help='Max content length for the grammar (default: 256).',
     )
+    parser.add_argument(
+        '--device', type=str, default='auto',
+        help='Device: auto, cpu, cuda, mps (default: auto).',
+    )
     return parser.parse_args()
 
 
@@ -345,7 +345,7 @@ def parse_args():
 def main():
     args = parse_args()
 
-    device = get_device()
+    device = get_device(args.device)
 
     out_dir = Path(args.out_dir) / args.grammar
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -374,15 +374,18 @@ def _run(args, device, out_dir):
     print(f"Grid: T={T_VALUES}  sigma={SIGMA_VALUES}")
     print(f"Temperature: {TEMPERATURE} (categorical)  n_evals: {args.n_evals}  n_samples: {args.n_samples}")
 
-    set_seed(args.seed)
     grammar = make_grammar(args.grammar, grammar_l)
     grammar.generate_seq()
     vocab_size = getattr(grammar, 'vocab_size', 6)
     oracle = oracleModel(grammar_name=args.grammar, vocab_size=vocab_size, device=device)
     print(f"vocab_size={oracle.vocab_size}")
 
+    # Draw fresh random seeds (from system entropy) for each eval.
+    # All (T, sigma) cells use the same seed list for comparability.
+    eval_seeds = [random.randint(0, 2**31 - 1) for _ in range(args.n_evals)]
+    print(f"Eval seeds ({args.n_evals}): {eval_seeds}")
+
     print(f"\nBuilding {DATASET_TYPE} dataset ({args.n_samples} samples)...")
-    set_seed(args.seed)
     eval_ds = EvaluationDataset(
         l=grammar_l,
         eval_dataset=DATASET_TYPE,
@@ -399,16 +402,15 @@ def _run(args, device, out_dir):
     total_cells = len(T_VALUES) * len(SIGMA_VALUES)
     cell_idx = 0
 
-    for T_idx, T in enumerate(T_VALUES):
-        for sigma_idx, sigma in enumerate(SIGMA_VALUES):
+    for T in T_VALUES:
+        for sigma in SIGMA_VALUES:
             cell_idx += 1
             schedule = GaussianSchedule(sigma=sigma)
             print(f"\n[{cell_idx}/{total_cells}] T={T}  sigma={sigma}")
 
             accs = []
             for eval_i in range(args.n_evals):
-                # Unique seed per (T, sigma, eval_i)
-                cell_seed = args.seed + T_idx * 100_000 + sigma_idx * 1_000 + eval_i
+                cell_seed = eval_seeds[eval_i]
                 set_seed(cell_seed)
                 acc = evaluate_one(oracle, grammar, eval_ds, T, schedule, device, cutoff)
                 accs.append(acc)

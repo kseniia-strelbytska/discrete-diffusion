@@ -116,7 +116,9 @@ def set_seed(seed):
         torch.cuda.manual_seed_all(seed)
 
 
-def get_device():
+def get_device(device_arg='auto'):
+    if device_arg and device_arg != 'auto':
+        return torch.device(device_arg)
     if torch.backends.mps.is_available():
         return torch.device('mps')
     if torch.cuda.is_available():
@@ -256,8 +258,8 @@ def parse_args():
         epilog=(
             "Example:\n"
             "  cd /home/superuser/discrete-diffusion\n"
-            "  python src/eval_oracle_sweep.py \\\n"
-            "      --n-samples 500 --n-evals 20 --seed 2024 \\\n"
+            "  python src/oracle/eval_oracle_sweep.py \\\n"
+            "      --n-samples 500 --n-evals 20 \\\n"
             "      --out-dir results/oracle_eval\n"
         ),
     )
@@ -268,15 +270,9 @@ def parse_args():
     parser.add_argument(
         '--n-evals', type=int, default=20,
         help=(
-            'Number of independent seed evaluations to average per '
-            '(sweep, mode) cell (default: 20). '
-            'Greedy is deterministic so std will be 0; '
-            'categorical variance is characterised by these N runs.'
+            'Number of independent evaluations to average per '
+            '(sweep, mode) cell (default: 20). Each uses a fresh random seed.'
         ),
-    )
-    parser.add_argument(
-        '--seed', type=int, default=2024,
-        help='Base random seed (default: 2024). Per-eval seeds are derived from this.',
     )
     parser.add_argument(
         '--out-dir', type=str, default='results/oracle_eval',
@@ -290,6 +286,10 @@ def parse_args():
         '--grammar-l', type=int, default=256,
         help='Max content length for the grammar (default: 256).',
     )
+    parser.add_argument(
+        '--device', type=str, default='auto',
+        help='Device: auto, cpu, cuda, mps (default: auto).',
+    )
     return parser.parse_args()
 
 
@@ -300,7 +300,7 @@ def parse_args():
 def main():
     args = parse_args()
 
-    device = get_device()
+    device = get_device(args.device)
 
     out_dir = Path(args.out_dir) / args.grammar
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -324,17 +324,19 @@ def _run(args, device, out_dir):
     print(f"Device: {device}")
     print(f"Oracle model — no training required.")
 
-    set_seed(args.seed)
     grammar = make_grammar(args.grammar, args.grammar_l)
     grammar.generate_seq()
     vocab_size = getattr(grammar, 'vocab_size', 6)
     oracle = oracleModel(grammar_name=args.grammar, vocab_size=vocab_size, device=device)
     print(f"Grammar: {args.grammar}  l={args.grammar_l}  vocab_size={oracle.vocab_size}")
 
+    # Draw fresh random seeds (from system entropy) for each eval.
+    eval_seeds = [random.randint(0, 2**31 - 1) for _ in range(args.n_evals)]
+    print(f"Eval seeds ({args.n_evals}): {eval_seeds}")
+
     print("\nBuilding evaluation datasets...")
     eval_datasets = {}
     for ds_type in DATASET_TYPES:
-        set_seed(args.seed)
         ds = EvaluationDataset(
             l=args.grammar_l,
             eval_dataset=ds_type,
@@ -377,12 +379,11 @@ def _run(args, device, out_dir):
             mode_accs = {mode: [] for mode in MODES}
 
             for eval_i in range(args.n_evals):
-                # Seed: unique per (sweep, dataset, eval_index)
-                # Mode offset keeps greedy/categorical seeds distinct within the same eval_i.
-                eval_seed = args.seed + sweep_idx * 100_000 + eval_i * 1_000
+                eval_seed = eval_seeds[eval_i]
                 print(f"  [{ds_type}] eval {eval_i + 1}/{args.n_evals}  seed={eval_seed}")
 
                 for mode_name, temperature in MODES.items():
+                    # +1 offset keeps greedy/categorical seeds distinct within the same eval.
                     mode_offset = list(MODES).index(mode_name)
                     set_seed(eval_seed + mode_offset)
                     acc = evaluate_oracle(

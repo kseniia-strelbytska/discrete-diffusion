@@ -249,6 +249,10 @@ def main():
         "--grammar", type=str, default=None,
         help="Override cfg.data.grammar (e.g. baN, aNbNcN, parentheses_and_brackets).",
     )
+    parser.add_argument(
+        "--device", type=str, default=None,
+        help="Override cfg.device: auto, cpu, cuda, mps.",
+    )
     args = parser.parse_args()
 
     base_config = load_config(args.config)
@@ -258,6 +262,8 @@ def main():
         cfg.model.T = args.T
     if args.grammar is not None:
         cfg.data.grammar = args.grammar
+    if args.device is not None:
+        cfg.device = args.device
 
     # W&B sweep: one agent = one T value
     in_sweep = os.getenv("WANDB_SWEEP_ID") is not None
@@ -289,10 +295,6 @@ def main():
         )
     else:
         wandb.init(mode="disabled")
-
-    random.seed(cfg.seed)
-    np.random.seed(cfg.seed)
-    torch.manual_seed(cfg.seed)
 
     device = get_device(cfg.device)
     PROJECT_ROOT = Path(args.config).resolve().parent
