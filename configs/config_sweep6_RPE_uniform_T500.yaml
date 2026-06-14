@@ -1,0 +1,51 @@
+seed: 42
+device: auto
+strategy: None
+temperature: 0.00001
+data:
+  l: 256
+  train_split: 0.9
+  batch_size: 64
+  grammar: anbn
+model:
+  architecture: RPE
+  max_len: 258
+  vocab_size: 6
+  n_head: 4
+  n_layers: 4
+  embed_dim: 256
+  dim_feedforward: 1024
+  dropout: 0.1
+  layer_norm_eps: 0.0002
+  T: 500
+  sampling_eps: 0.00001
+  eos_weight: 10.0
+  inverse_t: False
+schedule:
+  type: categorical
+training:
+  epochs: 100000
+  learning_rate: 0.001
+  num_warmup_steps: 1000
+  weight_decay: 0.0
+  loss_type: eq8
+  denoise: "0"
+validation:
+  val_every: 1000
+evaluation:
+  eval_every: 5000
+  n_samples: 100
+  eval_dataset: unconditional
+  eval_type: random
+  cutoff: 258
+investigation:
+  n_first_tokens: 258
+  store_numeric: True
+wandb:
+  project: "discrete-diffusion"
+  group: "RPE-schedule-sweep"
+paths:
+  models_dir: models
+  figures_dir: figures
+  experiment_name: sweep5-RPE-uniform-T500
+notes: "Sweep run 5/5: RPE + uniform (categorical) schedule, T=500, 100k epochs"

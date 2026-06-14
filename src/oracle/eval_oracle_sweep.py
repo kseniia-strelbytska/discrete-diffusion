@@ -278,6 +278,7 @@ def parse_args():
         '--out-dir', type=str, default='results/oracle_eval',
         help='Output directory root (default: results/oracle_eval). Results are saved under <out-dir>/<grammar>/.',
     )
+<<<<<<< HEAD
     parser.add_argument(
         '--grammar', type=str, default='anbn', choices=ORACLE_GRAMMARS,
         help='Grammar to evaluate (default: anbn).',
@@ -290,6 +291,8 @@ def parse_args():
         '--device', type=str, default='auto',
         help='Device: auto, cpu, cuda, mps (default: auto).',
     )
+=======
+>>>>>>> 480f52ffcf4e46edd1f4f71531c0acf9c5e25dd5
     return parser.parse_args()
 
 
@@ -324,6 +327,7 @@ def _run(args, device, out_dir):
     print(f"Device: {device}")
     print(f"Oracle model — no training required.")
 
+<<<<<<< HEAD
     grammar = make_grammar(args.grammar, args.grammar_l)
     grammar.generate_seq()
     vocab_size = getattr(grammar, 'vocab_size', 6)
