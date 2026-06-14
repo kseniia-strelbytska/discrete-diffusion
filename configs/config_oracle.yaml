@@ -3,17 +3,17 @@ device: cpu
 strategy: None # (redundant) categorical or temperature-sampling
 temperature: 0 # controls strategy: greedy if temperature <= 0, categorical if temperature = 1.0, tempareture-scaled categorical otherwise.
 data:
-  l: 256
+  l: 500
   train_split: 0.9
   batch_size: 64
   grammar: aNbN
 model:
   architecture: oracle # classic (torch-native) or v2 (QKV low-level) or RPE or FIRE
-  max_len: 258    
+  max_len: 502    
   vocab_size: 7
   n_head: 4
   n_layers: 4
-  embed_dim: 256
+  embed_dim: 500
   dim_feedforward: 1024
   dropout: 0.1
   layer_norm_eps: 0.0002
@@ -30,13 +30,13 @@ training:
   gaussian_noise: True
   denoise: "0" # "0" or eps
 schedule:
-  type: categorical  # categorical or gaussian
+  type: gaussian  # categorical or gaussian
   sigma: 20.0         # Gaussian width parameter; ignored when type=categorical
 validation:
   val_every: 1000
 evaluation:
   eval_every: 4000
-  n_samples: 10
+  n_samples: 1000
   eval_dataset: unconditional # limited or randomised or complete
   eval_type: random # full or random
   cutoff: 258
@@ -49,5 +49,5 @@ wandb:
 paths:
   models_dir: models
   figures_dir: figures
-  experiment_name: oracle-large-T-n_sample=500-greedy-Gaussian
-notes: "Investigate oracle model with varying number of denoising steps (T) to see how it affects a perfect predictor"
+  experiment_name: oracle-large-L-n_sample
+notes: ""

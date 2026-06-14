@@ -53,6 +53,7 @@ import argparse
 import csv
 import random
 import sys
+import time
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -91,7 +92,7 @@ def make_grammar(grammar_name, l):
 # ---------------------------------------------------------------------------
 # Experiment grid
 # ---------------------------------------------------------------------------
-T_VALUES     = [128, 256, 512]
+T_VALUES     = [128, 256]
 SIGMA_VALUES = [1, 5, 20, 40, 160]
 
 TEMPERATURE  = 1.0      # categorical only
@@ -116,6 +117,14 @@ def get_device():
     if torch.cuda.is_available():
         return torch.device('cuda')
     return torch.device('cpu')
+
+
+def _fmt_dur(seconds):
+    m, s = divmod(int(seconds), 60)
+    h, m = divmod(m, 60)
+    if h:
+        return f"{h}h{m:02d}m{s:02d}s"
+    return f"{m}m{s:02d}s"
 
 
 def evaluate_one(oracle, grammar, eval_dataset, T, schedule, device, cutoff):
@@ -397,7 +406,11 @@ def _run(args, device, out_dir):
 
     results = {}
     total_cells = len(T_VALUES) * len(SIGMA_VALUES)
+    total_evals = total_cells * args.n_evals
     cell_idx = 0
+    done_evals = 0
+    start_time = time.time()
+    print(f"\nTotal evaluations: {total_evals}  ({total_cells} cells × {args.n_evals} seeds)")
 
     for T_idx, T in enumerate(T_VALUES):
         for sigma_idx, sigma in enumerate(SIGMA_VALUES):
@@ -407,12 +420,14 @@ def _run(args, device, out_dir):
 
             accs = []
             for eval_i in range(args.n_evals):
-                # Unique seed per (T, sigma, eval_i)
                 cell_seed = args.seed + T_idx * 100_000 + sigma_idx * 1_000 + eval_i
                 set_seed(cell_seed)
                 acc = evaluate_one(oracle, grammar, eval_ds, T, schedule, device, cutoff)
                 accs.append(acc)
-                print(f"  eval {eval_i + 1:>2}/{args.n_evals}  seed={cell_seed}  acc={acc:.4f}")
+                done_evals += 1
+                elapsed = time.time() - start_time
+                eta = (elapsed / done_evals) * (total_evals - done_evals)
+                print(f"  [{done_evals}/{total_evals} complete | {_fmt_dur(elapsed)} elapsed | ETA {_fmt_dur(eta)}]")
 
             mean = float(np.mean(accs))
             std  = float(np.std(accs))

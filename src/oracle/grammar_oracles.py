@@ -62,7 +62,7 @@ def _check_pos_range(seq, positions, allowed):
 
 def aNbN_get_marginals(seq, vocab_size=6):
     from oracle.deterministic_token_distribution import determineTokenDistribution
-    return determineTokenDistribution(seq, vocab_size=vocab_size, device='cpu')
+    return determineTokenDistribution(seq, vocab_size=vocab_size, device=seq.device)
 
 
 # ─── baN oracle (L1) ──────────────────────────────────────────────────────────
@@ -76,6 +76,7 @@ def baN_get_marginals(seq, vocab_size=6):
     if seq.ndim != 1:
         seq = seq.view(-1)
     L = seq.shape[0]
+    device = seq.device
 
     ok, eos_pos = _validate(seq)
     if not ok:
@@ -83,7 +84,7 @@ def baN_get_marginals(seq, vocab_size=6):
     if L > 1 and seq[1].item() not in (B, MASK_token):
         return None, 'Position 1 must be B'
 
-    counts = torch.zeros(L, vocab_size, dtype=torch.float64)
+    counts = torch.zeros(L, vocab_size, dtype=torch.float64, device=device)
     total = 0.0
 
     for n in range(1, L):          # content length n >= 1
@@ -143,12 +144,13 @@ def bbaN_get_marginals(seq, vocab_size=6):
     if seq.ndim != 1:
         seq = seq.view(-1)
     L = seq.shape[0]
+    device = seq.device
 
     ok, eos_pos = _validate(seq)
     if not ok:
         return None, eos_pos
 
-    counts = torch.zeros(L, vocab_size, dtype=torch.float64)
+    counts = torch.zeros(L, vocab_size, dtype=torch.float64, device=device)
     total = 0.0
 
     for n in range(1, L):             # B count >= 1
@@ -192,12 +194,13 @@ def aNbNcN_get_marginals(seq, vocab_size=7):
     if seq.ndim != 1:
         seq = seq.view(-1)
     L = seq.shape[0]
+    device = seq.device
 
     ok, eos_pos = _validate(seq)
     if not ok:
         return None, eos_pos
 
-    counts = torch.zeros(L, vocab_size, dtype=torch.float64)
+    counts = torch.zeros(L, vocab_size, dtype=torch.float64, device=device)
     total = 0.0
 
     for n in range(1, L):
@@ -283,12 +286,13 @@ def _dyck_oracle(seq, vocab_size, content_tokens, trans_fn, inv_trans_fn, final_
     if seq.ndim != 1:
         seq = seq.view(-1)
     L = seq.shape[0]
+    device = seq.device
 
     ok, eos_pos = _validate(seq)
     if not ok:
         return None, eos_pos
 
-    counts = torch.zeros(L, vocab_size, dtype=torch.float64)
+    counts = torch.zeros(L, vocab_size, dtype=torch.float64, device=device)
     total = 0.0
 
     for n in range(2, L - 1, 2):   # even content length >= 2
@@ -526,6 +530,7 @@ class oracleModel(nn.Module):
         Returns:
             (L, vocab_size) or (1, L, vocab_size) FloatTensor of marginals
         """
+        X = X.to(self.device)
         squeeze = X.ndim == 1
         if not squeeze:
             X = X.view(-1)

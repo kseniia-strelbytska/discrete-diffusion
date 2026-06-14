@@ -18,6 +18,7 @@ import os
 import random
 import shutil
 import sys
+import time
 from datetime import datetime
 from pathlib import Path
 from types import SimpleNamespace
@@ -40,6 +41,14 @@ from schedules import CategoricalSchedule, GaussianSchedule
 
 def dict_to_ns(d):
     return SimpleNamespace(**{k: dict_to_ns(v) if isinstance(v, dict) else v for k, v in d.items()})
+
+
+def _fmt_dur(seconds):
+    m, s = divmod(int(seconds), 60)
+    h, m = divmod(m, 60)
+    if h:
+        return f"{h}h{m:02d}m{s:02d}s"
+    return f"{m}m{s:02d}s"
 
 
 def load_config(path):
@@ -305,15 +314,21 @@ def main():
     if args.all_T:
         # Multi-T mode: log each T as a step so W&B draws line charts
         all_metrics = []
-        for t_val in args.all_T:
+        total_T = len(args.all_T)
+        start_time = time.time()
+        print(f"Total T values: {total_T}  ({args.all_T})")
+        for done_T, t_val in enumerate(args.all_T, start=1):
             cfg.model.T = t_val
             print(f"\nRunning T={t_val}…")
             m = eval_one_T(cfg, device, grammar, schedule, dirs=dirs, save_mode=args.save)
             all_metrics.append(m)
             flat = {k: v for k, v in m.items() if k != "T"}
             wandb.log({"T": t_val, **flat}, step=t_val)
+            elapsed = time.time() - start_time
+            eta = (elapsed / done_T) * (total_T - done_T)
             print(f"  both_rules_acc={m['Rule_Accuracy/both_rules_acc']:.4f}  "
                   f"finished_pct={m['finished_pct']:.4f}")
+            print(f"  [{done_T}/{total_T} complete | {_fmt_dur(elapsed)} elapsed | ETA {_fmt_dur(eta)}]")
 
         img, T_values, acc_all, acc_fin = plot_accuracy_vs_T(all_metrics)
         wandb.log({
