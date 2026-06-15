@@ -18,3 +18,19 @@ Evaluation from generation satisfies rule #1: 32/100 (0.32)
 Evaluation from generation satisfies rule #2: 95/100 (0.95)
 Evaluation from generation satisfies both rules: 32/100 (0.32)
 This is quite bad! But I looked into the generated samples: almost all meet the said format (diffusion learned that SOS goes before 0s before 1s before EOS before PAD). This is amazing since SOS/EOS are quite rare in data (2/258 tokens), and loss doesn't weigh them differently, and results are still high! However, the model still struggles with counting: most generated examples generate 1-2 more tokens '1' or '0' than needed. 
+
+
+discrete-diffusion ❯ python tests/test_efficiency.py --seq-length 512
+
+Oracle grammar benchmark  |  seq_length=512  n_samples=100
+──────────────────────────────────────────────────────────
+  grammar                                        avg µs    min µs    max µs
+  ──────────────────────────────────────────── ────────  ────────  ────────
+  aNbN                                            296.8     276.0     694.1
+  baN                                            2378.2    1303.1    3588.5
+  bbaN                                          52887.5    6649.9   98636.0
+  aNbNcN                                         1336.5    1308.4    1606.8
+  parentheses_and_brackets                       2208.3    1371.0    5204.7
+  not_nested_parentheses_and_brackets            2942.9    1421.5    4232.9
+
+  (keep in mind when running large oracle evaluations that bbaN grammar's oracle is much less efficient)

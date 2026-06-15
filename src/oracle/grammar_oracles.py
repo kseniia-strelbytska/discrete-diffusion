@@ -46,11 +46,20 @@ def _validate(seq):
     return True, eos_pos
 
 
-def _finish(counts, total):
-    """Normalise counts or return None if no completions found."""
+def _finish(counts_py, total, device):
+    """
+    Divide Python-native counts by total and build a float tensor.
+
+    counts_py is a plain Python list-of-lists (shape L × vocab_size) whose
+    values are arbitrary-precision Python ints.  Division happens entirely in
+    Python before any torch conversion, so there is no int→C-long overflow
+    regardless of how large the raw counts grow (e.g. 2^k for baN).
+    """
     if total == 0:
         return None, 'No valid completion'
-    return 'expected_prob', (counts / total).float()
+    L, V = len(counts_py), len(counts_py[0])
+    probs = [[counts_py[pos][tok] / total for tok in range(V)] for pos in range(L)]
+    return 'expected_prob', torch.tensor(probs, dtype=torch.float32, device=device)
 
 
 def _check_pos_range(seq, positions, allowed):
@@ -84,8 +93,8 @@ def baN_get_marginals(seq, vocab_size=6):
     if L > 1 and seq[1].item() not in (B, MASK_token):
         return None, 'Position 1 must be B'
 
-    counts = torch.zeros(L, vocab_size, dtype=torch.float64, device=device)
-    total = 0.0
+    counts = [[0] * vocab_size for _ in range(L)]   # Python ints — no overflow
+    total  = 0
 
     for n in range(1, L):          # content length n >= 1
         ep = n + 1                 # EOS position
@@ -108,30 +117,29 @@ def baN_get_marginals(seq, vocab_size=6):
         if cnt == 0:
             continue
 
-        total += cnt
-        counts[0,  SOS_token] += cnt
-        counts[1,  B]         += cnt
-        counts[ep, EOS_token] += cnt
+        total                   += cnt
+        counts[0] [SOS_token]   += cnt
+        counts[1] [B]           += cnt
+        counts[ep][EOS_token]   += cnt
         for p in range(ep + 1, L):
-            counts[p, PAD_token] += cnt
+            counts[p][PAD_token] += cnt
 
         for p in range(2, n + 1):
             t = seq[p].item()
             if t == A:
-                counts[p, A] += cnt
+                counts[p][A] += cnt
             elif t == B:
-                counts[p, B] += cnt
+                counts[p][B] += cnt
             else:  # MASK
                 if k == 1:
-                    # fixing to A: remaining 0 masked pos need parity (parity+1)%2 met by 0 items
                     ca = 1 if (parity + 1) % 2 == 0 else 0   # i.e., 1 iff parity==1
                     cb = 1 if parity == 0 else 0
                 else:
                     ca = cb = 2 ** (k - 2)
-                counts[p, A] += ca
-                counts[p, B] += cb
+                counts[p][A] += ca
+                counts[p][B] += cb
 
-    return _finish(counts, total)
+    return _finish(counts, total, device)
 
 
 # ─── bbaN oracle (L2) ─────────────────────────────────────────────────────────
@@ -150,8 +158,8 @@ def bbaN_get_marginals(seq, vocab_size=6):
     if not ok:
         return None, eos_pos
 
-    counts = torch.zeros(L, vocab_size, dtype=torch.float64, device=device)
-    total = 0.0
+    counts = [[0] * vocab_size for _ in range(L)]   # Python ints — no overflow
+    total  = 0
 
     for n in range(1, L):             # B count >= 1
         for m in range(0, L // 2 + 1):
@@ -171,17 +179,17 @@ def bbaN_get_marginals(seq, vocab_size=6):
                 continue
 
             # exactly 1 completion for this (n, m)
-            total += 1
-            counts[0, SOS_token] += 1
+            total                 += 1
+            counts[0] [SOS_token] += 1
             for p in range(1, n + 1):
-                counts[p, B] += 1
+                counts[p][B] += 1
             for p in range(n + 1, n + 2 * m + 1):
-                counts[p, A] += 1
-            counts[ep, EOS_token] += 1
+                counts[p][A] += 1
+            counts[ep][EOS_token] += 1
             for p in range(ep + 1, L):
-                counts[p, PAD_token] += 1
+                counts[p][PAD_token] += 1
 
-    return _finish(counts, total)
+    return _finish(counts, total, device)
 
 
 # ─── aNbNcN oracle (L5) ───────────────────────────────────────────────────────
@@ -200,8 +208,8 @@ def aNbNcN_get_marginals(seq, vocab_size=7):
     if not ok:
         return None, eos_pos
 
-    counts = torch.zeros(L, vocab_size, dtype=torch.float64, device=device)
-    total = 0.0
+    counts = [[0] * vocab_size for _ in range(L)]   # Python ints — no overflow
+    total  = 0
 
     for n in range(1, L):
         ep = 3 * n + 1
@@ -220,16 +228,16 @@ def aNbNcN_get_marginals(seq, vocab_size=7):
         if not _check_pos_range(seq, range(2 * n + 1, 3 * n + 1), (C, MASK_token)):
             continue
 
-        total += 1
-        counts[0, SOS_token] += 1
-        for p in range(1,         n + 1):     counts[p, A] += 1
-        for p in range(n + 1,     2 * n + 1): counts[p, B] += 1
-        for p in range(2 * n + 1, 3 * n + 1): counts[p, C] += 1
-        counts[ep, EOS_token] += 1
+        total                 += 1
+        counts[0] [SOS_token] += 1
+        for p in range(1,         n + 1):      counts[p][A] += 1
+        for p in range(n + 1,     2 * n + 1):  counts[p][B] += 1
+        for p in range(2 * n + 1, 3 * n + 1):  counts[p][C] += 1
+        counts[ep][EOS_token] += 1
         for p in range(ep + 1, L):
-            counts[p, PAD_token] += 1
+            counts[p][PAD_token] += 1
 
-    return _finish(counts, total)
+    return _finish(counts, total, device)
 
 
 # ─── Dyck DP (shared forward–backward engine) ─────────────────────────────────
@@ -292,8 +300,8 @@ def _dyck_oracle(seq, vocab_size, content_tokens, trans_fn, inv_trans_fn, final_
     if not ok:
         return None, eos_pos
 
-    counts = torch.zeros(L, vocab_size, dtype=torch.float64, device=device)
-    total = 0.0
+    counts = [[0] * vocab_size for _ in range(L)]   # Python ints — no overflow
+    total  = 0
 
     for n in range(2, L - 1, 2):   # even content length >= 2
         ep = n + 1
@@ -315,16 +323,16 @@ def _dyck_oracle(seq, vocab_size, content_tokens, trans_fn, inv_trans_fn, final_
 
         bwd = _dyck_backward_impl(seq, n, content_tokens, inv_trans_fn, final_state)
 
-        total += cnt
-        counts[0, SOS_token] += cnt
-        counts[ep, EOS_token] += cnt
+        total                 += cnt
+        counts[0] [SOS_token] += cnt
+        counts[ep][EOS_token] += cnt
         for p in range(ep + 1, L):
-            counts[p, PAD_token] += cnt
+            counts[p][PAD_token] += cnt
 
         for pos in range(1, n + 1):
             t_seq = seq[pos].item()
             if t_seq != MASK_token:
-                counts[pos, t_seq] += cnt
+                counts[pos][t_seq] += cnt
             else:
                 for t in content_tokens:
                     tc = 0
@@ -332,9 +340,9 @@ def _dyck_oracle(seq, vocab_size, content_tokens, trans_fn, inv_trans_fn, final_
                         ns = trans_fn(s, t)
                         if ns is not None:
                             tc += fc * bwd[pos].get(ns, 0)
-                    counts[pos, t] += tc
+                    counts[pos][t] += tc
 
-    return _finish(counts, total)
+    return _finish(counts, total, device)
 
 
 def _dyck_forward_impl(seq, n, content_tokens, trans_fn, initial_state):

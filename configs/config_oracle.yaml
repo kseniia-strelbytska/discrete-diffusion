@@ -1,12 +1,12 @@
 seed: 42
 device: auto
 strategy: None # (redundant) categorical or temperature-sampling
-temperature: 1.0 # controls strategy: greedy if temperature <= 0, categorical if temperature = 1.0, tempareture-scaled categorical otherwise.
+temperature: 0 # controls strategy: greedy if temperature <= 0, categorical if temperature = 1.0, tempareture-scaled categorical otherwise.
 data:
   l: 500
   train_split: 0.9
   batch_size: 64
-  grammar: anbn
+  grammar: aNbNcN
 model:
   architecture: oracle # classic (torch-native) or v2 (QKV low-level) or RPE or FIRE
   max_len: 502    
@@ -36,7 +36,7 @@ validation:
   val_every: 1000
 evaluation:
   eval_every: 4000
-  n_samples: 1000
+  n_samples: 10
   eval_dataset: unconditional # limited or randomised or complete
   eval_type: random # full or random
   cutoff: 258

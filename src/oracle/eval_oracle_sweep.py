@@ -34,14 +34,13 @@ Usage example
   python src/eval_oracle_sweep.py
 
   # Custom options:
-  python src/oracle/eval_oracle_sweep.py --n-samples 100 --n-evals 2 --seed 2024 --out-dir results/oracle_eval
+  python src/oracle/eval_oracle_sweep.py --n-samples 500 --n-evals 20 --seed 2024 --out-dir results/oracle_eval
 """
 
 import argparse
 import csv
 import random
 import sys
-import time
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -61,16 +60,12 @@ from evaluation_tools import EvaluationDataset, evaluation_from_generation
 from schedules import CategoricalSchedule, GaussianSchedule
 
 # ---------------------------------------------------------------------------
-# Grammars to sweep over — (grammar_name, max_content_length)
+# Supported oracle grammars and grammar factory
 # ---------------------------------------------------------------------------
 
-GRAMMARS = [
-    ('anbn',                                256),
-    ('baN',                                 256),
-    ('bbaN',                                256),
-    ('aNbNcN',                              256),
-    ('not_nested_parentheses_and_brackets', 256),
-    ('parentheses_and_brackets',            256),
+ORACLE_GRAMMARS = [
+    'anbn', 'baN', 'bbaN', 'aNbNcN',
+    'not_nested_parentheses_and_brackets', 'parentheses_and_brackets',
 ]
 
 
@@ -85,12 +80,12 @@ def make_grammar(grammar_name, l):
 # ---------------------------------------------------------------------------
 # Sweep config directories — read T and schedule from each run's saved config
 # ---------------------------------------------------------------------------
-CONFIG_PATHS = [
-    "/home/superuser/discrete-diffusion/configs/config_sweep1_RPE_uniform_T100.yaml",
-    "/home/superuser/discrete-diffusion/configs/config_sweep2_RPE_gaussian_s20_T100.yaml",
-    "/home/superuser/discrete-diffusion/configs/config_sweep3_RPE_gaussian_s10_T100.yaml",
-    "/home/superuser/discrete-diffusion/configs/config_sweep4_RPE_gaussian_s5_T100.yaml",
-    "/home/superuser/discrete-diffusion/configs/config_sweep5_RPE_uniform_T500.yaml"
+SWEEP_DIRS = [
+    "/home/superuser/discrete-diffusion/models/sweep1-RPE-uniform-T100_12062026_214734",
+    "/home/superuser/discrete-diffusion/models/sweep2-RPE-gaussian-s20-T100_12062026_231649",
+    "/home/superuser/discrete-diffusion/models/sweep3-RPE-gaussian-s10-T100_13062026_005150",
+    "/home/superuser/discrete-diffusion/models/sweep4-RPE-gaussian-s5-T100_13062026_022706",
+    "/home/superuser/discrete-diffusion/models/sweep5-RPE-uniform-T500_13062026_040137",
 ]
 
 DATASET_TYPES = ['unconditional']
@@ -121,22 +116,12 @@ def set_seed(seed):
         torch.cuda.manual_seed_all(seed)
 
 
-def get_device(device_arg='auto'):
-    if device_arg and device_arg != 'auto':
-        return torch.device(device_arg)
+def get_device():
     if torch.backends.mps.is_available():
         return torch.device('mps')
     if torch.cuda.is_available():
         return torch.device('cuda')
     return torch.device('cpu')
-
-
-def _fmt_dur(seconds):
-    m, s = divmod(int(seconds), 60)
-    h, m = divmod(m, 60)
-    if h:
-        return f"{h}h{m:02d}m{s:02d}s"
-    return f"{m}m{s:02d}s"
 
 
 def get_schedule(cfg):
@@ -220,7 +205,7 @@ def make_table(rows, dataset_name, n_samples):
 def save_csv(all_results, out_dir):
     out_path = Path(out_dir) / 'oracle_eval_results.csv'
     fieldnames = [
-        'grammar', 'dataset', 'sweep_label', 'schedule', 'sigma', 'T',
+        'dataset', 'sweep_label', 'schedule', 'sigma', 'T',
         'n_evals',
         'greedy_mean', 'greedy_std',
         'categorical_mean', 'categorical_std',
@@ -271,8 +256,8 @@ def parse_args():
         epilog=(
             "Example:\n"
             "  cd /home/superuser/discrete-diffusion\n"
-            "  python src/oracle/eval_oracle_sweep.py \\\n"
-            "      --n-samples 500 --n-evals 20 \\\n"
+            "  python src/eval_oracle_sweep.py \\\n"
+            "      --n-samples 500 --n-evals 20 --seed 2024 \\\n"
             "      --out-dir results/oracle_eval\n"
         ),
     )
@@ -283,15 +268,20 @@ def parse_args():
     parser.add_argument(
         '--n-evals', type=int, default=20,
         help=(
-            'Number of independent evaluations to average per '
-            '(sweep, mode) cell (default: 20). Each uses a fresh random seed.'
+            'Number of independent seed evaluations to average per '
+            '(sweep, mode) cell (default: 20). '
+            'Greedy is deterministic so std will be 0; '
+            'categorical variance is characterised by these N runs.'
         ),
+    )
+    parser.add_argument(
+        '--seed', type=int, default=2024,
+        help='Base random seed (default: 2024). Per-eval seeds are derived from this.',
     )
     parser.add_argument(
         '--out-dir', type=str, default='results/oracle_eval',
         help='Output directory root (default: results/oracle_eval). Results are saved under <out-dir>/<grammar>/.',
     )
-<<<<<<< HEAD
     parser.add_argument(
         '--grammar', type=str, default='anbn', choices=ORACLE_GRAMMARS,
         help='Grammar to evaluate (default: anbn).',
@@ -300,12 +290,6 @@ def parse_args():
         '--grammar-l', type=int, default=256,
         help='Max content length for the grammar (default: 256).',
     )
-    parser.add_argument(
-        '--device', type=str, default='auto',
-        help='Device: auto, cpu, cuda, mps (default: auto).',
-    )
-=======
->>>>>>> 480f52ffcf4e46edd1f4f71531c0acf9c5e25dd5
     return parser.parse_args()
 
 
@@ -316,9 +300,9 @@ def parse_args():
 def main():
     args = parse_args()
 
-    device = get_device(args.device)
+    device = get_device()
 
-    out_dir = Path(args.out_dir)
+    out_dir = Path(args.out_dir) / args.grammar
     out_dir.mkdir(parents=True, exist_ok=True)
 
     log_path = out_dir / 'run.log'
@@ -339,22 +323,18 @@ def main():
 def _run(args, device, out_dir):
     print(f"Device: {device}")
     print(f"Oracle model — no training required.")
-    print(f"Grammars: {[g for g, _ in GRAMMARS]}")
 
-<<<<<<< HEAD
+    set_seed(args.seed)
     grammar = make_grammar(args.grammar, args.grammar_l)
     grammar.generate_seq()
     vocab_size = getattr(grammar, 'vocab_size', 6)
     oracle = oracleModel(grammar_name=args.grammar, vocab_size=vocab_size, device=device)
     print(f"Grammar: {args.grammar}  l={args.grammar_l}  vocab_size={oracle.vocab_size}")
 
-    # Draw fresh random seeds (from system entropy) for each eval.
-    eval_seeds = [random.randint(0, 2**31 - 1) for _ in range(args.n_evals)]
-    print(f"Eval seeds ({args.n_evals}): {eval_seeds}")
-
     print("\nBuilding evaluation datasets...")
     eval_datasets = {}
     for ds_type in DATASET_TYPES:
+        set_seed(args.seed)
         ds = EvaluationDataset(
             l=args.grammar_l,
             eval_dataset=ds_type,
@@ -367,53 +347,42 @@ def _run(args, device, out_dir):
         ds.data = ds.data.to(device)
         eval_datasets[ds_type] = ds
         print(f"  {ds_type}: {ds.data.shape[0]} samples")
-=======
-    total_evals = len(GRAMMARS) * len(CONFIG_PATHS) * len(DATASET_TYPES) * args.n_evals * len(MODES)
-    done_evals = 0
-    start_time = time.time()
-    print(f"Total evaluations: {total_evals}  "
-          f"({len(GRAMMARS)} grammars × {len(CONFIG_PATHS)} sweeps × "
-          f"{len(DATASET_TYPES)} datasets × {args.n_evals} seeds × {len(MODES)} modes)")
->>>>>>> 480f52ffcf4e46edd1f4f71531c0acf9c5e25dd5
 
     all_csv_rows = []
+    per_dataset_table_rows = {ds: [] for ds in DATASET_TYPES}
 
-    for grammar_name, grammar_l in GRAMMARS:
-        print(f"\n{'#' * 60}")
-        print(f"GRAMMAR: {grammar_name}  l={grammar_l}")
-        print(f"{'#' * 60}")
+    for sweep_idx, sweep_dir_str in enumerate(SWEEP_DIRS):
+        sweep_dir = Path(sweep_dir_str)
+        sweep_name = f"sweep{sweep_idx + 1}"
 
-        set_seed(args.seed)
-        grammar = make_grammar(grammar_name, grammar_l)
-        grammar.generate_seq()
-        vocab_size = getattr(grammar, 'vocab_size', 6)
-        oracle = oracleModel(grammar_name=grammar_name, vocab_size=vocab_size, device=device)
-        print(f"vocab_size={oracle.vocab_size}")
+        print(f"\n{'=' * 60}")
+        print(f"[{sweep_name}] {sweep_dir.name}")
 
-        print("Building evaluation datasets...")
-        eval_datasets = {}
+        if not sweep_dir.exists():
+            print(f"  [WARNING] Directory not found: {sweep_dir}. Skipping.")
+            continue
+
+        config_path = sweep_dir / 'config.yaml'
+        if not config_path.exists():
+            print(f"  [WARNING] config.yaml missing in {sweep_dir}. Skipping.")
+            continue
+
+        cfg = dict_to_ns(load_config(config_path))
+        label = sweep_label(cfg)
+        schedule = get_schedule(cfg)
+        print(f"  T={cfg.model.T}, label={label!r}")
+
         for ds_type in DATASET_TYPES:
-            set_seed(args.seed)
-            ds = EvaluationDataset(
-                l=grammar_l,
-                eval_dataset=ds_type,
-                eval_type='random',
-                n_samples=args.n_samples,
-                T=100,
-                sampling_eps=1e-5,
-                device=device,
-            )
-            ds.data = ds.data.to(device)
-            eval_datasets[ds_type] = ds
-            print(f"  {ds_type}: {ds.data.shape[0]} samples")
+            eval_ds = eval_datasets[ds_type]
+            mode_accs = {mode: [] for mode in MODES}
 
-<<<<<<< HEAD
             for eval_i in range(args.n_evals):
-                eval_seed = eval_seeds[eval_i]
+                # Seed: unique per (sweep, dataset, eval_index)
+                # Mode offset keeps greedy/categorical seeds distinct within the same eval_i.
+                eval_seed = args.seed + sweep_idx * 100_000 + eval_i * 1_000
                 print(f"  [{ds_type}] eval {eval_i + 1}/{args.n_evals}  seed={eval_seed}")
 
                 for mode_name, temperature in MODES.items():
-                    # +1 offset keeps greedy/categorical seeds distinct within the same eval.
                     mode_offset = list(MODES).index(mode_name)
                     set_seed(eval_seed + mode_offset)
                     acc = evaluate_oracle(
@@ -421,94 +390,56 @@ def _run(args, device, out_dir):
                     )
                     mode_accs[mode_name].append(acc)
                     print(f"    {mode_name}: both_rules_acc={acc:.4f}")
-=======
-        per_dataset_table_rows = {ds: [] for ds in DATASET_TYPES}
 
-        for sweep_idx, config_path_str in enumerate(CONFIG_PATHS):
-            config_path = Path(config_path_str)
-            sweep_name = f"sweep{sweep_idx + 1}"
->>>>>>> 480f52ffcf4e46edd1f4f71531c0acf9c5e25dd5
+            greedy_accs = mode_accs['greedy']
+            cat_accs    = mode_accs['categorical']
+            greedy_mean = float(np.mean(greedy_accs))
+            greedy_std  = float(np.std(greedy_accs))
+            cat_mean    = float(np.mean(cat_accs))
+            cat_std     = float(np.std(cat_accs))
+            gap         = greedy_mean - cat_mean
 
-            print(f"\n{'=' * 60}")
-            print(f"[{sweep_name}] {config_path.parent.name}")
+            all_csv_rows.append({
+                'dataset':                      ds_type,
+                'sweep_label':                  label,
+                'schedule':                     getattr(getattr(cfg, 'schedule', None), 'type', 'categorical'),
+                'sigma':                        getattr(getattr(cfg, 'schedule', None), 'sigma', ''),
+                'T':                            cfg.model.T,
+                'n_evals':                      args.n_evals,
+                'greedy_mean':                  round(greedy_mean, 6),
+                'greedy_std':                   round(greedy_std, 6),
+                'categorical_mean':             round(cat_mean, 6),
+                'categorical_std':              round(cat_std, 6),
+                'gap_greedy_minus_categorical': round(gap, 6),
+            })
+            per_dataset_table_rows[ds_type].append({
+                'label':       label,
+                'greedy_mean': greedy_mean, 'greedy_std': greedy_std,
+                'cat_mean':    cat_mean,    'cat_std':    cat_std,
+            })
 
-            if not config_path.exists():
-                print(f"  [WARNING] Config not found: {config_path}. Skipping.")
-                continue
+    # ---------------------------------------------------------------------------
+    # Print and save results
+    # ---------------------------------------------------------------------------
+    print('\n' + '=' * 60)
+    print('ORACLE RESULTS')
+    print('=' * 60)
 
-            cfg = dict_to_ns(load_config(config_path))
-            label = sweep_label(cfg)
-            schedule = get_schedule(cfg)
-            print(f"  T={cfg.model.T}, label={label!r}")
+    table_lines = []
+    for ds_type in DATASET_TYPES:
+        rows = per_dataset_table_rows[ds_type]
+        actual_n = eval_datasets[ds_type].data.shape[0]
+        table = make_table(rows, ds_type, actual_n)
+        print(table)
+        table_lines.append(table)
 
-            for ds_type in DATASET_TYPES:
-                eval_ds = eval_datasets[ds_type]
-                mode_accs = {mode: [] for mode in MODES}
-
-                for eval_i in range(args.n_evals):
-                    eval_seed = args.seed + sweep_idx * 100_000 + eval_i * 1_000
-
-                    for mode_name, temperature in MODES.items():
-                        mode_offset = list(MODES).index(mode_name)
-                        set_seed(eval_seed + mode_offset)
-                        acc = evaluate_oracle(
-                            oracle, grammar, eval_ds, cfg, schedule, device, temperature
-                        )
-                        mode_accs[mode_name].append(acc)
-                        done_evals += 1
-                        elapsed = time.time() - start_time
-                        eta = (elapsed / done_evals) * (total_evals - done_evals)
-                        print(f"  [{done_evals}/{total_evals} complete | {_fmt_dur(elapsed)} elapsed | ETA {_fmt_dur(eta)}]")
-
-                greedy_accs = mode_accs['greedy']
-                cat_accs    = mode_accs['categorical']
-                greedy_mean = float(np.mean(greedy_accs))
-                greedy_std  = float(np.std(greedy_accs))
-                cat_mean    = float(np.mean(cat_accs))
-                cat_std     = float(np.std(cat_accs))
-                gap         = greedy_mean - cat_mean
-
-                all_csv_rows.append({
-                    'grammar':                      grammar_name,
-                    'dataset':                      ds_type,
-                    'sweep_label':                  label,
-                    'schedule':                     getattr(getattr(cfg, 'schedule', None), 'type', 'categorical'),
-                    'sigma':                        getattr(getattr(cfg, 'schedule', None), 'sigma', ''),
-                    'T':                            cfg.model.T,
-                    'n_evals':                      args.n_evals,
-                    'greedy_mean':                  round(greedy_mean, 6),
-                    'greedy_std':                   round(greedy_std, 6),
-                    'categorical_mean':             round(cat_mean, 6),
-                    'categorical_std':              round(cat_std, 6),
-                    'gap_greedy_minus_categorical': round(gap, 6),
-                })
-                per_dataset_table_rows[ds_type].append({
-                    'label':       label,
-                    'greedy_mean': greedy_mean, 'greedy_std': greedy_std,
-                    'cat_mean':    cat_mean,    'cat_std':    cat_std,
-                })
-
-        # Per-grammar table
-        print(f"\n{'=' * 60}")
-        print(f"RESULTS: {grammar_name}")
-        print('=' * 60)
-        grammar_out = out_dir / grammar_name
-        grammar_out.mkdir(parents=True, exist_ok=True)
-        table_lines = []
-        for ds_type in DATASET_TYPES:
-            rows = per_dataset_table_rows[ds_type]
-            actual_n = eval_datasets[ds_type].data.shape[0]
-            table = make_table(rows, ds_type, actual_n)
-            print(table)
-            table_lines.append(table)
-        table_path = grammar_out / 'oracle_eval_table.txt'
-        with open(table_path, 'w') as f:
-            f.write('\n'.join(table_lines) + '\n')
-        print(f"Table saved to: {table_path}")
-
-    # Combined CSV across all grammars
     if all_csv_rows:
         save_csv(all_csv_rows, out_dir)
+
+    table_path = out_dir / 'oracle_eval_table.txt'
+    with open(table_path, 'w') as f:
+        f.write('\n'.join(table_lines) + '\n')
+    print(f"Table saved to: {table_path}")
 
 
 if __name__ == '__main__':
