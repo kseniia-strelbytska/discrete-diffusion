@@ -34,3 +34,19 @@ Oracle grammar benchmark  |  seq_length=512  n_samples=100
   not_nested_parentheses_and_brackets            2942.9    1421.5    4232.9
 
   (keep in mind when running large oracle evaluations that bbaN grammar's oracle is much less efficient)
+
+UPD: fixed/optimised!
+
+~/Desktop/programming/Projects/AI/discrete-diffusion integrate-formal-grammar-dataset*
+discrete-diffusion ❯ python tests/test_efficiency.py --seq-length 512
+
+Oracle grammar benchmark  |  seq_length=512  n_samples=100
+──────────────────────────────────────────────────────────
+  grammar                                        avg µs    min µs    max µs
+  ──────────────────────────────────────────── ────────  ────────  ────────
+  aNbN                                            307.1     285.3     671.7
+  baN                                            2461.4    1329.9    3449.0
+  bbaN                                           1320.9    1030.1   25691.5
+  aNbNcN                                         1340.1    1304.9    1599.7
+  parentheses_and_brackets                       2353.0    1375.3    4974.7
+  not_nested_parentheses_and_brackets            2862.7    1407.2   25806.5

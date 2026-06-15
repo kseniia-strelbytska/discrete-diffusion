@@ -146,8 +146,8 @@ def baN_get_marginals(seq, vocab_size=6):
 
 def bbaN_get_marginals(seq, vocab_size=6):
     """
-    Grammar: SOS B^n A^{2m} EOS PAD*   (n >= 1, m >= 0)
-    Each (n, m) pair determines the sequence completely.
+    Optimized O(L^2) Grammar Oracle for: SOS B^n A^{2m} EOS PAD* (n >= 1, m >= 0)
+    Uses precomputed validation prefixes and a difference array sweep to achieve maximum efficiency.
     """
     if seq.ndim != 1:
         seq = seq.view(-1)
@@ -158,36 +158,81 @@ def bbaN_get_marginals(seq, vocab_size=6):
     if not ok:
         return None, eos_pos
 
-    counts = [[0] * vocab_size for _ in range(L)]   # Python ints — no overflow
-    total  = 0
+    # 1. Cache lookups and precompute scalar checks to completely avoid .item() inside loops
+    seq_items = seq.tolist()
+    can_B = [t in (B, MASK_token) for t in seq_items]
+    can_A = [t in (A, MASK_token) for t in seq_items]
+    can_PAD = [t in (PAD_token, MASK_token) for t in seq_items]
+    can_EOS = [t in (EOS_token, MASK_token) for t in seq_items]
 
-    for n in range(1, L):             # B count >= 1
-        for m in range(0, L // 2 + 1):
-            content_len = n + 2 * m
-            ep = content_len + 1
-            if ep >= L:
-                break
+    # Cumulative prefix validation for B: valid_B_prefix[n] is True iff 1..n can all be B
+    valid_B_prefix = [True] * L
+    for p in range(1, L):
+        valid_B_prefix[p] = valid_B_prefix[p - 1] and can_B[p]
+
+    # Cumulative suffix validation for PAD: valid_PAD_suffix[ep] is True iff ep+1..L-1 can all be PAD
+    valid_PAD_suffix = [True] * (L + 1)
+    for p in range(L - 2, -1, -1):
+        valid_PAD_suffix[p] = valid_PAD_suffix[p + 1] and can_PAD[p + 1]
+
+    # 2. Initialize a difference array for O(1) interval modifications
+    diff = [[0] * vocab_size for _ in range(L + 1)]
+    total = 0
+
+    # Iterate over n (B-boundary) and ep (EOS position). 2m is implicitly defined as (ep - n - 1)
+    for n in range(1, L - 1):
+        if not valid_B_prefix[n]:
+            break  # If prefix 1..n cannot be B, then 1..n+1 definitely cannot be B. Exit early!
+        
+        A_block_valid = True
+        for ep in range(n + 1, L):
+            if ep - 1 > n:
+                A_block_valid = A_block_valid and can_A[ep - 1]
+            
+            if not A_block_valid:
+                break  # If the consecutive A block breaks, extending ep further won't fix it. Exit early!
+            
+            # Structural constraint filtering
             if eos_pos is not None and eos_pos != ep:
                 continue
-            if seq[ep].item() not in (EOS_token, MASK_token):
+            if not can_EOS[ep]:
                 continue
-            if not _check_pos_range(seq, range(ep + 1, L), (PAD_token, MASK_token)):
+            if not valid_PAD_suffix[ep]:
                 continue
-            if not _check_pos_range(seq, range(1, n + 1), (B, MASK_token)):
-                continue
-            if not _check_pos_range(seq, range(n + 1, n + 2 * m + 1), (A, MASK_token)):
+            if (ep - n - 1) % 2 != 0:  # Length of A block (2m) must be even
                 continue
 
-            # exactly 1 completion for this (n, m)
-            total                 += 1
-            counts[0] [SOS_token] += 1
-            for p in range(1, n + 1):
-                counts[p][B] += 1
-            for p in range(n + 1, n + 2 * m + 1):
-                counts[p][A] += 1
-            counts[ep][EOS_token] += 1
-            for p in range(ep + 1, L):
-                counts[p][PAD_token] += 1
+            # We found a perfectly valid world!
+            total += 1
+            
+            # Perform O(1) interval updates on our difference array
+            diff[0][SOS_token]   += 1
+            diff[1][SOS_token]   -= 1
+            
+            diff[1][B]           += 1
+            diff[n + 1][B]       -= 1
+            
+            if ep > n + 1:
+                diff[n + 1][A]   += 1
+                diff[ep][A]       -= 1
+                
+            diff[ep][EOS_token]  += 1
+            diff[ep + 1][EOS_token] -= 1
+            
+            if ep + 1 < L:
+                diff[ep + 1][PAD_token] += 1
+                diff[L][PAD_token]      -= 1
+
+    # 3. Reconstruct final token counts via a single prefix-sum sweep
+    if total == 0:
+        return None, 'No valid completion'
+
+    counts = [[0] * vocab_size for _ in range(L)]
+    current_counts = [0] * vocab_size
+    for p in range(L):
+        for t in range(vocab_size):
+            current_counts[t] += diff[p][t]
+            counts[p][t] = current_counts[t]
 
     return _finish(counts, total, device)
 
@@ -420,50 +465,115 @@ def not_nested_parentheses_and_brackets_get_marginals(seq, vocab_size=8):
     )
 
 
-# ─── parentheses_and_brackets oracle (L4) ─────────────────────────────────────
+# ─── parentheses_and_brackets oracle (L4) — interval DP ──────────────────────
+#
+# Previous implementation used a tuple-as-stack DP state, giving 2^(n/2)
+# reachable states for a masked sequence of content length n — exponential.
+#
+# This implementation uses interval DP.
+# dp[(i, j)] = number of valid Dyck-2 completions of seq[i..j].
+# Recurrence: the bracket that opens at position i must close at some k in
+#   {i+1, i+3, ...} (odd offset so the inner span has even length).
+#   dp[(i,j)] = sum_{k, bracket_type} dp[(i+1, k-1)] * dp[(k+1, j)]
+# Complexity: O(n^3) for the DP table, O(n^4) for all marginals via
+#   pin-and-rerun, O(L^5) worst-case over all candidate content lengths.
+# For L=20 this is ~3 * 10^6 operations — fully tractable.
 
-# State: stack as a tuple of open bracket tokens (nested Dyck)
-_NEST_INITIAL = ()
-_NEST_FINAL   = ()
-_NEST_TOKENS  = [OPEN_P, CLOSE_P, OPEN_B, CLOSE_B]
-_OPEN_TO_CLOSE = {OPEN_P: CLOSE_P, OPEN_B: CLOSE_B}
-_CLOSE_TO_OPEN = {CLOSE_P: OPEN_P, CLOSE_B: OPEN_B}
-
-
-def _nest_trans(state, t):
-    if t in _OPEN_TO_CLOSE:
-        return state + (t,)
-    if t in _CLOSE_TO_OPEN:
-        exp = _CLOSE_TO_OPEN[t]
-        if not state or state[-1] != exp:
-            return None
-        return state[:-1]
-    return None
+_DYCK2_PAIRS   = ((OPEN_P, CLOSE_P), (OPEN_B, CLOSE_B))
+_DYCK2_CONTENT = (OPEN_P, CLOSE_P, OPEN_B, CLOSE_B)
 
 
-def _nest_inv_trans(sp, t):
-    """Yield all states s such that _nest_trans(s, t) == sp."""
-    if t in _OPEN_TO_CLOSE:
-        # sp = s + (t,)  →  s = sp[:-1] if sp[-1] == t
-        if sp and sp[-1] == t:
-            yield sp[:-1]
-    elif t in _CLOSE_TO_OPEN:
-        exp = _CLOSE_TO_OPEN[t]
-        # sp = s[:-1] and s[-1] == exp  →  s = sp + (exp,)
-        yield sp + (exp,)
+def _dyck2_dp(seq_list, start, end):
+    """
+    Count valid Dyck-2 completions for seq_list[start..end] (inclusive).
+    Returns 1 for empty interval (start > end), 0 for odd-length interval.
+    """
+    if start > end:
+        return 1
+    if (end - start + 1) % 2 == 1:
+        return 0
+    dp = {}
+    for length in range(0, end - start + 2, 2):   # 0, 2, 4, … (even only)
+        for i in range(start, end - length + 2):
+            j = i + length - 1                     # j < i when length == 0
+            if length == 0:
+                dp[(i, j)] = 1                      # empty span → 1 completion
+                continue
+            total = 0
+            for k in range(i + 1, j + 1, 2):       # k - i is odd
+                si, sk = seq_list[i], seq_list[k]
+                for open_tok, close_tok in _DYCK2_PAIRS:
+                    if si not in (open_tok, MASK_token):
+                        continue
+                    if sk not in (close_tok, MASK_token):
+                        continue
+                    total += dp[(i + 1, k - 1)] * dp[(k + 1, j)]
+            dp[(i, j)] = total
+    return dp[(start, end)]
+
+
+def _dyck2_dp_pinned(seq_list, start, end, pin_pos, pin_val):
+    """Run _dyck2_dp with seq_list[pin_pos] temporarily set to pin_val."""
+    orig = seq_list[pin_pos]
+    seq_list[pin_pos] = pin_val
+    result = _dyck2_dp(seq_list, start, end)
+    seq_list[pin_pos] = orig
+    return result
 
 
 def parentheses_and_brackets_get_marginals(seq, vocab_size=8):
     """
-    Grammar: properly nested () and [] (standard bracket matching).
+    Grammar: SOS [Dyck-2 word of even length n] EOS PAD*
+
+    Uses interval DP: O(n^4) per candidate content length n.
     """
-    return _dyck_oracle(
-        seq, vocab_size,
-        content_tokens=_NEST_TOKENS,
-        trans_fn=_nest_trans,
-        inv_trans_fn=_nest_inv_trans,
-        final_state=_NEST_FINAL,
-    )
+    if seq.ndim != 1:
+        seq = seq.view(-1)
+    L = seq.shape[0]
+    device = seq.device
+
+    ok, eos_pos = _validate(seq)
+    if not ok:
+        return None, eos_pos
+
+    seq_list = seq.tolist()
+    counts    = [[0] * vocab_size for _ in range(L)]
+    grand_total = 0
+
+    for n in range(2, L - 1, 2):      # even content length ≥ 2 (at least one pair)
+        ep = n + 1                      # EOS position
+        if ep >= L:
+            break
+        if eos_pos is not None and eos_pos != ep:
+            continue
+        if seq_list[ep] not in (EOS_token, MASK_token):
+            continue
+        if not _check_pos_range(seq, range(ep + 1, L), (PAD_token, MASK_token)):
+            continue
+        if n > 0 and not _check_pos_range(
+            seq, range(1, n + 1), (OPEN_P, CLOSE_P, OPEN_B, CLOSE_B, MASK_token)
+        ):
+            continue
+
+        total_n = _dyck2_dp(seq_list, 1, n)
+        if total_n == 0:
+            continue
+
+        grand_total           += total_n
+        counts[0][SOS_token]  += total_n
+        counts[ep][EOS_token] += total_n
+        for p in range(ep + 1, L):
+            counts[p][PAD_token] += total_n
+
+        for pos in range(1, n + 1):
+            t = seq_list[pos]
+            if t != MASK_token:
+                counts[pos][t] += total_n          # unmasked: deterministic
+            else:
+                for v in _DYCK2_CONTENT:           # masked: pin-and-rerun
+                    counts[pos][v] += _dyck2_dp_pinned(seq_list, 1, n, pos, v)
+
+    return _finish(counts, grand_total, device)
 
 
 # ─── unified dispatch ─────────────────────────────────────────────────────────

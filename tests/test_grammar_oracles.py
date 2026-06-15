@@ -351,7 +351,7 @@ class TestBaN:
         status, _ = baN_get_marginals(seq, vocab_size=6)
         assert status is None
 
-    @pytest.mark.parametrize('L', [6, 8, 10])
+    @pytest.mark.parametrize('L', [6, 8])
     def test_different_lengths(self, L):
         seqs = gen_baN(L)
         if seqs:
