@@ -210,7 +210,7 @@ class ScheduledUnmasker(nn.Module):
                 steps = [X.clone()]
                 initial_masked = max((X == MASK_token).sum().item(), 1)
                 timesteps_log = [float(timestep)]
-                mopup_timestep = torch.zeros(1, device=self.device)
+                mopup_timestep = torch.tensor(0.0, device=self.device)
 
                 max_steps = getattr(self.decoding_strategy, 'MAX_STEPS', 10**5)
 
@@ -268,15 +268,11 @@ class ScheduledUnmasker(nn.Module):
                     do_mopup = True
 
                 if do_mopup:
-                    V_mu = logits.shape[-1]
-                    content_idx_mu = torch.tensor(
-                        [j for j in range(V_mu) if j != MASK_token],
-                        device=logits.device, dtype=torch.long,
-                    )
-                    probs_content = torch.softmax(logits[:, content_idx_mu], dim=-1)
+                    content_idx, content_probs = self._content_probs(logits, temperature)
+                    
                     remaining_masked = (X == MASK_token)
                     chosen_mu = sampling_strategy.choose_tokens(
-                        content_probs=probs_content, content_idx=content_idx_mu,
+                        content_probs=content_probs, content_idx=content_idx,
                         positions_mask=remaining_masked, device=self.device,
                     )
                     X[remaining_masked] = chosen_mu[remaining_masked]

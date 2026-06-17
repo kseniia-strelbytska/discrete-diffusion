@@ -2,10 +2,10 @@ seed: 42
 device: auto
 decoding_strategy: ebsampler
 sampling_strategy: greedy
-eb_gamma: 5
+eb_gamma: 0.1
 temperature: 1.0  # logit scaling (scale-invariant for greedy; kept for consistency)
 data:
-  l: 500
+  l: 128 
   train_split: 0.9
   batch_size: 64
   grammar: anbn
@@ -38,7 +38,7 @@ validation:
   val_every: 1000
 evaluation:
   eval_every: 4000
-  n_samples: 10
+  n_samples: 100
   eval_dataset: unconditional # limited or randomised or complete
   eval_type: random # full or random
   cutoff: 258
