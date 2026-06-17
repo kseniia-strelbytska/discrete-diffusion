@@ -2,8 +2,8 @@ seed: 42
 device: auto
 decoding_strategy: ebsampler
 sampling_strategy: greedy
-eb_gamma: 0.1
-temperature: 0  # logit scaling (scale-invariant for greedy; kept for consistency)
+eb_gamma: 5
+temperature: 1.0  # logit scaling (scale-invariant for greedy; kept for consistency)
 data:
   l: 500
   train_split: 0.9
@@ -32,13 +32,13 @@ training:
   gaussian_noise: True
   denoise: "0" # "0" or eps
 schedule:
-  type: gaussian  # categorical or gaussian
+  type: categorical  # categorical or gaussian
   sigma: 1.0         # Gaussian width parameter; ignored when type=categorical
 validation:
   val_every: 1000
 evaluation:
   eval_every: 4000
-  n_samples: 1
+  n_samples: 10
   eval_dataset: unconditional # limited or randomised or complete
   eval_type: random # full or random
   cutoff: 258
