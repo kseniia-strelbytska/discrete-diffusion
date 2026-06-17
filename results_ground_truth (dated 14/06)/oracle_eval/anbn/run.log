@@ -1,0 +1,37 @@
+Device: mps
+Oracle model — no training required.
+Data generated; shape: torch.Size([128, 258])
+Grammar: anbn  l=256  vocab_size=6
+
+Building evaluation datasets...
+  unconditional: 500 samples
+
+============================================================
+[sweep1] sweep1-RPE-uniform-T100_12062026_214734
+  [WARNING] Directory not found: /home/superuser/discrete-diffusion/models/sweep1-RPE-uniform-T100_12062026_214734. Skipping.
+
+============================================================
+[sweep2] sweep2-RPE-gaussian-s20-T100_12062026_231649
+  [WARNING] Directory not found: /home/superuser/discrete-diffusion/models/sweep2-RPE-gaussian-s20-T100_12062026_231649. Skipping.
+
+============================================================
+[sweep3] sweep3-RPE-gaussian-s10-T100_13062026_005150
+  [WARNING] Directory not found: /home/superuser/discrete-diffusion/models/sweep3-RPE-gaussian-s10-T100_13062026_005150. Skipping.
+
+============================================================
+[sweep4] sweep4-RPE-gaussian-s5-T100_13062026_022706
+  [WARNING] Directory not found: /home/superuser/discrete-diffusion/models/sweep4-RPE-gaussian-s5-T100_13062026_022706. Skipping.
+
+============================================================
+[sweep5] sweep5-RPE-uniform-T500_13062026_040137
+  [WARNING] Directory not found: /home/superuser/discrete-diffusion/models/sweep5-RPE-uniform-T500_13062026_040137. Skipping.
+
+============================================================
+ORACLE RESULTS
+============================================================
+
+=== Dataset: unconditional — no results ===
+
+Table saved to: results/oracle_eval/anbn/oracle_eval_table.txt
+
+Log saved to: results/oracle_eval/anbn/run.log

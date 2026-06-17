@@ -1479,7 +1479,7 @@ def generate_not_nested_matched_parentheses_and_brackets_data(
     else:
         data = []
         while len(data) < num_samples:
-            sample = generate_matched_parentheses_and_brackets(max_length)
+            sample = generate_not_nested_matched_parentheses_and_brackets(max_length)
             if len(sample) == (max_length + 2):  # +SOS, EOS
                 data.append(sample)
 

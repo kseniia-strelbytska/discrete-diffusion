@@ -120,7 +120,9 @@ def eval_one_T(cfg, device, grammar, schedule, dirs=None, save_mode=False):
         device=device,
     )
 
-    strategy = cfg.strategy
+    decoding_strategy = getattr(cfg, 'decoding_strategy', 'schedule_driven')
+    sampling_strategy = getattr(cfg, 'sampling_strategy', 'categorical')
+    temperature = getattr(cfg, 'temperature', 1.0)
     denoise = getattr(getattr(cfg, "training", None), "denoise", "0")
 
     figures_path = output_path = loss_log_path = None
@@ -135,8 +137,9 @@ def eval_one_T(cfg, device, grammar, schedule, dirs=None, save_mode=False):
         grammar,
         evaluation_dataset=dataset,
         T=cfg.model.T,
-        strategy=strategy,
-        temperature=cfg.temperature,
+        decoding_strategy=decoding_strategy,
+        sampling_strategy=sampling_strategy,
+        temperature=temperature,
         write_steps=save_mode,
         device=device,
         figures_path=figures_path,

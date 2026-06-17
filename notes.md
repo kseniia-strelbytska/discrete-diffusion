@@ -50,3 +50,56 @@ Oracle grammar benchmark  |  seq_length=512  n_samples=100
   aNbNcN                                         1340.1    1304.9    1599.7
   parentheses_and_brackets                       2353.0    1375.3    4974.7
   not_nested_parentheses_and_brackets            2862.7    1407.2   25806.5
+
+All oracle brute-force L=10 tests pass.
+
+~/Desktop/programming/Projects/AI/discrete-diffusion integrate-formal-grammar-dataset* 25s
+discrete-diffusion ❯ pytest tests/test_grammar_oracles.py --seq-length 10 -v
+
+============================================================================= test session starts =============================================================================
+platform darwin -- Python 3.12.4, pytest-9.0.3, pluggy-1.6.0 -- /Users/kseniia/Desktop/programming/Projects/AI/discrete-diffusion/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/kseniia
+plugins: anyio-4.13.0
+collected 38 items                                                                                                                                                            
+
+tests/test_grammar_oracles.py::test_manual_small_sequences PASSED                                                                                                       [  2%]
+tests/test_grammar_oracles.py::TestANBN::test_count PASSED                                                                                                              [  5%]
+tests/test_grammar_oracles.py::TestANBN::test_oracle_vs_brute_force PASSED                                                                                              [  7%]
+tests/test_grammar_oracles.py::TestANBN::test_fully_unmasked_is_deterministic PASSED                                                                                    [ 10%]
+tests/test_grammar_oracles.py::TestANBN::test_invalid_returns_none PASSED                                                                                               [ 13%]
+tests/test_grammar_oracles.py::TestBaN::test_count PASSED                                                                                                               [ 15%]
+tests/test_grammar_oracles.py::TestBaN::test_oracle_vs_brute_force PASSED                                                                                               [ 18%]
+tests/test_grammar_oracles.py::TestBaN::test_fully_unmasked_is_deterministic PASSED                                                                                     [ 21%]
+tests/test_grammar_oracles.py::TestBaN::test_position1_must_be_B PASSED                                                                                                 [ 23%]
+tests/test_grammar_oracles.py::TestBaN::test_position1_masked_returns_B PASSED                                                                                          [ 26%]
+tests/test_grammar_oracles.py::TestBaN::test_odd_a_count_no_valid_completion PASSED                                                                                     [ 28%]
+tests/test_grammar_oracles.py::TestBaN::test_different_lengths[6] PASSED                                                                                                [ 31%]
+tests/test_grammar_oracles.py::TestBaN::test_different_lengths[8] PASSED                                                                                                [ 34%]
+tests/test_grammar_oracles.py::TestBBaN::test_count PASSED                                                                                                              [ 36%]
+tests/test_grammar_oracles.py::TestBBaN::test_oracle_vs_brute_force PASSED                                                                                              [ 39%]
+tests/test_grammar_oracles.py::TestBBaN::test_fully_unmasked_is_deterministic PASSED                                                                                    [ 42%]
+tests/test_grammar_oracles.py::TestBBaN::test_no_Bs_returns_none PASSED                                                                                                 [ 44%]
+tests/test_grammar_oracles.py::TestBBaN::test_A_before_B_returns_none PASSED                                                                                            [ 47%]
+tests/test_grammar_oracles.py::TestBBaN::test_different_lengths[6] PASSED                                                                                               [ 50%]
+tests/test_grammar_oracles.py::TestBBaN::test_different_lengths[8] PASSED                                                                                               [ 52%]
+tests/test_grammar_oracles.py::TestBBaN::test_different_lengths[10] PASSED                                                                                              [ 55%]
+tests/test_grammar_oracles.py::TestANBNCN::test_count PASSED                                                                                                            [ 57%]
+tests/test_grammar_oracles.py::TestANBNCN::test_oracle_vs_brute_force PASSED                                                                                            [ 60%]
+tests/test_grammar_oracles.py::TestANBNCN::test_fully_unmasked_is_deterministic PASSED                                                                                  [ 63%]
+tests/test_grammar_oracles.py::TestANBNCN::test_wrong_order_returns_none PASSED                                                                                         [ 65%]
+tests/test_grammar_oracles.py::TestANBNCN::test_different_lengths[7] PASSED                                                                                             [ 68%]
+tests/test_grammar_oracles.py::TestANBNCN::test_different_lengths[10] PASSED                                                                                            [ 71%]
+tests/test_grammar_oracles.py::TestNotNestedParenthesesAndBrackets::test_count PASSED                                                                                   [ 73%]
+tests/test_grammar_oracles.py::TestNotNestedParenthesesAndBrackets::test_oracle_vs_brute_force PASSED                                                                   [ 76%]
+tests/test_grammar_oracles.py::TestNotNestedParenthesesAndBrackets::test_fully_unmasked_is_deterministic PASSED                                                         [ 78%]
+tests/test_grammar_oracles.py::TestNotNestedParenthesesAndBrackets::test_mismatched_returns_none PASSED                                                                 [ 81%]
+tests/test_grammar_oracles.py::TestParenthesesAndBrackets::test_count PASSED                                                                                            [ 84%]
+tests/test_grammar_oracles.py::TestParenthesesAndBrackets::test_oracle_vs_brute_force PASSED                                                                            [ 86%]
+tests/test_grammar_oracles.py::TestParenthesesAndBrackets::test_fully_unmasked_is_deterministic PASSED                                                                  [ 89%]
+tests/test_grammar_oracles.py::TestParenthesesAndBrackets::test_wrong_close_returns_none PASSED                                                                         [ 92%]
+tests/test_grammar_oracles.py::TestParenthesesAndBrackets::test_independent_vs_nested_differ PASSED                                                                     [ 94%]
+tests/test_grammar_oracles.py::TestCrossGrammar::test_baN_seqs_invalid_for_bbaN PASSED                                                                                  [ 97%]
+tests/test_grammar_oracles.py::TestCrossGrammar::test_marginals_sum_to_one_at_each_position PASSED                                                                      [100%]
+
+======================================================================= 38 passed in 1412.84s (0:23:32) =======================================================================

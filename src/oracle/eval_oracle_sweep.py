@@ -34,7 +34,7 @@ Usage example
   python src/eval_oracle_sweep.py
 
   # Custom options:
-  python src/oracle/eval_oracle_sweep.py --n-samples 500 --n-evals 20 --seed 2024 --out-dir results/oracle_eval
+  python src/oracle/eval_oracle_sweep.py --n-samples 100 --n-evals 2 --seed 2024 --out-dir ./results/oracle_eval
 """
 
 import argparse
@@ -51,6 +51,7 @@ import torch
 import yaml
 
 # Add src/ to path so all project imports resolve regardless of CWD
+_ROOT = Path(__file__).resolve().parent.parent.parent
 _SRC = Path(__file__).resolve().parent.parent
 if str(_SRC) not in sys.path:
     sys.path.insert(0, str(_SRC))
@@ -63,9 +64,12 @@ from schedules import CategoricalSchedule, GaussianSchedule
 # Supported oracle grammars and grammar factory
 # ---------------------------------------------------------------------------
 
+# ORACLE_GRAMMARS = [
+#     'anbn', 'baN', 'bbaN', 'aNbNcN',
+#     'not_nested_parentheses_and_brackets', 'parentheses_and_brackets',
+# ]
 ORACLE_GRAMMARS = [
-    'anbn', 'baN', 'bbaN', 'aNbNcN',
-    'not_nested_parentheses_and_brackets', 'parentheses_and_brackets',
+    'anbn'
 ]
 
 
@@ -80,19 +84,23 @@ def make_grammar(grammar_name, l):
 # ---------------------------------------------------------------------------
 # Sweep config directories — read T and schedule from each run's saved config
 # ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# Sweep config directories — read T and schedule from each run's saved config
+# ---------------------------------------------------------------------------
+# Using _SRC dynamically adapts to your actual project location
 SWEEP_DIRS = [
-    "/home/superuser/discrete-diffusion/models/sweep1-RPE-uniform-T100_12062026_214734",
-    "/home/superuser/discrete-diffusion/models/sweep2-RPE-gaussian-s20-T100_12062026_231649",
-    "/home/superuser/discrete-diffusion/models/sweep3-RPE-gaussian-s10-T100_13062026_005150",
-    "/home/superuser/discrete-diffusion/models/sweep4-RPE-gaussian-s5-T100_13062026_022706",
-    "/home/superuser/discrete-diffusion/models/sweep5-RPE-uniform-T500_13062026_040137",
+    str(_ROOT / "models/sweep1-RPE-uniform-T100_12062026_214734"),
+    str(_ROOT / "models/sweep2-RPE-gaussian-s20-T100_12062026_231649"),
+    str(_ROOT / "models/sweep3-RPE-gaussian-s10-T100_13062026_005150"),
+    str(_ROOT / "models/sweep4-RPE-gaussian-s5-T100_13062026_022706"),
+    str(_ROOT / "models/sweep5-RPE-uniform-T500_13062026_040137"),
 ]
 
 DATASET_TYPES = ['unconditional']
 
 MODES = {
-    'greedy':      0,
-    'categorical': 1.0,
+    'greedy':      ('greedy',      1.0),  # (sampling_strategy, temperature for logit scaling)
+    'categorical': ('categorical', 1.0),
 }
 
 # ---------------------------------------------------------------------------
@@ -142,7 +150,7 @@ def sweep_label(cfg):
     return f"gaussian σ={sigma} T={T}"
 
 
-def evaluate_oracle(oracle, grammar, eval_dataset, cfg, schedule, device, temperature):
+def evaluate_oracle(oracle, grammar, eval_dataset, cfg, schedule, device, sampling_strategy, temperature=1.0):
     """Run evaluation_from_generation for one seed. Returns both_rules_acc."""
     is_gaussian = isinstance(schedule, GaussianSchedule)
     stats, _, _, _, _ = evaluation_from_generation(
@@ -150,7 +158,8 @@ def evaluate_oracle(oracle, grammar, eval_dataset, cfg, schedule, device, temper
         grammar,
         evaluation_dataset=eval_dataset,
         T=cfg.model.T,
-        strategy='categorical',
+        decoding_strategy='schedule_driven',
+        sampling_strategy=sampling_strategy,
         temperature=temperature,
         write_steps=False,
         device=device,
@@ -382,11 +391,11 @@ def _run(args, device, out_dir):
                 eval_seed = args.seed + sweep_idx * 100_000 + eval_i * 1_000
                 print(f"  [{ds_type}] eval {eval_i + 1}/{args.n_evals}  seed={eval_seed}")
 
-                for mode_name, temperature in MODES.items():
+                for mode_name, (sampling_strategy, temperature) in MODES.items():
                     mode_offset = list(MODES).index(mode_name)
                     set_seed(eval_seed + mode_offset)
                     acc = evaluate_oracle(
-                        oracle, grammar, eval_ds, cfg, schedule, device, temperature
+                        oracle, grammar, eval_ds, cfg, schedule, device, sampling_strategy, temperature
                     )
                     mode_accs[mode_name].append(acc)
                     print(f"    {mode_name}: both_rules_acc={acc:.4f}")

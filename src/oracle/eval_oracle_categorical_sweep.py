@@ -74,10 +74,9 @@ from schedules import GaussianSchedule
 # ---------------------------------------------------------------------------
 
 ORACLE_GRAMMARS = [
-    'anbn'
+    'anbn', 'baN', 'bbaN', 'aNbNcN',
+    'not_nested_parentheses_and_brackets', 'parentheses_and_brackets',
 ]
-# , 'baN', 'bbaN', 'aNbNcN',
-#   'not_nested_parentheses_and_brackets', 'parentheses_and_brackets',
 
 def make_grammar(grammar_name, l):
     if grammar_name == 'anbn':
@@ -135,7 +134,8 @@ def evaluate_one(oracle, grammar, eval_dataset, T, schedule, device, cutoff):
         grammar,
         evaluation_dataset=eval_dataset,
         T=T,
-        strategy='categorical',
+        decoding_strategy='schedule_driven',
+        sampling_strategy='categorical',
         temperature=TEMPERATURE,
         write_steps=False,
         device=device,

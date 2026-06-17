@@ -11,15 +11,6 @@ For each grammar we:
      the pool contains ALL valid sequences up to seq_length, so we additionally
      compare oracle marginals against exact brute-force marginals over the pool.
 
-Dyck oracle complexity note
----------------------------
-The nested-Dyck oracle uses a tuple-as-stack DP state, giving a state space that
-grows as O(2^(n/2)) for a masked sequence of content length n.  The not-nested
-oracle uses (depth_p, depth_b) pairs giving O(n^2) states, but the outer loop
-over candidate content lengths makes the full call O(n^4).  Neither implementation
-scales to large n.  Dyck grammar pools are therefore capped at DYCK_MAX_SEQ_LENGTH
-regardless of --seq-length, keeping each oracle call fast.
-
 Usage:
     pytest tests/test_grammar_oracles_random_tests.py --n-samples 100000
     pytest tests/test_grammar_oracles_random_tests.py --n-samples 100000 --seq-length 20
@@ -57,11 +48,6 @@ from oracle.grammar_oracles import (
     parentheses_and_brackets_get_marginals,
     not_nested_parentheses_and_brackets_get_marginals,
 )
-
-# Dyck oracles have super-polynomial complexity in content length (see module docstring).
-# Cap the sequence length used for their pools so each oracle call stays fast.
-# Nested Dyck becomes infeasible above ~40 content tokens; not-nested above ~30.
-DYCK_MAX_SEQ_LENGTH = 20
 
 # ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -348,19 +334,15 @@ class TestANBNCNRandom:
 class TestParenthesesAndBracketsRandom:
     """
     Nested Dyck: pool is a random sample; property checks only.
-
-    Capped at DYCK_MAX_SEQ_LENGTH regardless of --seq-length because the oracle's
-    stack-tuple DP state gives O(2^(n/2)) states for content length n.
     """
 
     @pytest.fixture(scope='class')
     def pool(self, seq_length, n_samples):
-        effective = min(seq_length, DYCK_MAX_SEQ_LENGTH)
         pool_size = max(n_samples // 10, 1000)
         raw = generate_matched_parentheses_and_brackets_data(
-            num_samples=pool_size, max_length=effective - 2,
+            num_samples=pool_size, max_length=seq_length - 2,
         )
-        return _make_pool(raw, target_length=effective)
+        return _make_pool(raw, target_length=seq_length)
 
     def test_pool_nonempty(self, pool):
         seqs, _ = pool
@@ -388,19 +370,15 @@ class TestParenthesesAndBracketsRandom:
 class TestNotNestedParenthesesAndBracketsRandom:
     """
     Not-nested (independent) Dyck: pool is a random sample; property checks only.
-
-    Capped at DYCK_MAX_SEQ_LENGTH regardless of --seq-length because the oracle's
-    (depth_p, depth_b) DP has O(n^4) total complexity when EOS is masked.
     """
 
     @pytest.fixture(scope='class')
     def pool(self, seq_length, n_samples):
-        effective = min(seq_length, DYCK_MAX_SEQ_LENGTH)
         pool_size = max(n_samples // 10, 1000)
         raw = generate_not_nested_matched_parentheses_and_brackets_data(
-            num_samples=pool_size, max_length=effective - 2,
+            num_samples=pool_size, max_length=seq_length - 2,
         )
-        return _make_pool(raw, target_length=effective)
+        return _make_pool(raw, target_length=seq_length)
 
     def test_pool_nonempty(self, pool):
         seqs, _ = pool

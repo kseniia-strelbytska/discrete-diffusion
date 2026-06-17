@@ -283,9 +283,13 @@ def run_oracle_test(oracle_fn, vocab_size, valid_seqs, atol=1e-5, label=''):
             msg += f'  seq={f["seq"]}\n  oracle={f["oracle"]}\n  bf={f["bf"]}\n'
         pytest.fail(msg)
 
-
 # ─── tests ────────────────────────────────────────────────────────────────────
 
+def test_manual_small_sequences():
+    sample_seqs = [torch.tensor([SOS_token, MASK_token, A, MASK_token, MASK_token, MASK_token, B, MASK_token, C, MASK_token, EOS_token, PAD_token, PAD_token], dtype=torch.long),]
+    
+    
+    
 class TestANBN:
     @pytest.fixture(scope='class')
     def seqs(self, seq_length):
