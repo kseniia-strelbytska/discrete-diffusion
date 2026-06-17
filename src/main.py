@@ -401,6 +401,8 @@ def main():
     else:
         raise ValueError(f"Invalid model architecture: {cfg.model.architecture}")
 
+    print(f'Model eb: {getattr(cfg, 'eb_gamma', 0.1)}')
+
     if args.mode == "train":
         # output = PROJECT_ROOT / "all_masks.txt"
         # with open(output, "w") as f:
@@ -432,8 +434,10 @@ def main():
             evaluation_dataset=evaluation_dataset,
             verbose=args.verbose,
             save_mode=args.save,
-            strategy=cfg.strategy,
+            decoding_strategy=cfg.decoding_strategy,
+            sampling_strategy=cfg.sampling_strategy,
             temperature=cfg.temperature,
+            eb_gamma=getattr(cfg, 'eb_gamma', 0.1),
             wandb=wandb,
             loss_type=cfg.training.loss_type,
             gaussian_noise=isinstance(schedule, GaussianSchedule),
@@ -449,8 +453,11 @@ def main():
                                      denoise=cfg.training.denoise,
                                      oracle=(cfg.model.architecture == "oracle"),
                                      oracle_model=oracleModel(grammar_name=cfg.data.grammar, vocab_size=model.vocab_size, device=device) if cfg.model.architecture != "oracle" else None,
-                                     schedule=schedule)
-        
+                                     schedule=schedule,
+                                     decoding_strategy=cfg.decoding_strategy,
+                                     sampling_strategy=cfg.sampling_strategy,
+                                     eb_gamma=getattr(cfg, 'eb_gamma', 0.1))
+
         sample = torch.full((cfg.model.max_len,), MASK_token, dtype=torch.long).to(device)
         res = unmasker(sample, ((sample == MASK_token).sum() / torch.numel(sample)), return_steps=False)
         
@@ -482,7 +489,10 @@ def main():
                                      denoise=cfg.training.denoise,
                                      oracle=(cfg.model.architecture == "oracle"),
                                      oracle_model=oracleModel(grammar_name=cfg.data.grammar, vocab_size=model.vocab_size, device=device) if cfg.model.architecture != "oracle" else None,
-                                     schedule=schedule)
+                                     schedule=schedule,
+                                     decoding_strategy=cfg.decoding_strategy,
+                                     sampling_strategy=cfg.sampling_strategy,
+                                     eb_gamma=getattr(cfg, 'eb_gamma', 0.1))
 
         investigate_dataset(model, 
                             unmasker, 
@@ -555,8 +565,10 @@ def main():
                 model,
                 grammar,
                 evaluation_dataset=current_evaluation_dataset,
-                strategy=cfg.strategy,
+                decoding_strategy=cfg.decoding_strategy,
+                sampling_strategy=cfg.sampling_strategy,
                 temperature=cfg.temperature,
+                eb_gamma=getattr(cfg, 'eb_gamma', 0.1),
                 T=cfg.model.T,
                 write_steps=True,
                 device=device,

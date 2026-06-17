@@ -1,0 +1,11 @@
+dataset,T,sigma,n_evals,mean_both_rules_acc,std_both_rules_acc
+unconditional,128,1,10,0.602,0.045122
+unconditional,128,5,10,0.689,0.042297
+unconditional,128,20,10,0.851,0.03015
+unconditional,128,40,10,0.858,0.027857
+unconditional,128,160,10,0.766,0.025768
+unconditional,256,1,10,0.773,0.04776
+unconditional,256,5,10,0.827,0.020025
+unconditional,256,20,10,0.922,0.02358
+unconditional,256,40,10,0.922,0.024
+unconditional,256,160,10,0.828,0.034

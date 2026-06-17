@@ -120,7 +120,8 @@ def evaluation_from_generation(model,
                                grammar,
                                evaluation_dataset=None,
                                T=500,
-                               strategy = 'categorical',
+                               decoding_strategy='schedule_driven',
+                               sampling_strategy='categorical',
                                temperature=1.0,
                                write_steps=False,
                                device='cpu',
@@ -136,7 +137,8 @@ def evaluation_from_generation(model,
                                investigate=False,
                                n_first_tokens=10**9,
                                attention_every=10,
-                               max_attention_tokens=24):
+                               max_attention_tokens=24,
+                               eb_gamma=0.1):
     # r1, r2, both, format
     stats = np.array([0, 0, 0, 0])
     stats_eos = np.array([0, 0, 0, 0])  # stats for sequences that contain EOS
@@ -156,7 +158,10 @@ def evaluation_from_generation(model,
     _oracle_for_eval = None if _is_oracle_model else oracleModel(grammar_name=_grammar_name, vocab_size=model.vocab_size, device=device)
     unmaskModel = ScheduledUnmasker(model, device, T=T, denoise=denoise,
                                     oracle=_is_oracle_model, oracle_model=_oracle_for_eval,
-                                    schedule=schedule, gaussian_noise=gaussian_noise, sigma=sigma)
+                                    schedule=schedule, gaussian_noise=gaussian_noise, sigma=sigma,
+                                    decoding_strategy=decoding_strategy,
+                                    sampling_strategy=sampling_strategy,
+                                    eb_gamma=eb_gamma)
         
     model.eval()
     with torch.no_grad():
@@ -165,9 +170,9 @@ def evaluation_from_generation(model,
             
             if model.architecture not in ('autoregressive', 'RE'):
                 if write_steps == False:
-                    y_pred = unmaskModel(s, ((s == MASK_token).sum() / torch.numel(s)), strategy, temperature=temperature) # no batch dimension
+                    y_pred = unmaskModel(s, ((s == MASK_token).sum() / torch.numel(s)), temperature=temperature) # no batch dimension
                 else:
-                    y_pred, steps, timesteps_log, error_message = unmaskModel(s, ((s == MASK_token).sum() / torch.numel(s)), strategy, temperature=temperature, return_steps=True)
+                    y_pred, steps, timesteps_log, error_message = unmaskModel(s, ((s == MASK_token).sum() / torch.numel(s)), temperature=temperature, return_steps=True)
             else:
                 y_pred = get_prediction(model, s, max_tokens=cutoff)  # autoregressive generation; no batch dimension
 

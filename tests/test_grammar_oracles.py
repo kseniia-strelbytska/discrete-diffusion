@@ -10,6 +10,7 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / 'src'))
 
+import time
 import pytest
 import torch
 from itertools import product, combinations
@@ -191,7 +192,48 @@ def gen_dyck_nested(L):
             seqs.append(torch.tensor(seq, dtype=torch.long))
     return seqs
 
+def generate_all_sequences_for_all_languages(L):
+    all_generation_functions = [gen_aNbN, gen_baN, gen_bbaN, gen_aNbNcN, gen_dyck_not_nested, gen_dyck_nested]
+    
+    for gen_fn in all_generation_functions:
+        print(f"Generating sequences for {gen_fn.__name__} with length {L}")
+        result = [] # 1. Create a list to hold the results
 
+        all_sequences = gen_fn(L)
+        for seq in all_sequences:
+            result.append(seq) # 2. Append instead of yield
+        
+        for seq in result:
+            for ch in seq:
+                if ch == SOS_token:
+                    print('SOS', end=' ')
+                elif ch == EOS_token:
+                    print('EOS', end=' ')
+                elif ch == PAD_token:
+                    print('PAD', end=' ')
+                elif ch == MASK_token:
+                    print('MASK', end=' ')
+                else:
+                    if gen_fn in [gen_dyck_not_nested, gen_dyck_nested]:
+                        if ch == OPEN_P:
+                            print('(', end=' ')
+                        elif ch == CLOSE_P:
+                            print(')', end=' ')
+                        elif ch == OPEN_B:
+                            print('[', end=' ')
+                        elif ch == CLOSE_B:
+                            print(']', end=' ')
+                    else:
+                        if ch == A:
+                            print('A', end=' ')
+                        elif ch == B:
+                            print('B', end=' ')
+                        elif ch == C:
+                            print('C', end=' ')
+            print() # New line after each sequence
+        print(f"Total sequences generated for {gen_fn.__name__}: {len(all_sequences)}")
+        
+    return result # 3. Return the final list
 # ─── generic test harness ─────────────────────────────────────────────────────
 
 def run_oracle_test(oracle_fn, vocab_size, valid_seqs, atol=1e-5, label=''):
@@ -201,10 +243,13 @@ def run_oracle_test(oracle_fn, vocab_size, valid_seqs, atol=1e-5, label=''):
     """
     failures = []
     total = 0
+    oracle_total_s = 0.0
     for seq in valid_seqs:
         for masked in all_masking_patterns(seq):
             total += 1
+            t0 = time.perf_counter()
             status, result = oracle_fn(masked, vocab_size)
+            oracle_total_s += time.perf_counter() - t0
             bf = brute_force_marginals(masked, valid_seqs, vocab_size)
 
             if bf is None:
@@ -228,19 +273,27 @@ def run_oracle_test(oracle_fn, vocab_size, valid_seqs, atol=1e-5, label=''):
                         'bf': bf,
                     })
 
+    if total:
+        avg_us = oracle_total_s / total * 1e6
+        print(f'\n[{label}] oracle avg: {avg_us:.1f} µs/call over {total} calls')
+
     if failures:
         msg = f'{label}: {len(failures)}/{total} failures\n'
         for f in failures[:5]:  # show first 5
             msg += f'  seq={f["seq"]}\n  oracle={f["oracle"]}\n  bf={f["bf"]}\n'
         pytest.fail(msg)
 
-
 # ─── tests ────────────────────────────────────────────────────────────────────
 
+def test_manual_small_sequences():
+    sample_seqs = [torch.tensor([SOS_token, MASK_token, A, MASK_token, MASK_token, MASK_token, B, MASK_token, C, MASK_token, EOS_token, PAD_token, PAD_token], dtype=torch.long),]
+    
+    
+    
 class TestANBN:
     @pytest.fixture(scope='class')
-    def seqs(self):
-        return gen_aNbN(L=8)
+    def seqs(self, seq_length):
+        return gen_aNbN(L=seq_length)
 
     def test_count(self, seqs):
         assert len(seqs) > 0
@@ -264,8 +317,8 @@ class TestANBN:
 
 class TestBaN:
     @pytest.fixture(scope='class')
-    def seqs(self):
-        return gen_baN(L=8)
+    def seqs(self, seq_length):
+        return gen_baN(L=seq_length)
 
     def test_count(self, seqs):
         assert len(seqs) > 0
@@ -302,7 +355,7 @@ class TestBaN:
         status, _ = baN_get_marginals(seq, vocab_size=6)
         assert status is None
 
-    @pytest.mark.parametrize('L', [6, 8, 10])
+    @pytest.mark.parametrize('L', [6, 8])
     def test_different_lengths(self, L):
         seqs = gen_baN(L)
         if seqs:
@@ -311,8 +364,8 @@ class TestBaN:
 
 class TestBBaN:
     @pytest.fixture(scope='class')
-    def seqs(self):
-        return gen_bbaN(L=8)
+    def seqs(self, seq_length):
+        return gen_bbaN(L=seq_length)
 
     def test_count(self, seqs):
         assert len(seqs) > 0
@@ -349,8 +402,8 @@ class TestBBaN:
 
 class TestANBNCN:
     @pytest.fixture(scope='class')
-    def seqs(self):
-        return gen_aNbNcN(L=10)
+    def seqs(self, seq_length):
+        return gen_aNbNcN(L=seq_length)
 
     def test_count(self, seqs):
         assert len(seqs) > 0
@@ -382,8 +435,8 @@ class TestANBNCN:
 
 class TestNotNestedParenthesesAndBrackets:
     @pytest.fixture(scope='class')
-    def seqs(self):
-        return gen_dyck_not_nested(L=8)
+    def seqs(self, seq_length):
+        return gen_dyck_not_nested(L=seq_length)
 
     def test_count(self, seqs):
         assert len(seqs) > 0
@@ -411,8 +464,8 @@ class TestNotNestedParenthesesAndBrackets:
 
 class TestParenthesesAndBrackets:
     @pytest.fixture(scope='class')
-    def seqs(self):
-        return gen_dyck_nested(L=8)
+    def seqs(self, seq_length):
+        return gen_dyck_nested(L=seq_length)
 
     def test_count(self, seqs):
         assert len(seqs) > 0

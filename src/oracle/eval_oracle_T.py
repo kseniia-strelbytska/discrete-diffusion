@@ -120,7 +120,9 @@ def eval_one_T(cfg, device, grammar, schedule, dirs=None, save_mode=False):
         device=device,
     )
 
-    strategy = cfg.strategy
+    decoding_strategy = getattr(cfg, 'decoding_strategy', 'schedule_driven')
+    sampling_strategy = getattr(cfg, 'sampling_strategy', 'categorical')
+    temperature = getattr(cfg, 'temperature', 1.0)
     denoise = getattr(getattr(cfg, "training", None), "denoise", "0")
 
     figures_path = output_path = loss_log_path = None
@@ -135,8 +137,9 @@ def eval_one_T(cfg, device, grammar, schedule, dirs=None, save_mode=False):
         grammar,
         evaluation_dataset=dataset,
         T=cfg.model.T,
-        strategy=strategy,
-        temperature=cfg.temperature,
+        decoding_strategy=decoding_strategy,
+        sampling_strategy=sampling_strategy,
+        temperature=temperature,
         write_steps=save_mode,
         device=device,
         figures_path=figures_path,
@@ -258,6 +261,10 @@ def main():
         "--grammar", type=str, default=None,
         help="Override cfg.data.grammar (e.g. baN, aNbNcN, parentheses_and_brackets).",
     )
+    parser.add_argument(
+        "--device", type=str, default=None,
+        help="Override cfg.device: auto, cpu, cuda, mps.",
+    )
     args = parser.parse_args()
 
     base_config = load_config(args.config)
@@ -267,6 +274,8 @@ def main():
         cfg.model.T = args.T
     if args.grammar is not None:
         cfg.data.grammar = args.grammar
+    if args.device is not None:
+        cfg.device = args.device
 
     # W&B sweep: one agent = one T value
     in_sweep = os.getenv("WANDB_SWEEP_ID") is not None
@@ -298,10 +307,6 @@ def main():
         )
     else:
         wandb.init(mode="disabled")
-
-    random.seed(cfg.seed)
-    np.random.seed(cfg.seed)
-    torch.manual_seed(cfg.seed)
 
     device = get_device(cfg.device)
     PROJECT_ROOT = Path(args.config).resolve().parent

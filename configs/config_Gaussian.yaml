@@ -1,7 +1,8 @@
 seed: 42
 device: auto
-strategy: None # (redundant) categorical or temperature-sampling
-temperature: 0 # controls strategy: greedy if temperature <= 0, categorical if temperature = 1.0, tempareture-scaled categorical otherwise.
+decoding_strategy: schedule_driven
+sampling_strategy: greedy
+temperature: 0  # logit scaling (scale-invariant for greedy; kept for consistency)
 data:
   l: 256
   train_split: 0.9
