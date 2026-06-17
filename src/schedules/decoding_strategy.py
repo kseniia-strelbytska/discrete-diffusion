@@ -70,6 +70,31 @@ class ScheduleDrivenDecoding(DecodingStrategy):
         return (torch.rand(L, device=device) < (1 - self.last_mask_prob)) & masked_mask
 
 
+class AutoregressiveDecoding(DecodingStrategy):
+    """
+    Autoregressive position selection: unmask exactly the first (leftmost)
+    masked token on every timestep.
+
+    needs_schedule = False — no noise-schedule math is required.  The outer
+    loop in ScheduledUnmasker.forward() automatically caps max_steps to
+    X.shape[0] when this strategy is active, guaranteeing that the number of
+    denoising steps equals the sequence length.
+    """
+
+    needs_schedule = False
+
+    def select_positions(self, *, X, content_probs=None, masked_mask, device) -> Tensor:
+        """
+        Returns a boolean mask with True only at the lowest-index masked position.
+        If no masked positions remain, returns an all-False mask.
+        """
+        sel = torch.zeros(X.shape[0], dtype=torch.bool, device=device)
+        masked_positions = masked_mask.nonzero(as_tuple=True)[0]
+        if masked_positions.numel() > 0:
+            sel[masked_positions[0]] = True
+        return sel
+
+
 class EBSamplerDecoding(DecodingStrategy):
     """
     Entropy-Bounded position selection (https://arxiv.org/pdf/2505.24857).

@@ -61,9 +61,7 @@ GRAMMARS = [
     "baN",
     "bbaN",
     "aNbN",
-    "parentheses_and_brackets",
-    "aNbNcN",
-    "not_nested_parentheses_and_brackets",
+    "aNbNcN"
 ]
 
 # ---------------------------------------------------------------------------

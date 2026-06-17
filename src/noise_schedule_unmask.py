@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from datasets.constants import EOS_token, SOS_token, PAD_token, MASK_token
-from schedules.decoding_strategy import ScheduleDrivenDecoding, EBSamplerDecoding
+from schedules.decoding_strategy import ScheduleDrivenDecoding, EBSamplerDecoding, AutoregressiveDecoding
 from schedules.sampling_strategy import GreedySampling, CategoricalSampling
 
 
@@ -10,6 +10,8 @@ _DECODING_ALIASES = {
     'schedule_driven': ScheduleDrivenDecoding,
     'eb': EBSamplerDecoding,
     'ebsampler': EBSamplerDecoding,
+    'autoregressive': AutoregressiveDecoding,
+    'ar': AutoregressiveDecoding,
 }
 
 _SAMPLING_ALIASES = {
@@ -70,6 +72,8 @@ class ScheduledUnmasker(nn.Module):
                 raise ValueError(f"Unknown decoding_strategy: {decoding_strategy!r}")
             if key in ('eb', 'ebsampler'):
                 self.decoding_strategy = EBSamplerDecoding(gamma=eb_gamma)
+            elif key in ('autoregressive', 'ar'):
+                self.decoding_strategy = AutoregressiveDecoding()
             else:
                 self.decoding_strategy = ScheduleDrivenDecoding(self._schedule)
         else:
@@ -212,7 +216,12 @@ class ScheduledUnmasker(nn.Module):
                 timesteps_log = [float(timestep)]
                 mopup_timestep = torch.tensor(0.0, device=self.device)
 
-                max_steps = getattr(self.decoding_strategy, 'MAX_STEPS', 10**5)
+                # AutoregressiveDecoding unmasks one token per step, so the
+                # number of steps equals the sequence length — no T needed.
+                if isinstance(self.decoding_strategy, AutoregressiveDecoding):
+                    max_steps = X.shape[0]
+                else:
+                    max_steps = getattr(self.decoding_strategy, 'MAX_STEPS', 10**5)
 
                 for i in range(max_steps):
                     if not (X == MASK_token).any():
