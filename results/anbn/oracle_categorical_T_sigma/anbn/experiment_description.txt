@@ -1,0 +1,60 @@
+Experiment: Oracle model — categorical decoding — T × sigma sweep
+==================================================================
+
+Purpose
+-------
+Establish a theoretical upper bound on both-rules accuracy for a
+discrete-diffusion grammar task as a function of denoising steps T
+and Gaussian schedule width sigma.
+
+The oracle computes the exact valid-token probability distribution at
+every step, so its results are not limited by model approximation error.
+Comparing trained-model results (eval_sweep_checkpoints.py) against
+this ceiling reveals how much headroom remains.
+
+Grid
+----
+  T      : 128, 256
+  sigma  : 1, 5, 20, 40, 160
+  Total cells : 10
+
+Decoding
+--------
+  temperature = 1.0  (categorical / stochastic multinomial sampling)
+  Greedy (temp=0) is excluded: it is deterministic so std=0 and a
+  single run suffices; see eval_oracle_sweep.py for greedy results.
+
+Noise schedule
+--------------
+  All cells use a Gaussian noise schedule.
+  sigma controls the width of the soft masking boundary that sweeps
+  from right (t=0, clean) to left (t=1, fully masked).
+  Small sigma  → sharp front, positional masking is highly localised.
+  Large sigma  → diffuse front, approaches uniform (categorical) masking.
+
+Averaging
+---------
+  10 independent evaluations per cell, each with a distinct seed.
+  We report mean ± std of both_rules_acc across those runs.
+  Stochastic variance from sampling the correct oracle distribution
+  decreases as T grows (more steps → finer corrections per token).
+
+Dataset
+-------
+  Type   : unconditional
+  Samples: 100
+  Grammar: anbn, l=256, max_len=258
+
+Reproducibility
+---------------
+  Base seed: 2024
+  Per-cell seed: base_seed + T_idx * 100_000 + sigma_idx * 1_000 + eval_i
+
+Files
+-----
+  oracle_categorical_results.csv  — one row per (T, sigma) cell
+  oracle_categorical_table.txt    — 2-D grid (rows=T, columns=sigma)
+  experiment_description.txt      — this file
+  run.log                         — full terminal output
+
+Output directory: results/anbn/oracle_categorical_T_sigma/anbn
