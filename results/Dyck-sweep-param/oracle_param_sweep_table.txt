@@ -1,0 +1,44 @@
+
+=== Dataset: unconditional ===
+Config                                                                                  both_rules_acc (mean ± std)   n_reps
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+not_nested_parentheses_and_brackets L=32   strat=ar         samp=categorical  —         1.0000 ± 0.0000               1
+not_nested_parentheses_and_brackets L=32   strat=ar         samp=greedy       —         1.0000 (det.)                 1
+not_nested_parentheses_and_brackets L=32   strat=ebsampler  samp=categorical  γ=0.1     1.0000 ± 0.0000               1
+not_nested_parentheses_and_brackets L=32   strat=ebsampler  samp=categorical  γ=0.5     0.9900 ± 0.0000               1
+not_nested_parentheses_and_brackets L=32   strat=ebsampler  samp=categorical  γ=2.0     0.3300 ± 0.0000               1
+not_nested_parentheses_and_brackets L=32   strat=ebsampler  samp=categorical  γ=10.0    0.0600 ± 0.0000               1
+not_nested_parentheses_and_brackets L=32   strat=ebsampler  samp=greedy       γ=0.1     1.0000 (det.)                 1
+not_nested_parentheses_and_brackets L=32   strat=ebsampler  samp=greedy       γ=0.5     1.0000 (det.)                 1
+not_nested_parentheses_and_brackets L=32   strat=ebsampler  samp=greedy       γ=2.0     1.0000 (det.)                 1
+not_nested_parentheses_and_brackets L=32   strat=ebsampler  samp=greedy       γ=10.0    0.0000 (det.)                 1
+not_nested_parentheses_and_brackets L=32   strat=gaussian   samp=categorical  σ=0.5     0.8800 ± 0.0000               1
+not_nested_parentheses_and_brackets L=32   strat=gaussian   samp=categorical  σ=2.0     0.8800 ± 0.0000               1
+not_nested_parentheses_and_brackets L=32   strat=gaussian   samp=categorical  σ=10.0    0.9600 ± 0.0000               1
+not_nested_parentheses_and_brackets L=32   strat=gaussian   samp=categorical  σ=20.0    0.9100 ± 0.0000               1
+not_nested_parentheses_and_brackets L=32   strat=gaussian   samp=greedy       σ=0.5     0.9000 ± 0.0000               1
+not_nested_parentheses_and_brackets L=32   strat=gaussian   samp=greedy       σ=2.0     0.9100 ± 0.0000               1
+not_nested_parentheses_and_brackets L=32   strat=gaussian   samp=greedy       σ=10.0    0.9400 ± 0.0000               1
+not_nested_parentheses_and_brackets L=32   strat=gaussian   samp=greedy       σ=20.0    0.9300 ± 0.0000               1
+not_nested_parentheses_and_brackets L=32   strat=uniform    samp=categorical  —         0.8700 ± 0.0000               1
+not_nested_parentheses_and_brackets L=32   strat=uniform    samp=greedy       —         0.8700 ± 0.0000               1
+parentheses_and_brackets L=32   strat=ar         samp=categorical  —                    1.0000 ± 0.0000               1
+parentheses_and_brackets L=32   strat=ar         samp=greedy       —                    1.0000 (det.)                 1
+parentheses_and_brackets L=32   strat=ebsampler  samp=categorical  γ=0.1                1.0000 ± 0.0000               1
+parentheses_and_brackets L=32   strat=ebsampler  samp=categorical  γ=0.5                0.9900 ± 0.0000               1
+parentheses_and_brackets L=32   strat=ebsampler  samp=categorical  γ=2.0                0.3300 ± 0.0000               1
+parentheses_and_brackets L=32   strat=ebsampler  samp=categorical  γ=10.0               0.0000 ± 0.0000               1
+parentheses_and_brackets L=32   strat=ebsampler  samp=greedy       γ=0.1                1.0000 (det.)                 1
+parentheses_and_brackets L=32   strat=ebsampler  samp=greedy       γ=0.5                1.0000 (det.)                 1
+parentheses_and_brackets L=32   strat=ebsampler  samp=greedy       γ=2.0                0.0000 (det.)                 1
+parentheses_and_brackets L=32   strat=ebsampler  samp=greedy       γ=10.0               1.0000 (det.)                 1
+parentheses_and_brackets L=32   strat=gaussian   samp=categorical  σ=0.5                0.7100 ± 0.0000               1
+parentheses_and_brackets L=32   strat=gaussian   samp=categorical  σ=2.0                0.7000 ± 0.0000               1
+parentheses_and_brackets L=32   strat=gaussian   samp=categorical  σ=10.0               0.8800 ± 0.0000               1
+parentheses_and_brackets L=32   strat=gaussian   samp=categorical  σ=20.0               0.8600 ± 0.0000               1
+parentheses_and_brackets L=32   strat=gaussian   samp=greedy       σ=0.5                1.0000 ± 0.0000               1
+parentheses_and_brackets L=32   strat=gaussian   samp=greedy       σ=2.0                0.9700 ± 0.0000               1
+parentheses_and_brackets L=32   strat=gaussian   samp=greedy       σ=10.0               0.9700 ± 0.0000               1
+parentheses_and_brackets L=32   strat=gaussian   samp=greedy       σ=20.0               0.9800 ± 0.0000               1
+parentheses_and_brackets L=32   strat=uniform    samp=categorical  —                    0.9400 ± 0.0000               1
+parentheses_and_brackets L=32   strat=uniform    samp=greedy       —                    0.9000 ± 0.0000               1
