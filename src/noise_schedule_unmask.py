@@ -90,6 +90,8 @@ class ScheduledUnmasker(nn.Module):
         else:
             self.sampling_strategy = sampling_strategy
 
+        self.last_n_steps = None # number of steps taken in the last forward() call
+        
     # ── helpers ────────────────────────────────────────────────────────────────
 
     def _get_logits(self, X, timestep):
@@ -288,6 +290,8 @@ class ScheduledUnmasker(nn.Module):
                     steps.append(X.clone())
                     timesteps_log.append(0.0)
 
+            self.last_n_steps = len(steps) - 1
+            
         if return_steps:
             return X, steps, timesteps_log, error_message
         return X

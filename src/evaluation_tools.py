@@ -146,7 +146,8 @@ def evaluation_from_generation(model,
     total_eos = 0  # count of sequences containing EOS
     sequences = []
     sequences_eos = []  # sequences that contain EOS
-
+    n_steps_per_seq = [] # list to track the number of denoising steps taken for each sequence (EB Sampler uses a dynamic number of steps)
+    
     # Optionally prepare output file if saving is enabled.
     if save_mode:
         with open(output_path, "w") as f:
@@ -176,6 +177,8 @@ def evaluation_from_generation(model,
             else:
                 y_pred = get_prediction(model, s, max_tokens=cutoff)  # autoregressive generation; no batch dimension
 
+            n_steps_per_seq.append(int(unmaskModel.last_n_steps))
+            
             # `grammar.evaluate()` uses Python loops/indexing; it's much faster on CPU tensors
             # Moving a single (L,) tensor to CPU is cheap compared to thousands of tiny GPU syncs
             y_pred_cpu = y_pred.detach().to("cpu")
@@ -429,5 +432,5 @@ def evaluation_from_generation(model,
         with open(loss_log_path, "a") as f:
             f.write(evaluation_log + "\n")
 
-    return stats / total, stats_eos / eos_denom, total_eos, sequences, sequences_eos
+    return stats / total, stats_eos / eos_denom, total_eos, sequences, sequences_eos, n_steps_per_seq
   

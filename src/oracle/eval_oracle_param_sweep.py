@@ -17,34 +17,18 @@ from the YAML config file passed via --config. The config's `data.l` and
 `schedule.*` are IGNORED in this script — L is swept from LENGTHS below, and
 the schedule is built per-cell based on the strategy.
 
-Design notes
-------------
-1. Strategy is the unit that matters, not "decoder + schedule" separately. The
-   mapping is encoded in STRATEGIES:
-     uniform   → decoder='schedule_driven' + CategoricalSchedule()
-     gaussian  → decoder='schedule_driven' + GaussianSchedule(sigma=σ)
-     ar        → decoder='ar'              (schedule ignored)
-     ebsampler → decoder='ebsampler'       (schedule ignored)
+Logging
+-------
+Each cell logs mean ± std (across n_reps) for EVERY metric in STATS_NAMES, plus
+the mean and max number of denoising steps across all sequences in all reps.
+The CSV column count is therefore 2 * len(STATS_NAMES) + a handful of
+identifier and timing fields. See CSV_FIELDS construction below.
 
-2. Each strategy declares its own hyperparameter sweep. Uniform and AR have
-   no swept hyperparameter, so they yield exactly one cell per (grammar, L,
-   sampler) — never repeated six times the way EB cells are.
-
-3. Deterministic cells (output fully determined by starting X) are run with
-   n_reps=1 instead of args.n_evals. These are:
-     - ar        + greedy   (left-to-right argmax)
-     - ebsampler + greedy   (entropy-sorted argmax)
-   Schedule-driven (uniform/gaussian) is stochastic regardless of sampler
-   because the per-position Bernoulli mask draws use the RNG.
-
-4. Matched-pair seeding: rep i of every cell of the same (grammar, L) shares
-   its starting X tensor. Differences in accuracy reflect algorithmic
-   differences, not RNG variation.
-
-5. Per (grammar, L) caching: grammar / oracle / EvaluationDataset are built
-   once per (grammar, L), then reused across all strategy/sampler/param cells.
-
-6. Resume + per-cell error isolation as before.
+evaluation_from_generation must return 6 values:
+    (stats, _, _, _, _, n_steps_per_seq)
+where stats is an iterable of float metrics in the order declared by
+STATS_NAMES, and n_steps_per_seq is a list of ints — one entry per generated
+sequence — giving the number of unmask iterations that sequence used.
 
 Usage
 -----
@@ -96,11 +80,11 @@ LENGTHS             = [128]
 # LENGTHS             = [32]
 SAMPLING_STRATEGIES = ["greedy", "categorical"]
 
-EB_GAMMAS       = [0.1, 0.5, 2.0, 10.0]
+EB_GAMMAS       = [0.1, 0.5, 0.9, 2.0, 10.0]
 # Gaussian sigma values cover ~1.5 orders of magnitude. For L=128 the
 # previously-effective σ was on the order of L/10 to L/5, so this range
 # brackets that and also probes both extremes (very tight / very loose).
-GAUSSIAN_SIGMAS = [0.5, 2.0, 10.0, 20.0]
+GAUSSIAN_SIGMAS = [0.5, 2.0, 5.0, 10.0, 20.0]
 
 # Strategy registry. Each strategy declares:
 #   decoder      : decoder string passed to evaluation_from_generation
@@ -110,11 +94,27 @@ GAUSSIAN_SIGMAS = [0.5, 2.0, 10.0, 20.0]
 # NOTE: 'ar' assumes the decoder alias in your codebase is 'ar'. If it's
 # 'autoregressive' instead, change the 'decoder' field below.
 STRATEGIES = {
-    'uniform':   {'decoder': 'schedule_driven', 'param_name': None,       'param_values': [None]},
-    'gaussian':  {'decoder': 'schedule_driven', 'param_name': 'sigma',    'param_values': GAUSSIAN_SIGMAS},
-    'ar':        {'decoder': 'ar',              'param_name': None,       'param_values': [None]},
+    # 'uniform':   {'decoder': 'schedule_driven', 'param_name': None,       'param_values': [None]},
+    # 'gaussian':  {'decoder': 'schedule_driven', 'param_name': 'sigma',    'param_values': GAUSSIAN_SIGMAS},
+    # 'ar':        {'decoder': 'ar',              'param_name': None,       'param_values': [None]},
     'ebsampler': {'decoder': 'ebsampler',       'param_name': 'eb_gamma', 'param_values': EB_GAMMAS},
 }
+
+# Names of the metrics returned by evaluation_from_generation, in order. The
+# primary metric (the one used for the headline cell in the text table) is
+# PRIMARY_STAT, which must appear in STATS_NAMES.
+#
+# This must match the order of the `stats` tuple/list returned by
+# evaluation_from_generation. If your evaluator returns them in a different
+# order or with extra / missing entries, edit this list — every other piece of
+# logging is driven from it.
+STATS_NAMES = [
+    'rule1',
+    'rule2',
+    'both_rules',
+    'format'
+]
+PRIMARY_STAT = 'both_rules'
 
 
 # ---------------------------------------------------------------------------
@@ -145,11 +145,7 @@ def build_schedule(strategy: str, param_value):
 
 
 def build_grid():
-    """List of (grammar, L, strategy, sampler, param_value) cells.
-
-    Uniform and AR contribute exactly one cell per (grammar, L, sampler).
-    Gaussian contributes one per sigma. EB contributes one per gamma.
-    """
+    """List of (grammar, L, strategy, sampler, param_value) cells."""
     cells = []
     for grammar in GRAMMARS:
         for L in LENGTHS:
@@ -246,7 +242,18 @@ def cfg_get(cfg, *attrs, default=None):
 def evaluate_cell(*, oracle, grammar, eval_dataset,
                   strategy, sampler, param_value,
                   cfg, device, temperature, T):
-    """Run one evaluation pass; return both_rules_acc."""
+    """Run one evaluation pass.
+
+    Returns
+    -------
+    stats : tuple of floats, length == len(STATS_NAMES)
+        The full metrics vector for this rep, in the order declared by
+        STATS_NAMES. NaN-tolerant: missing or undefined metrics (e.g. the
+        '[Finished only] …' family when no sequence finished) propagate as NaN
+        and are handled by nanmean / nanstd at aggregation time.
+    n_steps_per_seq : list of int
+        Number of unmask iterations used per generated sequence in this rep.
+    """
     decoder    = STRATEGIES[strategy]['decoder']
     schedule   = build_schedule(strategy, param_value)
     is_gauss   = strategy == 'gaussian'
@@ -255,7 +262,7 @@ def evaluate_cell(*, oracle, grammar, eval_dataset,
     gamma_pass = float(param_value) if strategy == 'ebsampler' else 0.1
     sigma_pass = float(param_value) if is_gauss else 1.0
 
-    stats, _, _, _, _ = evaluation_from_generation(
+    stats, _, _, _, _, n_steps_per_seq = evaluation_from_generation(
         oracle,
         grammar,
         evaluation_dataset=eval_dataset,
@@ -276,19 +283,74 @@ def evaluate_cell(*, oracle, grammar, eval_dataset,
         denoise=cfg_get(cfg, 'training', 'denoise', default='0'),
         cutoff=cfg_get(cfg, 'evaluation', 'cutoff', default=None),
     )
-    return float(stats[2])  # both_rules_acc
+    
+    print(n_steps_per_seq)
+
+    # Coerce to a uniform shape regardless of what the evaluator returns.
+    stats_tuple = tuple(float(s) for s in stats)
+    if len(stats_tuple) != len(STATS_NAMES):
+        raise ValueError(
+            f"evaluation_from_generation returned {len(stats_tuple)} stats; "
+            f"STATS_NAMES has {len(STATS_NAMES)} entries. "
+            f"Update STATS_NAMES to match the evaluator's output order."
+        )
+    return stats_tuple, [int(n) for n in n_steps_per_seq]
+
+
+# ---------------------------------------------------------------------------
+# Per-cell aggregation
+# ---------------------------------------------------------------------------
+
+def aggregate_reps(stats_per_rep, n_steps_all):
+    """Reduce a cell's reps into a single record.
+
+    stats_per_rep : list of tuples — one tuple of floats per rep.
+    n_steps_all   : flat list of ints, all sequences across all reps.
+    """
+    if not stats_per_rep:
+        empty = {f'mean_{n}': float('nan') for n in STATS_NAMES}
+        empty.update({f'std_{n}': float('nan') for n in STATS_NAMES})
+        empty['n_steps_mean'] = float('nan')
+        empty['n_steps_max']  = 0
+        return empty
+
+    arr = np.array(stats_per_rep, dtype=float)  # (n_reps, n_stats)
+    means = np.nanmean(arr, axis=0)
+    stds  = np.nanstd(arr, axis=0)
+
+    out = {}
+    for i, name in enumerate(STATS_NAMES):
+        out[f'mean_{name}'] = float(means[i])
+        out[f'std_{name}']  = float(stds[i])
+
+    if n_steps_all:
+        out['n_steps_mean'] = float(np.mean(n_steps_all))
+        out['n_steps_max']  = int(np.max(n_steps_all))
+    else:
+        out['n_steps_mean'] = float('nan')
+        out['n_steps_max']  = 0
+
+    return out
 
 
 # ---------------------------------------------------------------------------
 # CSV I/O with resume
 # ---------------------------------------------------------------------------
-CSV_FIELDS = [
-    'dataset', 'grammar', 'L', 'strategy', 'sampling_strategy',
-    'sigma', 'eb_gamma',
-    'T', 'n_reps',
-    'mean_both_rules_acc', 'std_both_rules_acc',
-    'deterministic', 'elapsed_s',
-]
+
+def _build_csv_fields():
+    fields = [
+        'dataset', 'grammar', 'L', 'strategy', 'sampling_strategy',
+        'sigma', 'eb_gamma',
+        'T', 'n_reps',
+    ]
+    for n in STATS_NAMES:
+        fields.append(f'mean_{n}')
+        fields.append(f'std_{n}')
+    fields.extend(['n_steps_mean', 'n_steps_max', 'deterministic', 'elapsed_s'])
+    return fields
+
+
+CSV_FIELDS = _build_csv_fields()
 
 
 def cell_key(grammar, L, strategy, sampler, param_value):
@@ -297,7 +359,6 @@ def cell_key(grammar, L, strategy, sampler, param_value):
 
 
 def _row_to_key(row):
-    """Recover (grammar, L, strategy, sampler, param) from a CSV row."""
     strategy = row['strategy']
     if strategy == 'gaussian':
         pv = row.get('sigma') or None
@@ -357,10 +418,13 @@ def make_table(rows, dataset_name):
 
     label_w = max(len(r['label']) for r in rows) + 2
     cell_w  = 28
+    steps_w = 18
 
+    primary_header = f"{PRIMARY_STAT} (mean ± std)"
     header = (f"{'Config':<{label_w}}  "
-              f"{'both_rules_acc (mean ± std)':<{cell_w}}  n_reps")
-    sep = '─' * (label_w + cell_w + 12)
+              f"{primary_header:<{cell_w}}  "
+              f"{'n_steps (mean / max)':<{steps_w}}  n_reps")
+    sep = '─' * (label_w + cell_w + steps_w + 14)
 
     lines = [
         f"\n=== Dataset: {dataset_name} ===",
@@ -368,11 +432,19 @@ def make_table(rows, dataset_name):
         sep,
     ]
     for r in rows:
+        primary_mean = r['stat_means'].get(PRIMARY_STAT, float('nan'))
+        primary_std  = r['stat_stds'].get(PRIMARY_STAT,  float('nan'))
         if r['deterministic']:
-            cell = f"{r['mean']:.4f} (det.)"
+            cell = f"{primary_mean:.4f} (det.)"
         else:
-            cell = f"{r['mean']:.4f} ± {r['std']:.4f}"
-        lines.append(f"{r['label']:<{label_w}}  {cell:<{cell_w}}  {r['n_reps']}")
+            cell = f"{primary_mean:.4f} ± {primary_std:.4f}"
+        steps_str = f"{r['n_steps_mean']:.1f} / {r['n_steps_max']}"
+        lines.append(
+            f"{r['label']:<{label_w}}  "
+            f"{cell:<{cell_w}}  "
+            f"{steps_str:<{steps_w}}  "
+            f"{r['n_reps']}"
+        )
     return '\n'.join(lines)
 
 
@@ -418,14 +490,10 @@ def parse_args():
                              'Deterministic cells always run once.')
     parser.add_argument('--out-dir', type=str,
                         default='results/oracle_param_sweep')
-    parser.add_argument('--grammars',   nargs='+', default=None,
-                        help='Subset of grammars. Default: all.')
-    parser.add_argument('--lengths',    nargs='+', type=int, default=None,
-                        help='Subset of lengths. Default: all of LENGTHS.')
-    parser.add_argument('--strategies', nargs='+', default=None,
-                        help='Subset of strategies. Default: all.')
-    parser.add_argument('--samplers',   nargs='+', default=None,
-                        help='Subset of samplers. Default: all.')
+    parser.add_argument('--grammars',   nargs='+', default=None)
+    parser.add_argument('--lengths',    nargs='+', type=int, default=None)
+    parser.add_argument('--strategies', nargs='+', default=None)
+    parser.add_argument('--samplers',   nargs='+', default=None)
     parser.add_argument('--sigmas',     nargs='+', type=float, default=None,
                         help='Subset of sigmas (affects gaussian only).')
     parser.add_argument('--gammas',     nargs='+', type=float, default=None,
@@ -458,7 +526,6 @@ def _filter_grid(cells, args):
 
 
 def _grid_summary(cells):
-    """Per-strategy cell counts to sanity-check the grid before running."""
     counts = {}
     for _, _, strategy, _, _ in cells:
         counts[strategy] = counts.get(strategy, 0) + 1
@@ -499,8 +566,31 @@ def main():
         _log_file.close()
 
 
+def _row_from_csv(row, label):
+    """Rebuild the in-memory table-row dict from a CSV record (for resume)."""
+    stat_means = {n: float(row.get(f'mean_{n}', 'nan')) for n in STATS_NAMES}
+    stat_stds  = {n: float(row.get(f'std_{n}',  'nan')) for n in STATS_NAMES}
+    return {
+        'label':         label,
+        'stat_means':    stat_means,
+        'stat_stds':     stat_stds,
+        'n_steps_mean':  float(row.get('n_steps_mean', 'nan')),
+        'n_steps_max':   int(float(row.get('n_steps_max', 0))),
+        'n_reps':        int(row['n_reps']),
+        'deterministic': str(row.get('deterministic')).lower() == 'true',
+        'grammar':       row['grammar'],
+        'L':             int(row['L']),
+        'strategy':      row['strategy'],
+        'sampler':       row['sampling_strategy'],
+        'param':         (float(row['sigma']) if row['strategy'] == 'gaussian'
+                          and row.get('sigma')
+                          else float(row['eb_gamma']) if row['strategy'] == 'ebsampler'
+                          and row.get('eb_gamma')
+                          else None),
+    }
+
+
 def _run(args, cfg, device, out_dir):
-    # ---- fixed parameters (L is overridden by LENGTHS, schedule by strategy) --
     seed              = cfg_get(cfg, 'seed',                       default=2024)
     temperature       = cfg_get(cfg, 'temperature',                default=1.0)
     n_samples         = cfg_get(cfg, 'evaluation', 'n_samples',    default=500)
@@ -522,21 +612,19 @@ def _run(args, cfg, device, out_dir):
     print(f"  SAMPLERS        = {SAMPLING_STRATEGIES}")
     print(f"  EB_GAMMAS       = {EB_GAMMAS}")
     print(f"  GAUSSIAN_SIGMAS = {GAUSSIAN_SIGMAS}")
+    print(f"  STATS_NAMES     = {STATS_NAMES}  (primary = {PRIMARY_STAT})")
 
-    # ---- build & filter grid ------------------------------------------------
     full_grid = build_grid()
     cells = _filter_grid(full_grid, args)
     summary = _grid_summary(cells)
     print(f"\nGrid: {len(cells)} cells after filtering (from {len(full_grid)} total).")
     print(f"  by strategy: " + ", ".join(f"{k}={v}" for k, v in sorted(summary.items())))
 
-    # ---- resume -------------------------------------------------------------
     csv_path = out_dir / 'oracle_param_sweep_results.csv'
     completed = {} if args.no_resume else load_completed(csv_path)
     if completed and not args.no_resume:
         print(f"Resume: {len(completed)} completed cells found in {csv_path.name}.")
 
-    # ---- per-(grammar, L) cache --------------------------------------------
     cache = {}
     rows_for_table = []
 
@@ -545,20 +633,11 @@ def _run(args, cfg, device, out_dir):
         label   = row_label(grammar_name, L, strategy, sampler, pv)
         key     = cell_key(grammar_name, L, strategy, sampler, pv)
 
-        # Skip already-completed.
         if key in completed:
             row = completed[key]
             print(f"\n{cell_id} SKIP (cached): {label}")
             try:
-                rows_for_table.append({
-                    'label':         label,
-                    'mean':          float(row['mean_both_rules_acc']),
-                    'std':           float(row['std_both_rules_acc']),
-                    'n_reps':        int(row['n_reps']),
-                    'deterministic': str(row.get('deterministic')).lower() == 'true',
-                    'grammar':       grammar_name, 'L': L,
-                    'strategy':      strategy, 'sampler': sampler, 'param': pv,
-                })
+                rows_for_table.append(_row_from_csv(row, label))
             except (KeyError, ValueError):
                 pass
             continue
@@ -566,7 +645,6 @@ def _run(args, cfg, device, out_dir):
         print(f"\n{'=' * 60}")
         print(f"{cell_id} {label}")
 
-        # Build (grammar, L)-specific objects once.
         cache_key = (grammar_name, L)
         if cache_key not in cache:
             base_seed = grammar_l_seed(seed, grammar_name, L)
@@ -594,18 +672,19 @@ def _run(args, cfg, device, out_dir):
                   f"|X|={eval_ds.data.shape[0]}")
         cached = cache[cache_key]
 
-        # Run the reps.
         n_reps = n_reps_for(strategy, sampler, args.n_evals)
         if is_deterministic(strategy, sampler) and args.n_evals > 1:
             print(f"  deterministic cell — running 1 rep instead of {args.n_evals}")
 
-        accs = []
+        # ---- run reps -------------------------------------------------------
+        stats_per_rep = []   # list of tuples, length n_reps × len(STATS_NAMES)
+        all_n_steps   = []   # flat list of ints, n_reps × n_samples
         t0 = time.time()
         try:
             for rep_i in range(n_reps):
                 s = rep_seed(cached['base_seed'], rep_i)
                 set_seed(s)
-                acc = evaluate_cell(
+                rep_stats, rep_n_steps = evaluate_cell(
                     oracle=cached['oracle'],
                     grammar=cached['grammar'],
                     eval_dataset=cached['eval_ds'],
@@ -617,59 +696,74 @@ def _run(args, cfg, device, out_dir):
                     temperature=temperature,
                     T=T,
                 )
-                accs.append(acc)
+                stats_per_rep.append(rep_stats)
+                all_n_steps.extend(rep_n_steps)
                 if n_reps > 1:
-                    print(f"  rep {rep_i + 1}/{n_reps}  seed={s}  acc={acc:.4f}")
+                    primary_idx = STATS_NAMES.index(PRIMARY_STAT)
+                    print(f"  rep {rep_i + 1}/{n_reps}  seed={s}  "
+                          f"{PRIMARY_STAT}={rep_stats[primary_idx]:.4f}  "
+                          f"steps={np.mean(rep_n_steps):.1f}")
             elapsed = time.time() - t0
         except Exception as e:
             print(f"  CELL FAILED: {type(e).__name__}: {e}")
             traceback.print_exc()
             continue
 
-        mean = float(np.mean(accs))
-        std  = float(np.std(accs))
-        det  = is_deterministic(strategy, sampler)
+        # ---- aggregate ------------------------------------------------------
+        agg = aggregate_reps(stats_per_rep, all_n_steps)
+        det = is_deterministic(strategy, sampler)
 
+        primary_mean = agg[f'mean_{PRIMARY_STAT}']
+        primary_std  = agg[f'std_{PRIMARY_STAT}']
         if det:
-            print(f"  → acc={mean:.4f} (deterministic)  elapsed={elapsed:.1f}s")
+            print(f"  → {PRIMARY_STAT}={primary_mean:.4f} (deterministic)  "
+                  f"steps mean/max = {agg['n_steps_mean']:.1f} / {agg['n_steps_max']}  "
+                  f"elapsed={elapsed:.1f}s")
         else:
-            print(f"  → acc={mean:.4f} ± {std:.4f} over {n_reps} reps  "
+            print(f"  → {PRIMARY_STAT}={primary_mean:.4f} ± {primary_std:.4f}  "
+                  f"over {n_reps} reps  "
+                  f"steps mean/max = {agg['n_steps_mean']:.1f} / {agg['n_steps_max']}  "
                   f"elapsed={elapsed:.1f}s")
 
-        # Persist immediately.
+        # ---- persist --------------------------------------------------------
         row = {
-            'dataset':             eval_dataset_type,
-            'grammar':             grammar_name,
-            'L':                   L,
-            'strategy':            strategy,
-            'sampling_strategy':   sampler,
-            'sigma':               float(pv) if strategy == 'gaussian'  else '',
-            'eb_gamma':            float(pv) if strategy == 'ebsampler' else '',
-            'T':                   T,
-            'n_reps':              n_reps,
-            'mean_both_rules_acc': round(mean, 6),
-            'std_both_rules_acc':  round(std, 6),
-            'deterministic':       det,
-            'elapsed_s':           round(elapsed, 2),
+            'dataset':           eval_dataset_type,
+            'grammar':           grammar_name,
+            'L':                 L,
+            'strategy':          strategy,
+            'sampling_strategy': sampler,
+            'sigma':             float(pv) if strategy == 'gaussian'  else '',
+            'eb_gamma':          float(pv) if strategy == 'ebsampler' else '',
+            'T':                 T,
+            'n_reps':            n_reps,
+            'deterministic':     det,
+            'elapsed_s':         round(elapsed, 2),
+            'n_steps_mean':      round(agg['n_steps_mean'], 4),
+            'n_steps_max':       agg['n_steps_max'],
         }
+        for name in STATS_NAMES:
+            row[f'mean_{name}'] = round(agg[f'mean_{name}'], 6)
+            row[f'std_{name}']  = round(agg[f'std_{name}'],  6)
+
         append_csv_row(csv_path, row)
 
         rows_for_table.append({
             'label':         label,
-            'mean':          mean, 'std': std,
+            'stat_means':    {n: agg[f'mean_{n}'] for n in STATS_NAMES},
+            'stat_stds':     {n: agg[f'std_{n}']  for n in STATS_NAMES},
+            'n_steps_mean':  agg['n_steps_mean'],
+            'n_steps_max':   agg['n_steps_max'],
             'n_reps':        n_reps,
             'deterministic': det,
             'grammar':       grammar_name, 'L': L,
             'strategy':      strategy, 'sampler': sampler, 'param': pv,
         })
 
-    # ---- final table --------------------------------------------------------
     print('\n' + '=' * 60)
     print('SWEEP COMPLETE')
     print('=' * 60)
 
     if rows_for_table:
-        # Sort so the table groups by (grammar, L, strategy, sampler, param).
         rows_for_table.sort(key=lambda r: (
             r['grammar'], r['L'], r['strategy'],
             r['sampler'], 0.0 if r['param'] is None else float(r['param']),
