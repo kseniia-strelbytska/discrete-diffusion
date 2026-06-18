@@ -5,3 +5,7 @@ unconditional,baN,32,ar,greedy,,,128,1,1.0,0.0,True,23.7
 unconditional,baN,32,ebsampler,greedy,,0.1,128,1,1.0,0.0,True,20.95
 unconditional,baN,32,ebsampler,greedy,,0.1,128,1,1.0,0.0,1.0,0.0,1.0,0.0,1.0,0.0,32.0,32,True,21.34
 unconditional,baN,32,ebsampler,greedy,,0.9,128,1,0.0,0.0,1.0,0.0,0.0,0.0,1.0,0.0,16.0,16,True,10.85
+unconditional,aNbN,32,ebsampler,greedy,,0.1,128,1,1.0,0.0,1.0,0.0,1.0,0.0,1.0,0.0,16.0,16,True,1.02
+unconditional,aNbN,32,ebsampler,categorical,,0.1,128,1,1.0,0.0,1.0,0.0,1.0,0.0,1.0,0.0,8.51,16,False,0.62
+unconditional,aNbN,32,ebsampler,greedy,,0.1,128,1,1.0,0.0,1.0,0.0,1.0,0.0,1.0,0.0,16.0,16,True,1.04
+unconditional,aNbN,32,ebsampler,categorical,,0.1,128,1,1.0,0.0,1.0,0.0,1.0,0.0,1.0,0.0,8.51,16,False,0.64

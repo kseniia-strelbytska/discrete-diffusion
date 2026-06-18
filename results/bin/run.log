@@ -480,3 +480,157 @@ Table: results/bin/oracle_param_sweep_table.txt
 CSV:   results/bin/oracle_param_sweep_results.csv
 
 Log: results/bin/run.log
+
+############################################################
+# Sweep started: 2026-06-18 07:24:01
+############################################################
+Config: configs/config_oracle.yaml
+Output: results/bin
+Device: cuda
+
+Fixed config:
+  seed=42  T=128  n_samples=100
+  temperature=1.0  eval_dataset=unconditional
+  (NOTE: data.l and schedule.* in config are ignored; this script sweeps L from LENGTHS and selects schedule per strategy.)
+
+Sweep axes:
+  GRAMMARS        = ['aNbN']
+  LENGTHS         = [32]
+  STRATEGIES      = ['ebsampler']
+  SAMPLERS        = ['greedy', 'categorical']
+  EB_GAMMAS       = [0.1]
+  GAUSSIAN_SIGMAS = [10.0]
+  STATS_NAMES     = ['rule1', 'rule2', 'both_rules', 'format']  (primary = both_rules)
+
+Grid: 2 cells after filtering (from 2 total).
+  by strategy: ebsampler=2
+
+============================================================
+[1/2] aNbN    L=32   strat=ebsampler  samp=greedy       γ=0.1
+RE grammar "aNbN" data generated; shape: torch.Size([16, 34])
+  built (aNbN, L=32)  vocab=6  |X|=100
+Evaluation on data, shape: ftorch.Size([100, 34])
+  0%|                                                                                                                                                                | 0/100 [00:00<?, ?it/s]  1%|█▌                                                                                                                                                      | 1/100 [00:00<00:09,  9.93it/s] 11%|████████████████▌                                                                                                                                      | 11/100 [00:00<00:01, 62.74it/s] 22%|█████████████████████████████████▏                                                                                                                     | 22/100 [00:00<00:00, 83.31it/s] 33%|█████████████████████████████████████████████████▊                                                                                                     | 33/100 [00:00<00:00, 93.53it/s] 44%|██████████████████████████████████████████████████████████████████▍                                                                                    | 44/100 [00:00<00:00, 99.16it/s] 55%|██████████████████████████████████████████████████████████████████████████████████▌                                                                   | 55/100 [00:00<00:00, 102.57it/s] 66%|███████████████████████████████████████████████████████████████████████████████████████████████████                                                   | 66/100 [00:00<00:00, 104.47it/s] 77%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████▌                                  | 77/100 [00:00<00:00, 105.74it/s] 88%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████                  | 88/100 [00:00<00:00, 106.55it/s] 99%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▌ | 99/100 [00:01<00:00, 107.10it/s]100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 100/100 [00:01<00:00, 97.95it/s]
+
+    Evaluation from generation satisfies rule #1: 100/100 (1.0)
+    Evaluation from generation satisfies rule #2: 100/100 (1.0)
+    Evaluation from generation satisfies both rules: 100/100 (1.0)
+    Evaluation from generation satisfies satisfies format: 100/100 (1.0)
+    Finished sequences (with EOS): 100/100
+    [Finished only] satisfies rule #1: 100/100 (1.0)
+    [Finished only] satisfies rule #2: 100/100 (1.0)
+    [Finished only] satisfies both rules: 100/100 (1.0)
+    [Finished only] satisfies format: 100/100 (1.0)
+    
+[16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16]
+  → both_rules=1.0000 (deterministic)  steps mean/max = 16.0 / 16  elapsed=1.0s
+
+============================================================
+[2/2] aNbN    L=32   strat=ebsampler  samp=categorical  γ=0.1
+Evaluation on data, shape: ftorch.Size([100, 34])
+  0%|                                                                                                                                                                | 0/100 [00:00<?, ?it/s] 17%|█████████████████████████▌                                                                                                                            | 17/100 [00:00<00:00, 166.11it/s] 34%|███████████████████████████████████████████████████                                                                                                   | 34/100 [00:00<00:00, 162.24it/s] 51%|████████████████████████████████████████████████████████████████████████████▌                                                                         | 51/100 [00:00<00:00, 162.53it/s] 69%|███████████████████████████████████████████████████████████████████████████████████████████████████████▍                                              | 69/100 [00:00<00:00, 168.61it/s] 86%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████                     | 86/100 [00:00<00:00, 162.94it/s]100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 100/100 [00:00<00:00, 161.07it/s]
+
+    Evaluation from generation satisfies rule #1: 100/100 (1.0)
+    Evaluation from generation satisfies rule #2: 100/100 (1.0)
+    Evaluation from generation satisfies both rules: 100/100 (1.0)
+    Evaluation from generation satisfies satisfies format: 100/100 (1.0)
+    Finished sequences (with EOS): 100/100
+    [Finished only] satisfies rule #1: 100/100 (1.0)
+    [Finished only] satisfies rule #2: 100/100 (1.0)
+    [Finished only] satisfies both rules: 100/100 (1.0)
+    [Finished only] satisfies format: 100/100 (1.0)
+    
+[2, 5, 2, 4, 2, 12, 5, 3, 3, 8, 16, 5, 12, 10, 5, 8, 16, 8, 16, 6, 2, 5, 8, 13, 5, 6, 13, 13, 16, 8, 12, 11, 5, 2, 8, 11, 12, 12, 10, 6, 9, 3, 4, 16, 3, 15, 2, 16, 7, 3, 9, 10, 6, 2, 7, 5, 3, 14, 6, 3, 13, 7, 16, 2, 7, 9, 6, 11, 14, 16, 8, 16, 12, 6, 3, 2, 14, 3, 16, 13, 13, 7, 10, 8, 2, 9, 15, 4, 15, 14, 3, 15, 14, 2, 16, 10, 11, 4, 9, 7]
+  → both_rules=1.0000 ± 0.0000  over 1 reps  steps mean/max = 8.5 / 16  elapsed=0.6s
+
+============================================================
+SWEEP COMPLETE
+============================================================
+
+=== Dataset: unconditional ===
+Config                                                     both_rules (mean ± std)       n_steps (mean / max)  n_reps
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+aNbN    L=32   strat=ebsampler  samp=categorical  γ=0.1    1.0000 ± 0.0000               8.5 / 16            1
+aNbN    L=32   strat=ebsampler  samp=greedy       γ=0.1    1.0000 (det.)                 16.0 / 16           1
+
+Table: results/bin/oracle_param_sweep_table.txt
+CSV:   results/bin/oracle_param_sweep_results.csv
+
+Log: results/bin/run.log
+
+############################################################
+# Sweep started: 2026-06-18 07:26:18
+############################################################
+Config: configs/config_oracle.yaml
+Output: results/bin
+Device: cuda
+
+Fixed config:
+  seed=42  T=128  n_samples=100
+  temperature=1.0  eval_dataset=unconditional
+  (NOTE: data.l and schedule.* in config are ignored; this script sweeps L from LENGTHS and selects schedule per strategy.)
+
+Sweep axes:
+  GRAMMARS        = ['aNbN']
+  LENGTHS         = [32]
+  STRATEGIES      = ['ebsampler']
+  SAMPLERS        = ['greedy', 'categorical']
+  EB_GAMMAS       = [0.1]
+  GAUSSIAN_SIGMAS = [10.0]
+  STATS_NAMES     = ['rule1', 'rule2', 'both_rules', 'format']  (primary = both_rules)
+
+Grid: 2 cells after filtering (from 2 total).
+  by strategy: ebsampler=2
+
+============================================================
+[1/2] aNbN    L=32   strat=ebsampler  samp=greedy       γ=0.1
+RE grammar "aNbN" data generated; shape: torch.Size([16, 34])
+  built (aNbN, L=32)  vocab=6  |X|=100
+Evaluation on data, shape: ftorch.Size([100, 34])
+  0%|                                                                                                                                                                | 0/100 [00:00<?, ?it/s]  2%|███                                                                                                                                                     | 2/100 [00:00<00:05, 18.60it/s] 13%|███████████████████▋                                                                                                                                   | 13/100 [00:00<00:01, 68.72it/s] 24%|████████████████████████████████████▏                                                                                                                  | 24/100 [00:00<00:00, 85.32it/s] 35%|████████████████████████████████████████████████████▊                                                                                                  | 35/100 [00:00<00:00, 93.19it/s] 46%|█████████████████████████████████████████████████████████████████████▍                                                                                 | 46/100 [00:00<00:00, 97.48it/s] 57%|██████████████████████████████████████████████████████████████████████████████████████                                                                 | 57/100 [00:00<00:00, 99.81it/s] 68%|██████████████████████████████████████████████████████████████████████████████████████████████████████                                                | 68/100 [00:00<00:00, 101.60it/s] 79%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▌                               | 79/100 [00:00<00:00, 102.72it/s] 90%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████               | 90/100 [00:00<00:00, 103.41it/s]100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 100/100 [00:01<00:00, 96.10it/s]
+
+    Evaluation from generation satisfies rule #1: 100/100 (1.0)
+    Evaluation from generation satisfies rule #2: 100/100 (1.0)
+    Evaluation from generation satisfies both rules: 100/100 (1.0)
+    Evaluation from generation satisfies satisfies format: 100/100 (1.0)
+    Finished sequences (with EOS): 100/100
+    [Finished only] satisfies rule #1: 100/100 (1.0)
+    [Finished only] satisfies rule #2: 100/100 (1.0)
+    [Finished only] satisfies both rules: 100/100 (1.0)
+    [Finished only] satisfies format: 100/100 (1.0)
+    
+[16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16]
+  → both_rules=1.0000 (deterministic)  steps mean/max = 16.0 / 16  elapsed=1.0s
+
+============================================================
+[2/2] aNbN    L=32   strat=ebsampler  samp=categorical  γ=0.1
+Evaluation on data, shape: ftorch.Size([100, 34])
+  0%|                                                                                                                                                                | 0/100 [00:00<?, ?it/s] 17%|█████████████████████████▌                                                                                                                            | 17/100 [00:00<00:00, 154.05it/s] 33%|█████████████████████████████████████████████████▌                                                                                                    | 33/100 [00:00<00:00, 152.41it/s] 49%|█████████████████████████████████████████████████████████████████████████▌                                                                            | 49/100 [00:00<00:00, 154.39it/s] 68%|██████████████████████████████████████████████████████████████████████████████████████████████████████                                                | 68/100 [00:00<00:00, 167.22it/s] 85%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▌                      | 85/100 [00:00<00:00, 158.69it/s]100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 100/100 [00:00<00:00, 155.79it/s]
+
+    Evaluation from generation satisfies rule #1: 100/100 (1.0)
+    Evaluation from generation satisfies rule #2: 100/100 (1.0)
+    Evaluation from generation satisfies both rules: 100/100 (1.0)
+    Evaluation from generation satisfies satisfies format: 100/100 (1.0)
+    Finished sequences (with EOS): 100/100
+    [Finished only] satisfies rule #1: 100/100 (1.0)
+    [Finished only] satisfies rule #2: 100/100 (1.0)
+    [Finished only] satisfies both rules: 100/100 (1.0)
+    [Finished only] satisfies format: 100/100 (1.0)
+    
+[2, 5, 2, 4, 2, 12, 5, 3, 3, 8, 16, 5, 12, 10, 5, 8, 16, 8, 16, 6, 2, 5, 8, 13, 5, 6, 13, 13, 16, 8, 12, 11, 5, 2, 8, 11, 12, 12, 10, 6, 9, 3, 4, 16, 3, 15, 2, 16, 7, 3, 9, 10, 6, 2, 7, 5, 3, 14, 6, 3, 13, 7, 16, 2, 7, 9, 6, 11, 14, 16, 8, 16, 12, 6, 3, 2, 14, 3, 16, 13, 13, 7, 10, 8, 2, 9, 15, 4, 15, 14, 3, 15, 14, 2, 16, 10, 11, 4, 9, 7]
+  → both_rules=1.0000 ± 0.0000  over 1 reps  steps mean/max = 8.5 / 16  elapsed=0.6s
+
+============================================================
+SWEEP COMPLETE
+============================================================
+
+=== Dataset: unconditional ===
+Config                                                     rule1 (mean ± std)         rule2 (mean ± std)         both_rules (mean ± std)    format (mean ± std)        n_steps (mean / max)  n_reps
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+aNbN    L=32   strat=ebsampler  samp=categorical  γ=0.1    1.0000 ± 0.0000            1.0000 ± 0.0000            1.0000 ± 0.0000            1.0000 ± 0.0000            8.5 / 16            1
+aNbN    L=32   strat=ebsampler  samp=greedy       γ=0.1    1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              16.0 / 16           1
+
+Table: results/bin/oracle_param_sweep_table.txt
+CSV:   results/bin/oracle_param_sweep_results.csv
+
+Log: results/bin/run.log

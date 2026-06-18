@@ -1,5 +1,6 @@
 
 === Dataset: unconditional ===
-Config                                                     both_rules (mean ± std)       n_steps (mean / max)  n_reps
-─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-baN     L=32   strat=ebsampler  samp=greedy       γ=0.9    0.0000 (det.)                 16.0 / 16           1
+Config                                                     rule1 (mean ± std)         rule2 (mean ± std)         both_rules (mean ± std)    format (mean ± std)        n_steps (mean / max)  n_reps
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+aNbN    L=32   strat=ebsampler  samp=categorical  γ=0.1    1.0000 ± 0.0000            1.0000 ± 0.0000            1.0000 ± 0.0000            1.0000 ± 0.0000            8.5 / 16            1
+aNbN    L=32   strat=ebsampler  samp=greedy       γ=0.1    1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              16.0 / 16           1

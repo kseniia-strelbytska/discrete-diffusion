@@ -32,7 +32,7 @@ sequence — giving the number of unmask iterations that sequence used.
 
 Usage
 -----
-  python src/oracle/eval_oracle_param_sweep.py --config configs/config_oracle.yaml
+  python src/oracle/eval_oracle_param_sweep.py --config configs/config_oracle.yaml --n-evals 4 --out-dir results/Dyck-sweep-param --no-resume
 
   # Selective re-runs:
   python src/oracle/eval_oracle_param_sweep.py --config configs/config_oracle.yaml \\
@@ -74,17 +74,20 @@ from schedules import CategoricalSchedule, GaussianSchedule
 # ---------------------------------------------------------------------------
 # Parameter grid  (edit these to control the sweep)
 # ---------------------------------------------------------------------------
-GRAMMARS            = ["baN", "bbaN", "aNbN", "aNbNcN"]
+# GRAMMARS            = ["baN", "bbaN", "aNbN", "aNbNcN"]
 # GRAMMARS = ['parentheses_and_brackets', 'not_nested_parentheses_and_brackets']
-LENGTHS             = [128]
-# LENGTHS             = [32]
+GRAMMARS = ['aNbN']
+# LENGTHS             = [128]
+LENGTHS             = [32]
 SAMPLING_STRATEGIES = ["greedy", "categorical"]
 
-EB_GAMMAS       = [0.1, 0.5, 0.9, 2.0, 10.0]
+# EB_GAMMAS       = [0.1, 0.5, 0.9, 2.0, 10.0]
+EB_GAMMAS       = [0.1]
 # Gaussian sigma values cover ~1.5 orders of magnitude. For L=128 the
 # previously-effective σ was on the order of L/10 to L/5, so this range
 # brackets that and also probes both extremes (very tight / very loose).
-GAUSSIAN_SIGMAS = [0.5, 2.0, 5.0, 10.0, 20.0]
+# GAUSSIAN_SIGMAS = [0.5, 2.0, 5.0, 10.0, 20.0]
+GAUSSIAN_SIGMAS = [10.0]
 
 # Strategy registry. Each strategy declares:
 #   decoder      : decoder string passed to evaluation_from_generation
@@ -417,14 +420,19 @@ def make_table(rows, dataset_name):
         return f"\n=== Dataset: {dataset_name} — no results ===\n"
 
     label_w = max(len(r['label']) for r in rows) + 2
-    cell_w  = 28
+    cell_w  = 25
     steps_w = 18
 
-    primary_header = f"{PRIMARY_STAT} (mean ± std)"
+    # Create headers dynamically for every stat in STATS_NAMES
+    stat_headers = [f"{stat} (mean ± std)" for stat in STATS_NAMES]
+    stats_header_str = "  ".join(f"{h:<{cell_w}}" for h in stat_headers)
+
     header = (f"{'Config':<{label_w}}  "
-              f"{primary_header:<{cell_w}}  "
+              f"{stats_header_str}  "
               f"{'n_steps (mean / max)':<{steps_w}}  n_reps")
-    sep = '─' * (label_w + cell_w + steps_w + 14)
+    
+    # Scale separator line to the full table width
+    sep = '─' * len(header)
 
     lines = [
         f"\n=== Dataset: {dataset_name} ===",
@@ -432,16 +440,23 @@ def make_table(rows, dataset_name):
         sep,
     ]
     for r in rows:
-        primary_mean = r['stat_means'].get(PRIMARY_STAT, float('nan'))
-        primary_std  = r['stat_stds'].get(PRIMARY_STAT,  float('nan'))
-        if r['deterministic']:
-            cell = f"{primary_mean:.4f} (det.)"
-        else:
-            cell = f"{primary_mean:.4f} ± {primary_std:.4f}"
+        # Build individual stat cells dynamically 
+        stat_cells = []
+        for stat in STATS_NAMES:
+            mean_val = r['stat_means'].get(stat, float('nan'))
+            std_val  = r['stat_stds'].get(stat,  float('nan'))
+            if r['deterministic']:
+                cell = f"{mean_val:.4f} (det.)"
+            else:
+                cell = f"{mean_val:.4f} ± {std_val:.4f}"
+            stat_cells.append(f"{cell:<{cell_w}}")
+            
+        stats_str = "  ".join(stat_cells)
         steps_str = f"{r['n_steps_mean']:.1f} / {r['n_steps_max']}"
+        
         lines.append(
             f"{r['label']:<{label_w}}  "
-            f"{cell:<{cell_w}}  "
+            f"{stats_str}  "
             f"{steps_str:<{steps_w}}  "
             f"{r['n_reps']}"
         )
