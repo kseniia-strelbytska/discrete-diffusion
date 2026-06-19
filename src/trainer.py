@@ -72,7 +72,7 @@ def train(
     for epoch in epochs_iter:
         #Calculate the eval metrics at initialisation
         if epoch == 0: # set to True to run evaluation at initialisation (expensive: ~4 min)
-            new_stats, new_stats_eos, total_eos, sequences, sequences_eos = evaluation_from_generation(
+            new_stats, new_stats_eos, total_eos, sequences, sequences_eos, _, _ = evaluation_from_generation(
                 model,
                 grammar,
                 evaluation_dataset=evaluation_dataset,
@@ -195,7 +195,7 @@ def train(
                     f.write(log_line + "\n")
 
         if (epoch + 1) % evaluation_config.eval_every == 0:
-            new_stats, new_stats_eos, total_eos, sequences, sequences_eos = evaluation_from_generation(
+            new_stats, new_stats_eos, total_eos, sequences, sequences_eos, _, _ = evaluation_from_generation(
                 model,
                 grammar,
                 evaluation_dataset=evaluation_dataset,

@@ -153,7 +153,7 @@ def sweep_label(cfg):
 def evaluate_oracle(oracle, grammar, eval_dataset, cfg, schedule, device, sampling_strategy, temperature=1.0):
     """Run evaluation_from_generation for one seed. Returns both_rules_acc."""
     is_gaussian = isinstance(schedule, GaussianSchedule)
-    stats, _, _, _, _ = evaluation_from_generation(
+    stats, _, _, _, _, _, _ = evaluation_from_generation(
         oracle,
         grammar,
         evaluation_dataset=eval_dataset,

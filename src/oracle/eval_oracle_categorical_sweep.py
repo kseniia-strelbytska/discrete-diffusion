@@ -129,7 +129,7 @@ def _fmt_dur(seconds):
 
 def evaluate_one(oracle, grammar, eval_dataset, T, schedule, device, cutoff):
     """Single evaluation pass. Returns both_rules_acc (float)."""
-    stats, _, _, _, _ = evaluation_from_generation(
+    stats, _, _, _, _, _, _ = evaluation_from_generation(
         oracle,
         grammar,
         evaluation_dataset=eval_dataset,

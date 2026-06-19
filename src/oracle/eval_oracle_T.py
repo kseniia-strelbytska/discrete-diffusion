@@ -132,7 +132,7 @@ def eval_one_T(cfg, device, grammar, schedule, dirs=None, save_mode=False):
         output_path = dirs.figure_path / f"outputs_T={cfg.model.T}.txt"
         loss_log_path = dirs.loss_log_path
 
-    stats, stats_eos, total_eos, sequences, _ = evaluation_from_generation(
+    stats, stats_eos, total_eos, sequences, _, _, _ = evaluation_from_generation(
         model,
         grammar,
         evaluation_dataset=dataset,

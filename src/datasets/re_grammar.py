@@ -192,3 +192,118 @@ class REGrammar(FormalGrammar):
 
         self.data = torch.tensor(np.stack(rows), dtype=torch.long)
         print(f'RE grammar "{self.grammar_name}" data generated; shape: {self.data.shape}')
+
+    # ------------------------------------------------------------------ #
+    # Diversity metric interface                                           #
+    # ------------------------------------------------------------------ #
+
+    def valid_n_range(self) -> range:
+        """Valid n values for n-distribution grammars.
+
+        aNbN:   n in [1, l//2]   (SOS + n a's + n b's + EOS <= l+2)
+        aNbNcN: n in [1, l//3]   (SOS + n a's + n b's + n c's + EOS <= l+2)
+        """
+        if self.grammar_name == 'aNbN':
+            return range(1, self.l // 2 + 1)
+        elif self.grammar_name == 'aNbNcN':
+            return range(1, self.l // 3 + 1)
+        raise ValueError(
+            f"valid_n_range() not applicable for grammar {self.grammar_name!r}"
+        )
+
+    def bbaN_valid_nm_pairs(self) -> frozenset:
+        """Valid (n, m) pairs for bbaN: n>=1, m>=1, n + 2m <= l.
+
+        Constraint: SOS + n b's + 2m a's + EOS <= total length (l+2),
+        so n + 2m <= l.
+        """
+        pairs = set()
+        for n in range(1, self.l + 1):
+            for m in range(1, (self.l - n) // 2 + 1):
+                if n + 2 * m <= self.l:
+                    pairs.add((n, m))
+        return frozenset(pairs)
+
+    def vocab_info(self) -> dict:
+        """Token ID map and grammar-specific ranges for diversity_metrics.
+
+        Returns a dict with at minimum: sos, eos, pad, mask.
+        Grammar-specific additions:
+          baN, bbaN, aNbN, aNbNcN: a, b (and c for aNbNcN)
+          bbaN: valid_nm_pairs (frozenset of (n, m) tuples)
+          aNbN, aNbNcN: valid_n_range (range)
+          parentheses_and_brackets,
+          not_nested_parentheses_and_brackets: paren_open, paren_close,
+                                               bracket_open, bracket_close
+        """
+        base = {
+            'sos': SOS_token,
+            'eos': EOS_token,
+            'pad': PAD_token,
+            'mask': MASK_token,
+        }
+        name = self.grammar_name
+
+        if name == 'baN':
+            return {**base, 'a': 0, 'b': 1}
+
+        elif name == 'bbaN':
+            return {
+                **base,
+                'a': 0,
+                'b': 1,
+                'valid_nm_pairs': self.bbaN_valid_nm_pairs(),
+            }
+
+        elif name == 'aNbN':
+            return {
+                **base,
+                'a': 0,
+                'b': 1,
+                'valid_n_range': self.valid_n_range(),
+            }
+
+        elif name == 'aNbNcN':
+            return {
+                **base,
+                'a': 0,
+                'b': 1,
+                'c': 6,
+                'valid_n_range': self.valid_n_range(),
+            }
+
+        elif name in ('parentheses_and_brackets',
+                      'not_nested_parentheses_and_brackets'):
+            return {
+                **base,
+                'paren_open': 0,
+                'paren_close': 1,
+                'bracket_open': 6,
+                'bracket_close': 7,
+            }
+
+        else:
+            # Fallback for other supported grammars
+            return base
+
+    def get_some_known_valid_sequences(self, n: int = 10):
+        """Return up to n valid sequences from self.data as a list of tensors."""
+        if self.data is None:
+            raise RuntimeError("Call generate_seq() first.")
+        end = min(n, len(self.data))
+        return [self.data[i] for i in range(end)]
+
+    def diversity_metrics(self, correct_sequences) -> dict:
+        """Scalar diversity metrics. Returns dict[str, float]; NaN for inapplicable."""
+        from diversity_metrics import compute_diversity_metrics
+        return compute_diversity_metrics(
+            self.grammar_name, correct_sequences,
+            vocab=self.vocab_info(), L=self.l,
+        )
+
+    def diversity_distributions(self, correct_sequences) -> dict:
+        """Raw distributions for JSON sidefile. Returns dict[str, list]."""
+        from diversity_metrics import compute_diversity_distributions
+        return compute_diversity_distributions(
+            self.grammar_name, correct_sequences, vocab=self.vocab_info(),
+        )

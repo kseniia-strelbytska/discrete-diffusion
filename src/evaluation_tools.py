@@ -147,6 +147,7 @@ def evaluation_from_generation(model,
     sequences = []
     sequences_eos = []  # sequences that contain EOS
     n_steps_per_seq = [] # list to track the number of denoising steps taken for each sequence (EB Sampler uses a dynamic number of steps)
+    correct_sequences = []  # sequences satisfying rule1 AND rule2 AND format
     
     # Optionally prepare output file if saving is enabled.
     if save_mode:
@@ -186,6 +187,10 @@ def evaluation_from_generation(model,
             stats += y_pred_stats
             seq_str = ''.join([str(i) for i in y_pred_cpu.tolist()])
             sequences.append(seq_str)
+
+            # Collect sequences satisfying both_rules AND format
+            if y_pred_stats[2] == 1 and y_pred_stats[3] == 1:
+                correct_sequences.append(y_pred_cpu)
 
             # Track finished sequences (those containing EOS)
             has_eos = (y_pred_cpu == EOS_token).any().item()
@@ -432,5 +437,5 @@ def evaluation_from_generation(model,
         with open(loss_log_path, "a") as f:
             f.write(evaluation_log + "\n")
 
-    return stats / total, stats_eos / eos_denom, total_eos, sequences, sequences_eos, n_steps_per_seq
+    return stats / total, stats_eos / eos_denom, total_eos, sequences, sequences_eos, n_steps_per_seq, correct_sequences
   

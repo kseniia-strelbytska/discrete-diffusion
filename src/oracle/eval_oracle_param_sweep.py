@@ -21,14 +21,16 @@ Logging
 -------
 Each cell logs mean ± std (across n_reps) for EVERY metric in STATS_NAMES, plus
 the mean and max number of denoising steps across all sequences in all reps.
-The CSV column count is therefore 2 * len(STATS_NAMES) + a handful of
-identifier and timing fields. See CSV_FIELDS construction below.
+Diversity metrics (uniqueness, DFA coverage, etc.) are computed once over the
+concatenation of all correct sequences across all reps.
+The CSV column count is therefore 2 * len(STATS_NAMES) + diversity fields +
+identifier and timing fields. See CSV_FIELDS and DIVERSITY_FIELDS below.
 
-evaluation_from_generation must return 6 values:
-    (stats, _, _, _, _, n_steps_per_seq)
+evaluation_from_generation returns 7 values:
+    (stats, _, _, _, _, n_steps_per_seq, correct_sequences)
 where stats is an iterable of float metrics in the order declared by
-STATS_NAMES, and n_steps_per_seq is a list of ints — one entry per generated
-sequence — giving the number of unmask iterations that sequence used.
+STATS_NAMES, n_steps_per_seq is a list of ints, and correct_sequences is a
+list of 1-D CPU tensors for sequences satisfying rule1 AND rule2 AND format.
 
 Usage
 -----
@@ -45,6 +47,7 @@ Usage
 
 import argparse
 import csv
+import json
 import random
 import sys
 import time
@@ -253,6 +256,8 @@ def evaluate_cell(*, oracle, grammar, eval_dataset,
         and are handled by nanmean / nanstd at aggregation time.
     n_steps_per_seq : list of int
         Number of unmask iterations used per generated sequence in this rep.
+    correct_sequences : list of 1-D CPU tensors
+        Sequences satisfying rule1 AND rule2 AND format for this rep.
     """
     decoder    = STRATEGIES[strategy]['decoder']
     schedule   = build_schedule(strategy, param_value)
@@ -262,7 +267,7 @@ def evaluate_cell(*, oracle, grammar, eval_dataset,
     gamma_pass = float(param_value) if strategy == 'ebsampler' else 0.1
     sigma_pass = float(param_value) if is_gauss else 1.0
 
-    stats, _, _, _, _, n_steps_per_seq = evaluation_from_generation(
+    stats, _, _, _, _, n_steps_per_seq, correct_sequences = evaluation_from_generation(
         oracle,
         grammar,
         evaluation_dataset=eval_dataset,
@@ -283,8 +288,6 @@ def evaluate_cell(*, oracle, grammar, eval_dataset,
         denoise=cfg_get(cfg, 'training', 'denoise', default='0'),
         cutoff=cfg_get(cfg, 'evaluation', 'cutoff', default=None),
     )
-    
-    print(n_steps_per_seq)
 
     # Coerce to a uniform shape regardless of what the evaluator returns.
     stats_tuple = tuple(float(s) for s in stats)
@@ -294,7 +297,7 @@ def evaluate_cell(*, oracle, grammar, eval_dataset,
             f"STATS_NAMES has {len(STATS_NAMES)} entries. "
             f"Update STATS_NAMES to match the evaluator's output order."
         )
-    return stats_tuple, [int(n) for n in n_steps_per_seq]
+    return stats_tuple, [int(n) for n in n_steps_per_seq], correct_sequences
 
 
 # ---------------------------------------------------------------------------
@@ -334,6 +337,77 @@ def aggregate_reps(stats_per_rep, n_steps_all):
 
 
 # ---------------------------------------------------------------------------
+# Diversity fields and helpers
+# ---------------------------------------------------------------------------
+
+DIVERSITY_FIELDS = [
+    'n_correct', 'n_correct_too_low', 'uniqueness', 'duplication_rate',
+    'mean_lev_dist_normalized', 'lev_n_used', 'bigram_diversity', 'trigram_diversity',
+    'dfa_state_coverage', 'dfa_transition_coverage', 'n_entropy', 'n_coverage',
+    'm_entropy', 'nm_joint_coverage', 'max_depth_ratio_mean', 'max_depth_ratio_std',
+    'brackets_parens_ratio_mean', 'brackets_parens_ratio_std',
+    'n_zero_paren_sequences', 'distribution_path',
+]
+
+
+def _cell_id_str(grammar_name, L, strategy, sampler, pv):
+    if strategy == 'gaussian':
+        param_str = f"sigma{pv}"
+    elif strategy == 'ebsampler':
+        param_str = f"gamma{pv}"
+    else:
+        param_str = "none"
+    return f"{grammar_name}_L{L}_{strategy}_{sampler}_{param_str}"
+
+
+def make_diversity_table(div_rows, dataset_name):
+    if not div_rows:
+        return f"\n=== Diversity: {dataset_name} — no results ===\n"
+
+    # Key metrics to display (subset that fits in a readable table)
+    display_fields = [
+        ('n_correct',              'n_corr',  6),
+        ('uniqueness',             'uniq',    6),
+        ('mean_lev_dist_normalized','lev_n',  6),
+        ('bigram_diversity',       'bi_div',  6),
+        ('trigram_diversity',      'tri_div', 7),
+        ('dfa_state_coverage',     'dfa_st',  6),
+        ('dfa_transition_coverage','dfa_tr',  6),
+        ('n_entropy',              'n_ent',   6),
+        ('n_coverage',             'n_cov',   6),
+        ('nm_joint_coverage',      'nm_cov',  7),
+        ('max_depth_ratio_mean',   'dep_r',   6),
+    ]
+
+    label_w = max(len(r['label']) for r in div_rows) + 2
+    header_parts = [f"{'Config':<{label_w}}"]
+    for _, short, w in display_fields:
+        header_parts.append(f"{short:>{w}}")
+    header = '  '.join(header_parts)
+    sep = '─' * len(header)
+
+    lines = [
+        f"\n=== Diversity Metrics — Dataset: {dataset_name} ===",
+        header,
+        sep,
+    ]
+    for r in div_rows:
+        parts = [f"{r['label']:<{label_w}}"]
+        for key, _, w in display_fields:
+            val = r['div'].get(key, float('nan'))
+            if val == '' or val is None:
+                cell = 'n/a'
+            else:
+                try:
+                    cell = f"{float(val):.4f}"
+                except (ValueError, TypeError):
+                    cell = str(val)
+            parts.append(f"{cell:>{w}}")
+        lines.append('  '.join(parts))
+    return '\n'.join(lines)
+
+
+# ---------------------------------------------------------------------------
 # CSV I/O with resume
 # ---------------------------------------------------------------------------
 
@@ -347,6 +421,7 @@ def _build_csv_fields():
         fields.append(f'mean_{n}')
         fields.append(f'std_{n}')
     fields.extend(['n_steps_mean', 'n_steps_max', 'deterministic', 'elapsed_s'])
+    fields.extend(DIVERSITY_FIELDS)
     return fields
 
 
@@ -689,14 +764,15 @@ def _run(args, cfg, device, out_dir):
             print(f"  deterministic cell — running 1 rep instead of {args.n_evals}")
 
         # ---- run reps -------------------------------------------------------
-        stats_per_rep = []   # list of tuples, length n_reps × len(STATS_NAMES)
-        all_n_steps   = []   # flat list of ints, n_reps × n_samples
+        stats_per_rep  = []   # list of tuples, length n_reps × len(STATS_NAMES)
+        all_n_steps    = []   # flat list of ints, n_reps × n_samples
+        all_correct_seqs = []  # all correct sequences concatenated across reps
         t0 = time.time()
         try:
             for rep_i in range(n_reps):
                 s = rep_seed(cached['base_seed'], rep_i)
                 set_seed(s)
-                rep_stats, rep_n_steps = evaluate_cell(
+                rep_stats, rep_n_steps, rep_correct = evaluate_cell(
                     oracle=cached['oracle'],
                     grammar=cached['grammar'],
                     eval_dataset=cached['eval_ds'],
@@ -710,6 +786,7 @@ def _run(args, cfg, device, out_dir):
                 )
                 stats_per_rep.append(rep_stats)
                 all_n_steps.extend(rep_n_steps)
+                all_correct_seqs.extend(rep_correct)
                 if n_reps > 1:
                     primary_idx = STATS_NAMES.index(PRIMARY_STAT)
                     print(f"  rep {rep_i + 1}/{n_reps}  seed={s}  "
@@ -737,6 +814,35 @@ def _run(args, cfg, device, out_dir):
                   f"steps mean/max = {agg['n_steps_mean']:.1f} / {agg['n_steps_max']}  "
                   f"elapsed={elapsed:.1f}s")
 
+        # ---- diversity metrics (computed once over all reps' correct seqs) --
+        div_metrics = {}
+        div_dist_path = ''
+        grammar_obj = cached['grammar']
+        if hasattr(grammar_obj, 'diversity_metrics'):
+            try:
+                div_metrics = grammar_obj.diversity_metrics(all_correct_seqs)
+                div_dist = grammar_obj.diversity_distributions(all_correct_seqs)
+                dist_dir = out_dir / 'distributions'
+                dist_dir.mkdir(exist_ok=True)
+                cid = _cell_id_str(grammar_name, L, strategy, sampler, pv)
+                dist_file = dist_dir / f"{cid}.json"
+                serialisable = {}
+                for k, v in div_dist.items():
+                    if hasattr(v, 'tolist'):
+                        serialisable[k] = v.tolist()
+                    elif isinstance(v, (list, dict, str, int, float, bool)) or v is None:
+                        serialisable[k] = v
+                    else:
+                        serialisable[k] = str(v)
+                with open(dist_file, 'w') as _f:
+                    json.dump(serialisable, _f, indent=2)
+                div_dist_path = str(dist_file)
+                print(f"  diversity: n_correct={div_metrics.get('n_correct', 0)}  "
+                      f"uniqueness={div_metrics.get('uniqueness', float('nan'))!r}  "
+                      f"dist → {dist_file.name}")
+            except Exception as _de:
+                print(f"  diversity metrics failed: {type(_de).__name__}: {_de}")
+
         # ---- persist --------------------------------------------------------
         row = {
             'dataset':           eval_dataset_type,
@@ -757,6 +863,13 @@ def _run(args, cfg, device, out_dir):
             row[f'mean_{name}'] = round(agg[f'mean_{name}'], 6)
             row[f'std_{name}']  = round(agg[f'std_{name}'],  6)
 
+        for df in DIVERSITY_FIELDS:
+            if df == 'distribution_path':
+                row[df] = div_dist_path
+            else:
+                val = div_metrics.get(df, '')
+                row[df] = '' if (val != val) else val  # NaN → empty string
+
         append_csv_row(csv_path, row)
 
         rows_for_table.append({
@@ -769,6 +882,7 @@ def _run(args, cfg, device, out_dir):
             'deterministic': det,
             'grammar':       grammar_name, 'L': L,
             'strategy':      strategy, 'sampler': sampler, 'param': pv,
+            'div':           div_metrics,
         })
 
     print('\n' + '=' * 60)
@@ -788,6 +902,15 @@ def _run(args, cfg, device, out_dir):
             f.write(table + '\n')
         print(f"\nTable: {table_path}")
         print(f"CSV:   {csv_path}")
+
+        div_rows = [r for r in rows_for_table if r.get('div')]
+        if div_rows:
+            div_table = make_diversity_table(div_rows, eval_dataset_type)
+            print(div_table)
+            div_table_path = out_dir / 'oracle_param_sweep_diversity.txt'
+            with open(div_table_path, 'w') as f:
+                f.write(div_table + '\n')
+            print(f"Diversity table: {div_table_path}")
 
 
 if __name__ == '__main__':

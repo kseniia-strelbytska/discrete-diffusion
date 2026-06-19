@@ -6,7 +6,8 @@ from .constants import EOS_token, SOS_token, PAD_token, MASK_token
 
 
 class anbnGrammar(FormalGrammar):
-    grammar_name = 'anbn'
+    grammar_name = 'aNbN'
+    vocab_size = 6
 
     def __init__(self, l):
         super().__init__(l)
@@ -75,3 +76,41 @@ class anbnGrammar(FormalGrammar):
 
         print(f'Data generated; shape: {data.shape}')
         self.data = data
+
+    def valid_n_range(self) -> range:
+        """Valid n values for a^n b^n sequences: n in [1, l//2]."""
+        return range(1, self.l // 2 + 1)
+
+    def vocab_info(self) -> dict:
+        """Token ID map and grammar-specific ranges for diversity_metrics."""
+        return {
+            'sos': SOS_token,
+            'eos': EOS_token,
+            'pad': PAD_token,
+            'mask': MASK_token,
+            'a': 0,
+            'b': 1,
+            'valid_n_range': self.valid_n_range(),
+        }
+
+    def get_some_known_valid_sequences(self, n: int = 10):
+        """Return up to n valid sequences from self.data as a list of tensors."""
+        if self.data is None:
+            raise RuntimeError("Call generate_seq() first.")
+        end = min(n, len(self.data))
+        return [self.data[i] for i in range(end)]
+
+    def diversity_metrics(self, correct_sequences) -> dict:
+        """Scalar diversity metrics. Returns dict[str, float]; NaN for inapplicable."""
+        from diversity_metrics import compute_diversity_metrics
+        return compute_diversity_metrics(
+            self.grammar_name, correct_sequences,
+            vocab=self.vocab_info(), L=self.l,
+        )
+
+    def diversity_distributions(self, correct_sequences) -> dict:
+        """Raw distributions for JSON sidefile. Returns dict[str, list]."""
+        from diversity_metrics import compute_diversity_distributions
+        return compute_diversity_distributions(
+            self.grammar_name, correct_sequences, vocab=self.vocab_info(),
+        )

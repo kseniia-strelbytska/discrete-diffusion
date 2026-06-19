@@ -218,7 +218,7 @@ def evaluate_checkpoint(model, grammar, eval_dataset, cfg, schedule, device, tem
     Returns both_rules_acc (float in [0, 1]).
     """
     is_gaussian = isinstance(schedule, GaussianSchedule)
-    stats, _, _, _, _ = evaluation_from_generation(
+    stats, _, _, _, _, _, _ = evaluation_from_generation(
         model,
         grammar,
         evaluation_dataset=eval_dataset,
