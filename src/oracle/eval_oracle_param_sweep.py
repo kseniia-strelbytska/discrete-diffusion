@@ -75,19 +75,16 @@ from schedules import CategoricalSchedule, GaussianSchedule
 # Parameter grid  (edit these to control the sweep)
 # ---------------------------------------------------------------------------
 # GRAMMARS            = ["baN", "bbaN", "aNbN", "aNbNcN"]
-# GRAMMARS = ['parentheses_and_brackets', 'not_nested_parentheses_and_brackets']
-GRAMMARS = ['aNbN']
+GRAMMARS = ['not_nested_parentheses_and_brackets', 'parentheses_and_brackets']
 # LENGTHS             = [128]
 LENGTHS             = [32]
 SAMPLING_STRATEGIES = ["greedy", "categorical"]
 
-# EB_GAMMAS       = [0.1, 0.5, 0.9, 2.0, 10.0]
-EB_GAMMAS       = [0.1]
+EB_GAMMAS       = [0.1, 0.5, 0.9, 2.0, 10.0]
 # Gaussian sigma values cover ~1.5 orders of magnitude. For L=128 the
 # previously-effective σ was on the order of L/10 to L/5, so this range
 # brackets that and also probes both extremes (very tight / very loose).
-# GAUSSIAN_SIGMAS = [0.5, 2.0, 5.0, 10.0, 20.0]
-GAUSSIAN_SIGMAS = [10.0]
+GAUSSIAN_SIGMAS = [0.5, 2.0, 5.0, 10.0, 20.0]
 
 # Strategy registry. Each strategy declares:
 #   decoder      : decoder string passed to evaluation_from_generation
@@ -97,9 +94,9 @@ GAUSSIAN_SIGMAS = [10.0]
 # NOTE: 'ar' assumes the decoder alias in your codebase is 'ar'. If it's
 # 'autoregressive' instead, change the 'decoder' field below.
 STRATEGIES = {
-    # 'uniform':   {'decoder': 'schedule_driven', 'param_name': None,       'param_values': [None]},
-    # 'gaussian':  {'decoder': 'schedule_driven', 'param_name': 'sigma',    'param_values': GAUSSIAN_SIGMAS},
-    # 'ar':        {'decoder': 'ar',              'param_name': None,       'param_values': [None]},
+    'uniform':   {'decoder': 'schedule_driven', 'param_name': None,       'param_values': [None]},
+    'gaussian':  {'decoder': 'schedule_driven', 'param_name': 'sigma',    'param_values': GAUSSIAN_SIGMAS},
+    'ar':        {'decoder': 'ar',              'param_name': None,       'param_values': [None]},
     'ebsampler': {'decoder': 'ebsampler',       'param_name': 'eb_gamma', 'param_values': EB_GAMMAS},
 }
 

@@ -1,44 +1,52 @@
 
 === Dataset: unconditional ===
-Config                                                                                  both_rules_acc (mean ± std)   n_reps
-──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-not_nested_parentheses_and_brackets L=32   strat=ar         samp=categorical  —         1.0000 ± 0.0000               1
-not_nested_parentheses_and_brackets L=32   strat=ar         samp=greedy       —         1.0000 (det.)                 1
-not_nested_parentheses_and_brackets L=32   strat=ebsampler  samp=categorical  γ=0.1     1.0000 ± 0.0000               1
-not_nested_parentheses_and_brackets L=32   strat=ebsampler  samp=categorical  γ=0.5     0.9900 ± 0.0000               1
-not_nested_parentheses_and_brackets L=32   strat=ebsampler  samp=categorical  γ=2.0     0.3300 ± 0.0000               1
-not_nested_parentheses_and_brackets L=32   strat=ebsampler  samp=categorical  γ=10.0    0.0600 ± 0.0000               1
-not_nested_parentheses_and_brackets L=32   strat=ebsampler  samp=greedy       γ=0.1     1.0000 (det.)                 1
-not_nested_parentheses_and_brackets L=32   strat=ebsampler  samp=greedy       γ=0.5     1.0000 (det.)                 1
-not_nested_parentheses_and_brackets L=32   strat=ebsampler  samp=greedy       γ=2.0     1.0000 (det.)                 1
-not_nested_parentheses_and_brackets L=32   strat=ebsampler  samp=greedy       γ=10.0    0.0000 (det.)                 1
-not_nested_parentheses_and_brackets L=32   strat=gaussian   samp=categorical  σ=0.5     0.8800 ± 0.0000               1
-not_nested_parentheses_and_brackets L=32   strat=gaussian   samp=categorical  σ=2.0     0.8800 ± 0.0000               1
-not_nested_parentheses_and_brackets L=32   strat=gaussian   samp=categorical  σ=10.0    0.9600 ± 0.0000               1
-not_nested_parentheses_and_brackets L=32   strat=gaussian   samp=categorical  σ=20.0    0.9100 ± 0.0000               1
-not_nested_parentheses_and_brackets L=32   strat=gaussian   samp=greedy       σ=0.5     0.9000 ± 0.0000               1
-not_nested_parentheses_and_brackets L=32   strat=gaussian   samp=greedy       σ=2.0     0.9100 ± 0.0000               1
-not_nested_parentheses_and_brackets L=32   strat=gaussian   samp=greedy       σ=10.0    0.9400 ± 0.0000               1
-not_nested_parentheses_and_brackets L=32   strat=gaussian   samp=greedy       σ=20.0    0.9300 ± 0.0000               1
-not_nested_parentheses_and_brackets L=32   strat=uniform    samp=categorical  —         0.8700 ± 0.0000               1
-not_nested_parentheses_and_brackets L=32   strat=uniform    samp=greedy       —         0.8700 ± 0.0000               1
-parentheses_and_brackets L=32   strat=ar         samp=categorical  —                    1.0000 ± 0.0000               1
-parentheses_and_brackets L=32   strat=ar         samp=greedy       —                    1.0000 (det.)                 1
-parentheses_and_brackets L=32   strat=ebsampler  samp=categorical  γ=0.1                1.0000 ± 0.0000               1
-parentheses_and_brackets L=32   strat=ebsampler  samp=categorical  γ=0.5                0.9900 ± 0.0000               1
-parentheses_and_brackets L=32   strat=ebsampler  samp=categorical  γ=2.0                0.3300 ± 0.0000               1
-parentheses_and_brackets L=32   strat=ebsampler  samp=categorical  γ=10.0               0.0000 ± 0.0000               1
-parentheses_and_brackets L=32   strat=ebsampler  samp=greedy       γ=0.1                1.0000 (det.)                 1
-parentheses_and_brackets L=32   strat=ebsampler  samp=greedy       γ=0.5                1.0000 (det.)                 1
-parentheses_and_brackets L=32   strat=ebsampler  samp=greedy       γ=2.0                0.0000 (det.)                 1
-parentheses_and_brackets L=32   strat=ebsampler  samp=greedy       γ=10.0               1.0000 (det.)                 1
-parentheses_and_brackets L=32   strat=gaussian   samp=categorical  σ=0.5                0.7100 ± 0.0000               1
-parentheses_and_brackets L=32   strat=gaussian   samp=categorical  σ=2.0                0.7000 ± 0.0000               1
-parentheses_and_brackets L=32   strat=gaussian   samp=categorical  σ=10.0               0.8800 ± 0.0000               1
-parentheses_and_brackets L=32   strat=gaussian   samp=categorical  σ=20.0               0.8600 ± 0.0000               1
-parentheses_and_brackets L=32   strat=gaussian   samp=greedy       σ=0.5                1.0000 ± 0.0000               1
-parentheses_and_brackets L=32   strat=gaussian   samp=greedy       σ=2.0                0.9700 ± 0.0000               1
-parentheses_and_brackets L=32   strat=gaussian   samp=greedy       σ=10.0               0.9700 ± 0.0000               1
-parentheses_and_brackets L=32   strat=gaussian   samp=greedy       σ=20.0               0.9800 ± 0.0000               1
-parentheses_and_brackets L=32   strat=uniform    samp=categorical  —                    0.9400 ± 0.0000               1
-parentheses_and_brackets L=32   strat=uniform    samp=greedy       —                    0.9000 ± 0.0000               1
+Config                                                                                  rule1 (mean ± std)         rule2 (mean ± std)         both_rules (mean ± std)    format (mean ± std)        n_steps (mean / max)  n_reps
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+not_nested_parentheses_and_brackets L=32   strat=ar         samp=categorical  —         nan ± nan                  nan ± nan                  nan ± nan                  nan ± nan                  nan / 0             1
+not_nested_parentheses_and_brackets L=32   strat=ar         samp=greedy       —         nan (det.)                 nan (det.)                 nan (det.)                 nan (det.)                 nan / 0             1
+not_nested_parentheses_and_brackets L=32   strat=ebsampler  samp=categorical  γ=0.1     nan ± nan                  nan ± nan                  nan ± nan                  nan ± nan                  nan / 0             1
+not_nested_parentheses_and_brackets L=32   strat=ebsampler  samp=categorical  γ=0.5     nan ± nan                  nan ± nan                  nan ± nan                  nan ± nan                  nan / 0             1
+not_nested_parentheses_and_brackets L=32   strat=ebsampler  samp=categorical  γ=0.9     0.7775 ± 0.0512            1.0000 ± 0.0000            0.7775 ± 0.0512            0.9300 ± 0.0255            28.6 / 31           4
+not_nested_parentheses_and_brackets L=32   strat=ebsampler  samp=categorical  γ=2.0     nan ± nan                  nan ± nan                  nan ± nan                  nan ± nan                  nan / 0             1
+not_nested_parentheses_and_brackets L=32   strat=ebsampler  samp=categorical  γ=10.0    nan ± nan                  nan ± nan                  nan ± nan                  nan ± nan                  nan / 0             1
+not_nested_parentheses_and_brackets L=32   strat=ebsampler  samp=greedy       γ=0.1     nan (det.)                 nan (det.)                 nan (det.)                 nan (det.)                 nan / 0             1
+not_nested_parentheses_and_brackets L=32   strat=ebsampler  samp=greedy       γ=0.5     nan (det.)                 nan (det.)                 nan (det.)                 nan (det.)                 nan / 0             1
+not_nested_parentheses_and_brackets L=32   strat=ebsampler  samp=greedy       γ=0.9     1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              31.0 / 31           1
+not_nested_parentheses_and_brackets L=32   strat=ebsampler  samp=greedy       γ=2.0     nan (det.)                 nan (det.)                 nan (det.)                 nan (det.)                 nan / 0             1
+not_nested_parentheses_and_brackets L=32   strat=ebsampler  samp=greedy       γ=10.0    nan (det.)                 nan (det.)                 nan (det.)                 nan (det.)                 nan / 0             1
+not_nested_parentheses_and_brackets L=32   strat=gaussian   samp=categorical  σ=0.5     nan ± nan                  nan ± nan                  nan ± nan                  nan ± nan                  nan / 0             1
+not_nested_parentheses_and_brackets L=32   strat=gaussian   samp=categorical  σ=2.0     nan ± nan                  nan ± nan                  nan ± nan                  nan ± nan                  nan / 0             1
+not_nested_parentheses_and_brackets L=32   strat=gaussian   samp=categorical  σ=5.0     0.9125 ± 0.0228            1.0000 ± 0.0000            0.9125 ± 0.0228            0.9175 ± 0.0228            107.0 / 126         4
+not_nested_parentheses_and_brackets L=32   strat=gaussian   samp=categorical  σ=10.0    nan ± nan                  nan ± nan                  nan ± nan                  nan ± nan                  nan / 0             1
+not_nested_parentheses_and_brackets L=32   strat=gaussian   samp=categorical  σ=20.0    nan ± nan                  nan ± nan                  nan ± nan                  nan ± nan                  nan / 0             1
+not_nested_parentheses_and_brackets L=32   strat=gaussian   samp=greedy       σ=0.5     nan ± nan                  nan ± nan                  nan ± nan                  nan ± nan                  nan / 0             1
+not_nested_parentheses_and_brackets L=32   strat=gaussian   samp=greedy       σ=2.0     nan ± nan                  nan ± nan                  nan ± nan                  nan ± nan                  nan / 0             1
+not_nested_parentheses_and_brackets L=32   strat=gaussian   samp=greedy       σ=5.0     0.9275 ± 0.0277            1.0000 ± 0.0000            0.9275 ± 0.0277            0.9425 ± 0.0259            109.3 / 126         4
+not_nested_parentheses_and_brackets L=32   strat=gaussian   samp=greedy       σ=10.0    nan ± nan                  nan ± nan                  nan ± nan                  nan ± nan                  nan / 0             1
+not_nested_parentheses_and_brackets L=32   strat=gaussian   samp=greedy       σ=20.0    nan ± nan                  nan ± nan                  nan ± nan                  nan ± nan                  nan / 0             1
+not_nested_parentheses_and_brackets L=32   strat=uniform    samp=categorical  —         nan ± nan                  nan ± nan                  nan ± nan                  nan ± nan                  nan / 0             1
+not_nested_parentheses_and_brackets L=32   strat=uniform    samp=greedy       —         nan ± nan                  nan ± nan                  nan ± nan                  nan ± nan                  nan / 0             1
+parentheses_and_brackets L=32   strat=ar         samp=categorical  —                    nan ± nan                  nan ± nan                  nan ± nan                  nan ± nan                  nan / 0             1
+parentheses_and_brackets L=32   strat=ar         samp=greedy       —                    nan (det.)                 nan (det.)                 nan (det.)                 nan (det.)                 nan / 0             1
+parentheses_and_brackets L=32   strat=ebsampler  samp=categorical  γ=0.1                nan ± nan                  nan ± nan                  nan ± nan                  nan ± nan                  nan / 0             1
+parentheses_and_brackets L=32   strat=ebsampler  samp=categorical  γ=0.5                nan ± nan                  nan ± nan                  nan ± nan                  nan ± nan                  nan / 0             1
+parentheses_and_brackets L=32   strat=ebsampler  samp=categorical  γ=0.9                0.9525 ± 0.0249            1.0000 ± 0.0000            0.9525 ± 0.0249            0.9425 ± 0.0268            25.3 / 31           4
+parentheses_and_brackets L=32   strat=ebsampler  samp=categorical  γ=2.0                nan ± nan                  nan ± nan                  nan ± nan                  nan ± nan                  nan / 0             1
+parentheses_and_brackets L=32   strat=ebsampler  samp=categorical  γ=10.0               nan ± nan                  nan ± nan                  nan ± nan                  nan ± nan                  nan / 0             1
+parentheses_and_brackets L=32   strat=ebsampler  samp=greedy       γ=0.1                nan (det.)                 nan (det.)                 nan (det.)                 nan (det.)                 nan / 0             1
+parentheses_and_brackets L=32   strat=ebsampler  samp=greedy       γ=0.5                nan (det.)                 nan (det.)                 nan (det.)                 nan (det.)                 nan / 0             1
+parentheses_and_brackets L=32   strat=ebsampler  samp=greedy       γ=0.9                1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              31.0 / 31           1
+parentheses_and_brackets L=32   strat=ebsampler  samp=greedy       γ=2.0                nan (det.)                 nan (det.)                 nan (det.)                 nan (det.)                 nan / 0             1
+parentheses_and_brackets L=32   strat=ebsampler  samp=greedy       γ=10.0               nan (det.)                 nan (det.)                 nan (det.)                 nan (det.)                 nan / 0             1
+parentheses_and_brackets L=32   strat=gaussian   samp=categorical  σ=0.5                nan ± nan                  nan ± nan                  nan ± nan                  nan ± nan                  nan / 0             4
+parentheses_and_brackets L=32   strat=gaussian   samp=categorical  σ=2.0                nan ± nan                  nan ± nan                  nan ± nan                  nan ± nan                  nan / 0             4
+parentheses_and_brackets L=32   strat=gaussian   samp=categorical  σ=5.0                nan ± nan                  nan ± nan                  nan ± nan                  nan ± nan                  nan / 0             4
+parentheses_and_brackets L=32   strat=gaussian   samp=categorical  σ=10.0               nan ± nan                  nan ± nan                  nan ± nan                  nan ± nan                  nan / 0             4
+parentheses_and_brackets L=32   strat=gaussian   samp=categorical  σ=20.0               nan ± nan                  nan ± nan                  nan ± nan                  nan ± nan                  nan / 0             1
+parentheses_and_brackets L=32   strat=gaussian   samp=greedy       σ=0.5                nan ± nan                  nan ± nan                  nan ± nan                  nan ± nan                  nan / 0             4
+parentheses_and_brackets L=32   strat=gaussian   samp=greedy       σ=2.0                nan ± nan                  nan ± nan                  nan ± nan                  nan ± nan                  nan / 0             4
+parentheses_and_brackets L=32   strat=gaussian   samp=greedy       σ=5.0                nan ± nan                  nan ± nan                  nan ± nan                  nan ± nan                  nan / 0             4
+parentheses_and_brackets L=32   strat=gaussian   samp=greedy       σ=10.0               nan ± nan                  nan ± nan                  nan ± nan                  nan ± nan                  nan / 0             4
+parentheses_and_brackets L=32   strat=gaussian   samp=greedy       σ=20.0               nan ± nan                  nan ± nan                  nan ± nan                  nan ± nan                  nan / 0             4
+parentheses_and_brackets L=32   strat=uniform    samp=categorical  —                    nan ± nan                  nan ± nan                  nan ± nan                  nan ± nan                  nan / 0             4
+parentheses_and_brackets L=32   strat=uniform    samp=greedy       —                    nan ± nan                  nan ± nan                  nan ± nan                  nan ± nan                  nan / 0             4

@@ -1,21 +1,22 @@
 seed: 42
 device: auto
 decoding_strategy: ebsampler
-sampling_strategy: greedy
-eb_gamma: 0.1
+sampling_strategy: categorical
+eb_gamma: 0.9
+# not_nested_parentheses_and_brackets L=32   strat=ebsampler  samp=categorical  γ=0.9
 temperature: 1.0  # logit scaling (scale-invariant for greedy; kept for consistency)
 data:
-  l: 128 
+  l: 32 
   train_split: 0.9
   batch_size: 64
-  grammar: baN
+  grammar: not_nested_parentheses_and_brackets
 model:
   architecture: oracle # classic (torch-native) or v2 (QKV low-level) or RPE or FIRE
-  max_len: 130    
+  max_len: 34    
   vocab_size: 7
   n_head: 4
   n_layers: 4
-  embed_dim: 130
+  embed_dim: 34
   dim_feedforward: 1024
   dropout: 0.1
   layer_norm_eps: 0.0002

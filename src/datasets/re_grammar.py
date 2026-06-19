@@ -20,6 +20,14 @@ Grammar vocab_sizes:
   separated_parentheses_and_brackets,
   not_nested_parentheses_and_brackets  → vocab_size=8  (open_p=0, close_p=1,
                                                          open_b=6, close_b=7)
+
+Rule assignments per language category (table):
+  L1 = baN                               regular         rule1=#a even,          rule2=starts with b
+  L2 = bbaN                              regular         rule1=#a even,          rule2=b's before a's
+  L3 = aNbN                              context-free    rule1=#a=#b,            rule2=a's before b's
+  L4 = Dyck (parentheses_and_brackets)   context-free    rule1=paired/nested [],  rule2=paired/nested ()
+  L5 = aNbNcN                            context-sensitive rule1=#a=#b=#c,       rule2=a's before b's before c's
+  L6 = CS Dyck (not_nested_…)            context-sensitive rule1=paired [],      rule2=paired ()
 """
 
 import torch
@@ -37,6 +45,33 @@ _VOCAB_SIZES = {
     'parentheses_and_brackets': 8,
     'separated_parentheses_and_brackets': 8,
     'not_nested_parentheses_and_brackets': 8,
+}
+
+# Maps each grammar to (rule1_fn, rule2_fn).
+# rule1 and rule2 are the two independent structural properties.
+_GRAMMAR_RULES = {
+    # L1 = {bα}: rule1=#a even, rule2=starts with b
+    'baN': (rd.check_even_number_of_as, rd.check_begins_with_b),
+    # L2 = {b^n a^{2m}}: rule1=#a even, rule2=b's before a's
+    'bbaN': (rd.check_even_number_of_as, rd.check_bs_before_as),
+    # L3 = {a^n b^n}: rule1=#a=#b, rule2=a's before b's
+    'aNbN': (rd.check_same_number_as_bs, rd.check_as_before_bs),
+    # L4 = Dyck: rule1=paired and nested [], rule2=paired and nested ()
+    'parentheses_and_brackets': (rd.check_matched_brackets, rd.check_matched_parentheses),
+    # L5 = {a^n b^n c^n}: rule1=#a=#b=#c, rule2=a's before b's before c's
+    'aNbNcN': (rd.check_same_number_as_bs_cs, rd.check_as_before_bs_before_cs),
+    # L6 = CS Dyck (not nested): rule1=paired [], rule2=paired ()
+    'not_nested_parentheses_and_brackets': (rd.check_matched_brackets, rd.check_matched_parentheses),
+    # remaining grammars: use combined grammar rule as rule1, rule2 always True
+    'abN': (rd.check_same_number_as_bs, lambda _: True),
+    'aNbM': (rd.check_as_before_bs, lambda _: True),
+    'aNbNaN': (
+        lambda x: rd.check_twice_many_as_than_bs(x) and rd.check_bs_in_the_middle(x) and rd.check_bs_together(x),
+        lambda _: True,
+    ),
+    'parentheses': (rd.check_matched_parentheses, lambda _: True),
+    'brackets': (rd.check_matched_brackets, lambda _: True),
+    'separated_parentheses_and_brackets': (rd.check_separated_brackets_and_parentheses, lambda _: True),
 }
 
 
@@ -78,6 +113,9 @@ class REGrammar(FormalGrammar):
 
     All sequences use the project token scheme (SOS=3, EOS=2, PAD=4, MASK=5)
     with content tokens starting at 0. No remapping layer is needed.
+
+    Each grammar exposes two independent structural rules (rule1, rule2) per
+    the language category table in the module docstring.
     """
 
     SUPPORTED = set(_VOCAB_SIZES.keys())
@@ -93,24 +131,27 @@ class REGrammar(FormalGrammar):
         self.vocab_size = _VOCAB_SIZES[grammar_name]
         self.data = None
         self.default_eval_type = 'next_token'
-        self._grammar_rule = rd.grammar_rules(grammar_name)
+        self._rule1_fn, self._rule2_fn = _GRAMMAR_RULES[grammar_name]
 
     # ------------------------------------------------------------------ #
     # FormalGrammar interface                                              #
     # ------------------------------------------------------------------ #
 
     def does_satisfy_rule1(self, seq):
-        """Grammaticality: satisfies the full RE grammar rule."""
         if isinstance(seq, np.ndarray):
             seq = torch.from_numpy(seq)
         try:
-            return bool(self._grammar_rule(seq))
+            return bool(self._rule1_fn(seq))
         except Exception:
             return False
 
     def does_satisfy_rule2(self, seq):
-        """Always True — RE grammars expose a single combined rule."""
-        return True
+        if isinstance(seq, np.ndarray):
+            seq = torch.from_numpy(seq)
+        try:
+            return bool(self._rule2_fn(seq))
+        except Exception:
+            return False
 
     def does_satisfy_format(self, seq):
         if isinstance(seq, np.ndarray):
@@ -126,9 +167,11 @@ class REGrammar(FormalGrammar):
         return True
 
     def evaluate(self, seq):
-        grammatical = self.does_satisfy_rule1(seq)
+        r1 = self.does_satisfy_rule1(seq)
+        r2 = self.does_satisfy_rule2(seq)
+        grammatical = r1 and r2
         fmt = self.does_satisfy_format(seq)
-        return np.array([int(grammatical), 1, int(grammatical), int(fmt)])
+        return np.array([int(r1), int(r2), int(grammatical), int(fmt)])
 
     def generate_seq(self):
         """
