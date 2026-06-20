@@ -8,12 +8,19 @@ purpose is to measure accuracy-vs-compute Pareto frontiers: for each grammar
 and decoder, how does accuracy degrade as we reduce the number of forward
 passes T?
 
+Parallelism
+-----------
+With --workers N (default 1), cells are dispatched to a ProcessPoolExecutor.
+Workers default to running on CPU (override with --worker-device, e.g. 'cuda').
+Each worker process maintains its own (grammar, L, T) cache across the cells
+it handles, so the build cost is amortised even with no cross-process sharing.
+
 T semantics per strategy
 ------------------------
   uniform   : T = number of scheduled timesteps. Forward passes ≈ T.
   gaussian  : T = number of scheduled timesteps. Forward passes ≈ T.
   ar        : commits one position per step → forward passes ≈ L.
-              We run AR ONCE per grammar at T = L + 2 (enough margin for EOS).
+              We run AR ONCE per grammar at T = L + 2 (margin for EOS).
               AR is the compute-ceiling reference, not a T-curve.
   ebsampler : T = upper bound on forward passes. EB may stop early via
               mop-up. So effective compute ≤ T.
@@ -21,59 +28,28 @@ T semantics per strategy
 For uniform / gaussian / EB we sweep T ∈ T_VALUES.
 For AR we run a single cell per (grammar, sampler) at T = L + 2.
 
-Grid sizes (default; non-Dyck grammars only)
---------------------------------------------
-  4 grammars × 1 L × 2 samplers × [
-       1 AR-T-cell
-     + len(T_VALUES) uniform-T-cells
-     + len(T_VALUES) × len(GAUSSIAN_SIGMAS) gaussian cells
-     + len(T_VALUES) × len(EB_GAMMAS) ebsampler cells
-    ]
-  = 4 × 2 × (1 + 6 + 36 + 36) = 632 cells at default T_VALUES.
-
-Half are deterministic (greedy + AR/EB) → 1 rep. The rest at --n-evals (default 4).
-
-Logging
--------
-Same CSV schema as eval_oracle_param_sweep, with T populated per cell.
-Diversity metrics computed once per cell over all correct sequences across
-reps. JSON sidefiles per cell in {out_dir}/distributions/.
-
 Usage
 -----
-  python src/oracle/eval_oracle_T_sweep.py --config configs/config_oracle.yaml \
-      --out-dir results/T-sweep-nonDyck --n-evals 4
+  # 28-core parallel run:
+  python src/oracle/eval_oracle_T_sweep.py \
+      --config configs/config_oracle.yaml \
+      --out-dir results/T-sweep-nonDyck \
+      --n-evals 4 --workers 8
 
-  # Restrict to a single grammar:
-  python src/oracle/eval_oracle_T_sweep.py --config configs/config_oracle.yaml \
-      --grammars aNbN --out-dir results/T-sweep-aNbN
-
-  # Custom T grid:
-  python src/oracle/eval_oracle_T_sweep.py --config configs/config_oracle.yaml \
-      --Ts 8 16 32 64
-"""
-
-"""
-# Sweep (45min–2h for non-Dyck at L=128 depending on n_samples)
-python src/oracle/eval_oracle_T_sweep.py \
-    --config configs/config_oracle.yaml \
-    --out-dir results/T-sweep-nonDyck \
-    --n-evals 4
-
-# Plot
-python src/oracle/plot_T_sweep.py \
-    --csv results/T-sweep-nonDyck/oracle_T_sweep_results.csv \
-    --out-dir results/T-sweep-nonDyck/figures
-    
+  # Sequential (original behaviour):
+  python src/oracle/eval_oracle_T_sweep.py \\
+      --config configs/config_oracle.yaml --out-dir results/T-sweep-nonDyck
 """
 
 import argparse
 import csv
 import json
+import multiprocessing as mp
 import random
 import sys
 import time
 import traceback
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -99,40 +75,32 @@ from schedules import CategoricalSchedule, GaussianSchedule
 # ---------------------------------------------------------------------------
 # Sweep grid (edit these to control the sweep)
 # ---------------------------------------------------------------------------
-GRAMMARS = ['baN', 'bbaN', 'aNbN', 'aNbNcN']          # non-Dyck by default
+GRAMMARS = ['baN', 'bbaN', 'aNbN', 'aNbNcN']
 LENGTHS  = [128]
 SAMPLING_STRATEGIES = ['greedy', 'categorical']
 
-# T axis — geometric spacing covers ~5–130 step range observed in prior runs.
 T_VALUES = [4, 8, 16, 32, 64, 128]
-
-# Sigma / gamma sweeps. Same range across grammars for cross-grammar comparability.
 GAUSSIAN_SIGMAS = [1.0, 2.0, 5.0, 10.0, 20.0, 50.0]
 EB_GAMMAS       = [0.1, 0.5, 0.9, 2.0, 5.0, 10.0]
 
-# Strategy registry. T_sweep=True means cells are generated for every T in
-# T_VALUES; T_sweep=False means a single cell at fixed_T_fn(L).
 STRATEGIES = {
-    'uniform':   {
-        'decoder': 'schedule_driven', 'param_name': None, 'param_values': [None],
-        'T_sweep': True, 'fixed_T_fn': None,
-    },
-    'gaussian':  {
-        'decoder': 'schedule_driven', 'param_name': 'sigma', 'param_values': GAUSSIAN_SIGMAS,
-        'T_sweep': True, 'fixed_T_fn': None,
-    },
-    'ar':        {
-        'decoder': 'ar', 'param_name': None, 'param_values': [None],
-        'T_sweep': False, 'fixed_T_fn': lambda L: L + 2,
-    },
-    'ebsampler': {
-        'decoder': 'ebsampler', 'param_name': 'eb_gamma', 'param_values': EB_GAMMAS,
-        'T_sweep': True, 'fixed_T_fn': None,
-    },
+    'uniform':   {'decoder': 'schedule_driven', 'param_name': None,       'param_values': [None],
+                  'T_sweep': True, 'fixed_T_fn': None},
+    'gaussian':  {'decoder': 'schedule_driven', 'param_name': 'sigma',    'param_values': GAUSSIAN_SIGMAS,
+                  'T_sweep': True, 'fixed_T_fn': None},
+    'ar':        {'decoder': 'ar',              'param_name': None,       'param_values': [None],
+                  'T_sweep': False, 'fixed_T_fn': lambda L: L + 2},
+    'ebsampler': {'decoder': 'ebsampler',       'param_name': 'eb_gamma', 'param_values': EB_GAMMAS,
+                  'T_sweep': True, 'fixed_T_fn': None},
 }
 
 STATS_NAMES = ['rule1', 'rule2', 'both_rules', 'format']
 PRIMARY_STAT = 'both_rules'
+
+# Module-level cache of (grammar, L, T) → built state. Populated by
+# _process_cell as it runs. In sequential mode, this is shared across all
+# cells; in parallel mode each worker process has its own independent copy.
+_worker_cache = {}
 
 
 # ---------------------------------------------------------------------------
@@ -140,12 +108,10 @@ PRIMARY_STAT = 'both_rules'
 # ---------------------------------------------------------------------------
 
 def is_deterministic(strategy: str, sampler: str) -> bool:
-    """AR and EB pick positions deterministically; greedy is argmax token. Schedule-driven has Bernoulli randomness in position selection regardless of sampler."""
     return sampler == 'greedy' and strategy in ('ar', 'ebsampler')
 
 
 def build_schedule(strategy: str, param_value):
-    """Schedule object for evaluation_from_generation. Only meaningful for schedule_driven; AR / EB ignore it but the API wants something non-None."""
     if strategy == 'gaussian':
         assert param_value is not None, 'Gaussian strategy requires sigma.'
         return GaussianSchedule(sigma=param_value)
@@ -153,7 +119,6 @@ def build_schedule(strategy: str, param_value):
 
 
 def Ts_for_strategy(strategy: str, L: int):
-    """T values for a given strategy at given L."""
     spec = STRATEGIES[strategy]
     if spec['T_sweep']:
         return list(T_VALUES)
@@ -260,12 +225,9 @@ def evaluate_cell(*, oracle, grammar, eval_dataset, strategy, sampler,
     stats, _, _, _, _, n_steps_per_seq, correct_sequences = evaluation_from_generation(
         oracle, grammar, evaluation_dataset=eval_dataset,
         T=T,
-        decoding_strategy=decoder,
-        sampling_strategy=sampler,
-        temperature=temperature,
-        eb_gamma=gamma_pass,
-        write_steps=False,
-        device=device,
+        decoding_strategy=decoder, sampling_strategy=sampler,
+        temperature=temperature, eb_gamma=gamma_pass,
+        write_steps=False, device=device,
         figures_path=None, loss_log_path=None, output_path=None,
         save_mode=False, schedule=schedule,
         gaussian_noise=is_gauss, sigma=sigma_pass,
@@ -277,8 +239,7 @@ def evaluate_cell(*, oracle, grammar, eval_dataset, strategy, sampler,
     if len(stats_tuple) != len(STATS_NAMES):
         raise ValueError(
             f'evaluation_from_generation returned {len(stats_tuple)} stats; '
-            f'STATS_NAMES has {len(STATS_NAMES)} entries. '
-            f'Update STATS_NAMES to match the evaluator output order.'
+            f'STATS_NAMES has {len(STATS_NAMES)} entries.'
         )
     return stats_tuple, [int(n) for n in n_steps_per_seq], correct_sequences
 
@@ -314,7 +275,7 @@ def aggregate_reps(stats_per_rep, n_steps_all):
 
 
 # ---------------------------------------------------------------------------
-# Diversity
+# Diversity fields and helpers
 # ---------------------------------------------------------------------------
 
 DIVERSITY_FIELDS = [
@@ -335,6 +296,21 @@ def _cell_id_str(grammar_name, L, strategy, sampler, T, pv):
     else:
         ps = 'none'
     return f'{grammar_name}_L{L}_T{T}_{strategy}_{sampler}_{ps}'
+
+
+def _serialise_dist(div_dist):
+    """Convert a diversity_distributions() dict into picklable / JSON-able form."""
+    if div_dist is None:
+        return None
+    out = {}
+    for k, v in div_dist.items():
+        if hasattr(v, 'tolist'):
+            out[k] = v.tolist()
+        elif isinstance(v, (list, dict, str, int, float, bool)) or v is None:
+            out[k] = v
+        else:
+            out[k] = str(v)
+    return out
 
 
 # ---------------------------------------------------------------------------
@@ -368,12 +344,9 @@ def _row_to_key(row):
         pv = row.get('eb_gamma') or None
     else:
         pv = None
-    return cell_key(
-        row['grammar'], int(row['L']),
-        row['strategy'], row['sampling_strategy'],
-        int(row['T']),
-        pv,
-    )
+    return cell_key(row['grammar'], int(row['L']),
+                    row['strategy'], row['sampling_strategy'],
+                    int(row['T']), pv)
 
 
 def load_completed(csv_path: Path):
@@ -399,10 +372,6 @@ def append_csv_row(csv_path: Path, row: dict):
         writer.writerow(row)
 
 
-# ---------------------------------------------------------------------------
-# Output formatting
-# ---------------------------------------------------------------------------
-
 def row_label(grammar, L, strategy, sampler, T, param_value):
     pname = STRATEGIES[strategy]['param_name']
     if pname == 'sigma':
@@ -413,6 +382,139 @@ def row_label(grammar, L, strategy, sampler, T, param_value):
         ps = '—'
     return (f'{grammar:<7} L={L:<4} T={T:<4} strat={strategy:<10} '
             f'samp={sampler:<12} {ps}')
+
+
+# ---------------------------------------------------------------------------
+# Per-cell work (worker function — must be picklable / importable)
+# ---------------------------------------------------------------------------
+
+def _process_cell(cell_spec, shared_cfg):
+    """Run all reps for a single cell. Returns (row_dict, serial_dist, log_str).
+    Pure top-level function so ProcessPoolExecutor can pickle it.
+
+    shared_cfg keys: cfg, seed, temperature, n_samples, eval_dataset_type,
+                     eval_type, sampling_eps, n_evals, device_str.
+    """
+    grammar_name, L, strategy, sampler, T, pv = cell_spec
+    label = row_label(grammar_name, L, strategy, sampler, T, pv)
+    log_buf = [f'>> {label}']
+
+    cache_key = (grammar_name, L, T)
+    if cache_key not in _worker_cache:
+        base_seed = grammar_l_seed(shared_cfg['seed'], grammar_name, L)
+        set_seed(base_seed)
+        grammar = make_grammar(grammar_name, L)
+        grammar.generate_seq()
+        vs = vocab_size_for(grammar)
+        device = torch.device(shared_cfg['device_str'])
+        oracle = oracleModel(grammar_name=grammar_name, vocab_size=vs, device=device)
+        set_seed(base_seed)
+        eval_ds = EvaluationDataset(
+            l=L, eval_dataset=shared_cfg['eval_dataset_type'],
+            eval_type=shared_cfg['eval_type'],
+            n_samples=shared_cfg['n_samples'],
+            T=T, sampling_eps=shared_cfg['sampling_eps'],
+            device=device,
+        )
+        eval_ds.data = eval_ds.data.to(device)
+        _worker_cache[cache_key] = {
+            'grammar': grammar, 'oracle': oracle, 'eval_ds': eval_ds,
+            'base_seed': base_seed, 'device': device,
+        }
+        log_buf.append(f'  built ({grammar_name}, L={L}, T={T})  vocab={vs}  '
+                       f'|X|={eval_ds.data.shape[0]}')
+    cached = _worker_cache[cache_key]
+
+    n_reps = n_reps_for(strategy, sampler, shared_cfg['n_evals'])
+
+    stats_per_rep, all_n_steps, all_correct_seqs = [], [], []
+    t0 = time.time()
+    try:
+        for rep_i in range(n_reps):
+            s = rep_seed(cached['base_seed'], rep_i)
+            set_seed(s)
+            rep_stats, rep_n_steps, rep_correct = evaluate_cell(
+                oracle=cached['oracle'], grammar=cached['grammar'],
+                eval_dataset=cached['eval_ds'],
+                strategy=strategy, sampler=sampler, param_value=pv,
+                cfg=shared_cfg['cfg'], device=cached['device'],
+                temperature=shared_cfg['temperature'], T=T,
+            )
+            stats_per_rep.append(rep_stats)
+            all_n_steps.extend(rep_n_steps)
+            all_correct_seqs.extend(rep_correct)
+        elapsed = time.time() - t0
+    except Exception as e:
+        log_buf.append(f'  CELL FAILED: {type(e).__name__}: {e}')
+        log_buf.append(traceback.format_exc())
+        return None, None, '\n'.join(log_buf)
+
+    agg = aggregate_reps(stats_per_rep, all_n_steps)
+    det = is_deterministic(strategy, sampler)
+
+    div_metrics, div_dist = {}, None
+    if hasattr(cached['grammar'], 'diversity_metrics'):
+        try:
+            div_metrics = cached['grammar'].diversity_metrics(all_correct_seqs)
+            div_dist = cached['grammar'].diversity_distributions(all_correct_seqs)
+        except Exception as _de:
+            log_buf.append(f'  diversity metrics failed: {type(_de).__name__}: {_de}')
+
+    # Build row (distribution_path filled by main after JSON write)
+    row = {
+        'dataset':           shared_cfg['eval_dataset_type'],
+        'grammar':           grammar_name, 'L': L, 'strategy': strategy,
+        'sampling_strategy': sampler,
+        'sigma':             float(pv) if strategy == 'gaussian'  else '',
+        'eb_gamma':          float(pv) if strategy == 'ebsampler' else '',
+        'T':                 T, 'n_reps': n_reps, 'deterministic': det,
+        'elapsed_s':         round(elapsed, 2),
+        'n_steps_mean':      round(agg['n_steps_mean'], 4),
+        'n_steps_max':       agg['n_steps_max'],
+    }
+    for name in STATS_NAMES:
+        row[f'mean_{name}'] = round(agg[f'mean_{name}'], 6)
+        row[f'std_{name}']  = round(agg[f'std_{name}'],  6)
+    for df in DIVERSITY_FIELDS:
+        if df == 'distribution_path':
+            row[df] = ''
+        else:
+            val = div_metrics.get(df, '')
+            row[df] = '' if (val != val) else val
+
+    pmean = agg[f'mean_{PRIMARY_STAT}']
+    pstd  = agg[f'std_{PRIMARY_STAT}']
+    if det:
+        log_buf.append(f'   → {PRIMARY_STAT}={pmean:.4f} (det)  '
+                       f'steps={agg["n_steps_mean"]:.1f}/{agg["n_steps_max"]}  '
+                       f'n_corr={div_metrics.get("n_correct", 0)}  '
+                       f'elapsed={elapsed:.1f}s')
+    else:
+        log_buf.append(f'   → {PRIMARY_STAT}={pmean:.4f} ± {pstd:.4f} ({n_reps} reps)  '
+                       f'steps={agg["n_steps_mean"]:.1f}/{agg["n_steps_max"]}  '
+                       f'n_corr={div_metrics.get("n_correct", 0)}  '
+                       f'elapsed={elapsed:.1f}s')
+
+    return row, _serialise_dist(div_dist), '\n'.join(log_buf)
+
+
+# ---------------------------------------------------------------------------
+# Output writer (main-process only — no race conditions)
+# ---------------------------------------------------------------------------
+
+def _write_outputs(row, serial_dist, cell_spec, out_dir, csv_path):
+    grammar_name, L, strategy, sampler, T, pv = cell_spec
+    div_dist_path = ''
+    if serial_dist is not None:
+        dist_dir = out_dir / 'distributions'
+        dist_dir.mkdir(exist_ok=True)
+        cid = _cell_id_str(grammar_name, L, strategy, sampler, T, pv)
+        dist_file = dist_dir / f'{cid}.json'
+        with open(dist_file, 'w') as _f:
+            json.dump(serial_dist, _f, indent=2)
+        div_dist_path = str(dist_file)
+    row['distribution_path'] = div_dist_path
+    append_csv_row(csv_path, row)
 
 
 # ---------------------------------------------------------------------------
@@ -443,20 +545,22 @@ def parse_args():
         description='Sweep the oracle across grammar × L × strategy × sampler × T × hyperparam.',
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    p.add_argument('--config', type=str, required=True,
-                   help='YAML config; data.l and schedule.* are ignored (L from LENGTHS, schedule per-cell).')
-    p.add_argument('--n-evals', type=int, default=4,
-                   help='Reps per stochastic cell (default 4). Deterministic cells always run 1.')
+    p.add_argument('--config', type=str, required=True)
+    p.add_argument('--n-evals', type=int, default=4)
     p.add_argument('--out-dir', type=str, default='results/oracle_T_sweep')
     p.add_argument('--grammars',   nargs='+', default=None)
     p.add_argument('--lengths',    nargs='+', type=int, default=None)
     p.add_argument('--strategies', nargs='+', default=None)
     p.add_argument('--samplers',   nargs='+', default=None)
     p.add_argument('--Ts',         nargs='+', type=int, default=None,
-                   help='Subset of T values to sweep (does not affect AR which is fixed at L+2).')
+                   help='Subset of T values for swept strategies (AR ignores this).')
     p.add_argument('--sigmas',     nargs='+', type=float, default=None)
     p.add_argument('--gammas',     nargs='+', type=float, default=None)
     p.add_argument('--no-resume',  action='store_true')
+    p.add_argument('--workers',    type=int, default=1,
+                   help='Number of worker processes (default 1 = sequential).')
+    p.add_argument('--worker-device', type=str, default='cpu',
+                   help='Device for workers when --workers > 1 (default cpu).')
     return p.parse_args()
 
 
@@ -467,7 +571,6 @@ def _filter_grid(cells, args):
         if args.lengths    is not None and L        not in args.lengths:    return False
         if args.strategies is not None and strategy not in args.strategies: return False
         if args.samplers   is not None and sampler  not in args.samplers:   return False
-        # T filter applies to swept strategies only; AR's fixed T is preserved.
         if args.Ts is not None and STRATEGIES[strategy]['T_sweep']:
             if T not in args.Ts: return False
         if strategy == 'gaussian'  and args.sigmas is not None:
@@ -493,7 +596,7 @@ def main():
     args = parse_args()
     cfg  = load_config_file(args.config)
 
-    device  = get_device(cfg_get(cfg, 'device', default='auto'))
+    main_device = get_device(cfg_get(cfg, 'device', default='auto'))
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -508,10 +611,11 @@ def main():
     print(f'{"#" * 60}')
     print(f'Config: {args.config}')
     print(f'Output: {out_dir}')
-    print(f'Device: {device}')
+    print(f'Workers: {args.workers}  (device: '
+          f'{args.worker_device if args.workers > 1 else main_device})')
 
     try:
-        _run(args, cfg, device, out_dir)
+        _run(args, cfg, main_device, out_dir)
     finally:
         print(f'\nLog: {log_path}')
         sys.stdout = _orig_stdout
@@ -519,7 +623,7 @@ def main():
         _log_file.close()
 
 
-def _run(args, cfg, device, out_dir):
+def _run(args, cfg, main_device, out_dir):
     seed              = cfg_get(cfg, 'seed',                       default=2024)
     temperature       = cfg_get(cfg, 'temperature',                default=1.0)
     n_samples         = cfg_get(cfg, 'evaluation', 'n_samples',    default=500)
@@ -527,12 +631,17 @@ def _run(args, cfg, device, out_dir):
     eval_type         = cfg_get(cfg, 'evaluation', 'eval_type',    default='random')
     sampling_eps      = cfg_get(cfg, 'model', 'sampling_eps',      default=1e-5)
 
-    print('\nFixed config:')
-    print(f'  seed={seed}  n_samples={n_samples}')
-    print(f'  temperature={temperature}  eval_dataset={eval_dataset_type}')
-    print('  (NOTE: data.l, schedule.*, and model.T in config are ignored; '
-          'this script sweeps L from LENGTHS and T per-cell from T_VALUES.)')
+    device_str = args.worker_device if args.workers > 1 else str(main_device)
+    shared_cfg = {
+        'cfg': cfg, 'seed': seed, 'temperature': temperature,
+        'n_samples': n_samples, 'eval_dataset_type': eval_dataset_type,
+        'eval_type': eval_type, 'sampling_eps': sampling_eps,
+        'n_evals': args.n_evals, 'device_str': device_str,
+    }
 
+    print('\nFixed config:')
+    print(f'  seed={seed}  n_samples={n_samples}  device_for_cells={device_str}')
+    print(f'  temperature={temperature}  eval_dataset={eval_dataset_type}')
     print('\nSweep axes:')
     print(f'  GRAMMARS        = {GRAMMARS}')
     print(f'  LENGTHS         = {LENGTHS}')
@@ -541,166 +650,47 @@ def _run(args, cfg, device, out_dir):
     print(f'  SAMPLERS        = {SAMPLING_STRATEGIES}')
     print(f'  EB_GAMMAS       = {EB_GAMMAS}')
     print(f'  GAUSSIAN_SIGMAS = {GAUSSIAN_SIGMAS}')
-    print(f'  STATS_NAMES     = {STATS_NAMES}  (primary = {PRIMARY_STAT})')
 
-    full_grid = build_grid()
-    cells = _filter_grid(full_grid, args)
-    summary = _grid_summary(cells)
-    print(f'\nGrid: {len(cells)} cells after filtering (from {len(full_grid)} total).')
-    print(f'  by strategy: ' + ', '.join(f'{k}={v}' for k, v in sorted(summary.items())))
+    cells = _filter_grid(build_grid(), args)
+    print(f'\nGrid: {len(cells)} cells after filtering.')
+    print('  by strategy: ' + ', '.join(f'{k}={v}' for k, v in sorted(_grid_summary(cells).items())))
 
     csv_path = out_dir / 'oracle_T_sweep_results.csv'
     completed = {} if args.no_resume else load_completed(csv_path)
-    if completed and not args.no_resume:
+    if completed:
         print(f'Resume: {len(completed)} completed cells found in {csv_path.name}.')
 
-    # Cache: build (grammar, L, T) → {grammar_obj, oracle, eval_ds}.
-    # T is in the key because EvaluationDataset's constructor takes T. In
-    # practice the eval data is just SOS + MASKs, so this is paranoia; it
-    # costs little.
-    cache = {}
+    cells_to_run = [c for c in cells if cell_key(*c) not in completed]
+    print(f'Cells to run: {len(cells_to_run)}\n')
 
-    for cell_idx, (grammar_name, L, strategy, sampler, T, pv) in enumerate(cells, start=1):
-        cell_id = f'[{cell_idx}/{len(cells)}]'
-        label   = row_label(grammar_name, L, strategy, sampler, T, pv)
-        key     = cell_key(grammar_name, L, strategy, sampler, T, pv)
-
-        if key in completed:
-            print(f'\n{cell_id} SKIP (cached): {label}')
-            continue
-
-        print(f'\n{"=" * 60}')
-        print(f'{cell_id} {label}')
-
-        cache_key = (grammar_name, L, T)
-        if cache_key not in cache:
-            base_seed = grammar_l_seed(seed, grammar_name, L)
-            set_seed(base_seed)
-            grammar = make_grammar(grammar_name, L)
-            grammar.generate_seq()
-            vs = vocab_size_for(grammar)
-            oracle = oracleModel(grammar_name=grammar_name,
-                                 vocab_size=vs, device=device)
-            set_seed(base_seed)
-            eval_ds = EvaluationDataset(
-                l=L, eval_dataset=eval_dataset_type,
-                eval_type=eval_type, n_samples=n_samples,
-                T=T, sampling_eps=sampling_eps, device=device,
-            )
-            eval_ds.data = eval_ds.data.to(device)
-            cache[cache_key] = {
-                'grammar':   grammar,
-                'oracle':    oracle,
-                'eval_ds':   eval_ds,
-                'base_seed': base_seed,
-                'vocab':     vs,
-            }
-            print(f'  built ({grammar_name}, L={L}, T={T})  vocab={vs}  |X|={eval_ds.data.shape[0]}')
-        cached = cache[cache_key]
-
-        n_reps = n_reps_for(strategy, sampler, args.n_evals)
-        if is_deterministic(strategy, sampler) and args.n_evals > 1:
-            print(f'  deterministic cell — 1 rep instead of {args.n_evals}')
-
-        stats_per_rep    = []
-        all_n_steps      = []
-        all_correct_seqs = []
-        t0 = time.time()
-        try:
-            for rep_i in range(n_reps):
-                s = rep_seed(cached['base_seed'], rep_i)
-                set_seed(s)
-                rep_stats, rep_n_steps, rep_correct = evaluate_cell(
-                    oracle=cached['oracle'], grammar=cached['grammar'],
-                    eval_dataset=cached['eval_ds'],
-                    strategy=strategy, sampler=sampler, param_value=pv,
-                    cfg=cfg, device=device, temperature=temperature, T=T,
-                )
-                stats_per_rep.append(rep_stats)
-                all_n_steps.extend(rep_n_steps)
-                all_correct_seqs.extend(rep_correct)
-                if n_reps > 1:
-                    pidx = STATS_NAMES.index(PRIMARY_STAT)
-                    print(f'  rep {rep_i + 1}/{n_reps}  seed={s}  '
-                          f'{PRIMARY_STAT}={rep_stats[pidx]:.4f}  '
-                          f'steps={np.mean(rep_n_steps):.1f}')
-            elapsed = time.time() - t0
-        except Exception as e:
-            print(f'  CELL FAILED: {type(e).__name__}: {e}')
-            traceback.print_exc()
-            continue
-
-        agg = aggregate_reps(stats_per_rep, all_n_steps)
-        det = is_deterministic(strategy, sampler)
-
-        primary_mean = agg[f'mean_{PRIMARY_STAT}']
-        primary_std  = agg[f'std_{PRIMARY_STAT}']
-        if det:
-            print(f'  → {PRIMARY_STAT}={primary_mean:.4f} (det)  '
-                  f'steps mean/max = {agg["n_steps_mean"]:.1f}/{agg["n_steps_max"]}  '
-                  f'elapsed={elapsed:.1f}s')
-        else:
-            print(f'  → {PRIMARY_STAT}={primary_mean:.4f} ± {primary_std:.4f}  '
-                  f'over {n_reps} reps  '
-                  f'steps mean/max = {agg["n_steps_mean"]:.1f}/{agg["n_steps_max"]}  '
-                  f'elapsed={elapsed:.1f}s')
-
-        # ---- diversity over union of correct sequences across reps ----------
-        div_metrics = {}
-        div_dist_path = ''
-        grammar_obj = cached['grammar']
-        if hasattr(grammar_obj, 'diversity_metrics'):
-            try:
-                div_metrics = grammar_obj.diversity_metrics(all_correct_seqs)
-                div_dist = grammar_obj.diversity_distributions(all_correct_seqs)
-                dist_dir = out_dir / 'distributions'
-                dist_dir.mkdir(exist_ok=True)
-                cid = _cell_id_str(grammar_name, L, strategy, sampler, T, pv)
-                dist_file = dist_dir / f'{cid}.json'
-                serial = {}
-                for k, v in div_dist.items():
-                    if hasattr(v, 'tolist'):
-                        serial[k] = v.tolist()
-                    elif isinstance(v, (list, dict, str, int, float, bool)) or v is None:
-                        serial[k] = v
-                    else:
-                        serial[k] = str(v)
-                with open(dist_file, 'w') as _f:
-                    json.dump(serial, _f, indent=2)
-                div_dist_path = str(dist_file)
-                print(f'  diversity: n_correct={div_metrics.get("n_correct", 0)}  '
-                      f'uniqueness={div_metrics.get("uniqueness", float("nan"))!r}  '
-                      f'dist → {dist_file.name}')
-            except Exception as _de:
-                print(f'  diversity metrics failed: {type(_de).__name__}: {_de}')
-
-        # ---- persist --------------------------------------------------------
-        row = {
-            'dataset':           eval_dataset_type,
-            'grammar':           grammar_name,
-            'L':                 L,
-            'strategy':          strategy,
-            'sampling_strategy': sampler,
-            'sigma':             float(pv) if strategy == 'gaussian'  else '',
-            'eb_gamma':          float(pv) if strategy == 'ebsampler' else '',
-            'T':                 T,
-            'n_reps':            n_reps,
-            'deterministic':     det,
-            'elapsed_s':         round(elapsed, 2),
-            'n_steps_mean':      round(agg['n_steps_mean'], 4),
-            'n_steps_max':       agg['n_steps_max'],
-        }
-        for name in STATS_NAMES:
-            row[f'mean_{name}'] = round(agg[f'mean_{name}'], 6)
-            row[f'std_{name}']  = round(agg[f'std_{name}'],  6)
-        for df in DIVERSITY_FIELDS:
-            if df == 'distribution_path':
-                row[df] = div_dist_path
-            else:
-                val = div_metrics.get(df, '')
-                row[df] = '' if (val != val) else val   # NaN → empty string
-
-        append_csv_row(csv_path, row)
+    if args.workers <= 1:
+        # Sequential — _worker_cache used as the shared cache.
+        for i, cell in enumerate(cells_to_run, start=1):
+            row, serial_dist, log_str = _process_cell(cell, shared_cfg)
+            print(f'[{i}/{len(cells_to_run)}] {log_str}')
+            if row is not None:
+                _write_outputs(row, serial_dist, cell, out_dir, csv_path)
+    else:
+        # Parallel — each worker maintains its own _worker_cache.
+        ctx = mp.get_context('spawn')
+        t_start = time.time()
+        with ProcessPoolExecutor(max_workers=args.workers, mp_context=ctx) as ex:
+            futures = {ex.submit(_process_cell, c, shared_cfg): c for c in cells_to_run}
+            done = 0
+            for f in as_completed(futures):
+                done += 1
+                cell = futures[f]
+                try:
+                    row, serial_dist, log_str = f.result()
+                except Exception as e:
+                    print(f'[{done}/{len(futures)}] WORKER CRASHED for {cell}: '
+                          f'{type(e).__name__}: {e}')
+                    traceback.print_exc()
+                    continue
+                eta = (time.time() - t_start) / done * (len(futures) - done)
+                print(f'[{done}/{len(futures)}  eta={eta/60:.1f}min]\n{log_str}')
+                if row is not None:
+                    _write_outputs(row, serial_dist, cell, out_dir, csv_path)
 
     print('\n' + '=' * 60)
     print('T-SWEEP COMPLETE')

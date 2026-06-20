@@ -9,3 +9,4 @@ __pycache__/
 models/
 figures/
 wandb/
+results/T-sweep-nonDyck-2/distributions
