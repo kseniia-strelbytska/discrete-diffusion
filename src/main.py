@@ -532,13 +532,15 @@ def main():
                 #     / "n_embed=128_ff=1024_drop=0.1_27012026_221030/model_epochs=96500",
                 #     map_location=torch.device("cpu"),
                 # )
-                
+
                 torch.load(
                     PROJECT_ROOT / "models/sweep1-RPE-uniform-T100_12062026_214734/model_epochs=80000", map_location=torch.device('cpu')
                 )
             )
-        
+
             model = model.to(device)
+
+        all_correct_sequences = []
 
         for iter_eval_dataset in [
             cfg.evaluation.eval_dataset
@@ -553,35 +555,90 @@ def main():
                 sampling_eps=cfg.model.sampling_eps,
                 device=device,
             )
-            
+
             print(current_evaluation_dataset.data.shape)
             print(f'Sample of evaluation data: {current_evaluation_dataset.data[:5]}')
-            
+
             iter_output_path = dirs.output_path.parent / f"outputs_{iter_eval_dataset}.txt"
             iter_figure_path = dirs.figure_path.parent / f"figures_{iter_eval_dataset}"
             iter_figure_path.mkdir(parents=True, exist_ok=True)
-            
-            evals = evaluation_from_generation(
-                model,
-                grammar,
-                evaluation_dataset=current_evaluation_dataset,
-                decoding_strategy=cfg.decoding_strategy,
-                sampling_strategy=cfg.sampling_strategy,
-                temperature=cfg.temperature,
-                eb_gamma=getattr(cfg, 'eb_gamma', 0.1),
-                T=cfg.model.T,
-                write_steps=True,
-                device=device,
-                figures_path=iter_figure_path,
-                loss_log_path=dirs.loss_log_path,
-                output_path=iter_output_path,
-                save_mode=args.save,
-                schedule=schedule,
-                gaussian_noise=isinstance(schedule, GaussianSchedule),
-                sigma=schedule.sigma if isinstance(schedule, GaussianSchedule) else 1.0,
-                cutoff=cfg.evaluation.cutoff,
-                investigate=True
-            )
+
+            stats, stats_eos, total_eos, sequences, sequences_eos, n_steps_per_seq, correct_sequences = \
+                evaluation_from_generation(
+                    model,
+                    grammar,
+                    evaluation_dataset=current_evaluation_dataset,
+                    decoding_strategy=cfg.decoding_strategy,
+                    sampling_strategy=cfg.sampling_strategy,
+                    temperature=cfg.temperature,
+                    eb_gamma=getattr(cfg, 'eb_gamma', 0.1),
+                    T=cfg.model.T,
+                    write_steps=True,
+                    device=device,
+                    figures_path=iter_figure_path,
+                    loss_log_path=dirs.loss_log_path,
+                    output_path=iter_output_path,
+                    save_mode=args.save,
+                    schedule=schedule,
+                    gaussian_noise=isinstance(schedule, GaussianSchedule),
+                    sigma=schedule.sigma if isinstance(schedule, GaussianSchedule) else 1.0,
+                    cutoff=cfg.evaluation.cutoff,
+                    investigate=True
+                )
+
+            all_correct_sequences.extend(correct_sequences)
+
+            stat_names = ['rule1', 'rule2', 'both_rules', 'format']
+            print(f"\n=== Accuracy ({iter_eval_dataset}) ===")
+            for name, val in zip(stat_names, stats):
+                print(f"  {name}: {float(val):.4f}")
+            if total_eos > 0:
+                print(f"  finished ({total_eos}/{len(sequences)} = {total_eos/len(sequences):.2%}):")
+                for name, val in zip(stat_names, stats_eos):
+                    print(f"    {name}: {float(val):.4f}")
+            if n_steps_per_seq:
+                print(f"  n_steps: mean={np.mean(n_steps_per_seq):.1f}  max={int(np.max(n_steps_per_seq))}")
+
+        # ---- Diversity metrics (over all correct sequences across eval datasets) ----
+        if hasattr(grammar, 'diversity_metrics') and all_correct_sequences:
+            try:
+                import json as _json
+                div = grammar.diversity_metrics(all_correct_sequences)
+                print(f"\n=== Diversity (n_correct={div.get('n_correct', 0)}) ===")
+                _div_display = [
+                    ('uniqueness',               'uniqueness'),
+                    ('duplication_rate',         'duplication_rate'),
+                    ('mean_lev_dist_normalized', 'lev_dist_norm'),
+                    ('bigram_diversity',         'bigram_div'),
+                    ('trigram_diversity',        'trigram_div'),
+                    ('dfa_state_coverage',       'dfa_state_cov'),
+                    ('dfa_transition_coverage',  'dfa_trans_cov'),
+                    ('n_entropy',                'n_entropy'),
+                    ('n_coverage',               'n_coverage'),
+                    ('m_entropy',                'm_entropy'),
+                    ('nm_joint_coverage',        'nm_joint_cov'),
+                    ('max_depth_ratio_mean',     'depth_ratio_mean'),
+                    ('brackets_parens_ratio_mean', 'bp_ratio_mean'),
+                ]
+                for key, label in _div_display:
+                    val = div.get(key, float('nan'))
+                    if not (isinstance(val, float) and math.isnan(val)):
+                        print(f"  {label}: {val:.4f}" if isinstance(val, float) else f"  {label}: {val}")
+
+                if args.save:
+                    div_dist = grammar.diversity_distributions(all_correct_sequences)
+                    div_out = {
+                        'metrics': {k: (None if isinstance(v, float) and math.isnan(v) else v)
+                                    for k, v in div.items()},
+                        'distributions': {k: (v.tolist() if hasattr(v, 'tolist') else v)
+                                          for k, v in div_dist.items()},
+                    }
+                    div_path = dirs.figure_path.parent / 'diversity.json'
+                    with open(div_path, 'w') as _f:
+                        _json.dump(div_out, _f, indent=2)
+                    print(f"  diversity saved → {div_path}")
+            except Exception as _e:
+                print(f"  diversity metrics failed: {type(_e).__name__}: {_e}")
 
         exit(0)
 

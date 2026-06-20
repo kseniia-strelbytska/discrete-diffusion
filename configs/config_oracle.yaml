@@ -3,6 +3,13 @@ device: auto
 decoding_strategy: ebsampler
 sampling_strategy: categorical
 eb_gamma: 0.9
+# "baN"
+# "bbaN"
+# "aNbN"
+# "parentheses_and_brackets"
+# "aNbNcN"
+# "not_nested_parentheses_and_brackets"
+
 # not_nested_parentheses_and_brackets L=32   strat=ebsampler  samp=categorical  γ=0.9
 temperature: 1.0  # logit scaling (scale-invariant for greedy; kept for consistency)
 data:
@@ -39,7 +46,7 @@ validation:
   val_every: 1000
 evaluation:
   eval_every: 4000
-  n_samples: 100
+  n_samples: 10
   eval_dataset: unconditional # limited or randomised or complete
   eval_type: random # full or random
   cutoff: 258

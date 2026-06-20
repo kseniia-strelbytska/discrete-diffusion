@@ -318,26 +318,29 @@ _DFA_CACHE: Dict[str, Dict] = {}
 #   transitions : dict {(state_id, token_id): next_state_id}
 
 
-def _build_ban_dfa() -> Dict:
+def _build_ban_dfa():
     """
-    Hand-constructed minimal DFA for baN: { B A^{2k} | k >= 0 }.
-
+    Hand-constructed minimal DFA for baN, ALIGNED WITH canonical rule check.
+ 
+    Canonical L1 = {sequences s : starts with b AND total #a in s is even}.
+    Multiple b's at non-initial positions are permitted; they do not change
+    a-count parity, so they self-loop within whichever parity state.
+ 
     Alphabet: A=0, B=1
     States:
-      0 = q_start  (initial; rejects on epsilon)
-      1 = q_even   (seen B, even # of A's; ACCEPTING)
-      2 = q_odd    (seen B, odd # of A's)
-      3 = q_dead   (sink)
-
+      0 = q_start   (no chars seen; REJECTING — empty fails check_begins_with_b)
+      1 = q_b_even  (started with b, current #a is even; ACCEPTING)
+      2 = q_b_odd   (started with b, current #a is odd)
+      3 = q_dead    (started with a; sink REJECTING)
+ 
     Transitions:
-      q_start --B--> q_even     (first token must be B)
+      q_start --B--> q_b_even          first token must be b
       q_start --A--> q_dead
-      q_even  --A--> q_odd
-      q_even  --B--> q_dead     (no second B)
-      q_odd   --A--> q_even     (back to even)
-      q_odd   --B--> q_dead
-      q_dead  --A--> q_dead
-      q_dead  --B--> q_dead
+      q_b_even --A--> q_b_odd          a flips parity
+      q_b_even --B--> q_b_even         b does NOT flip parity (FIX: was dead)
+      q_b_odd  --A--> q_b_even
+      q_b_odd  --B--> q_b_odd          b does NOT flip parity (FIX: was dead)
+      q_dead --A/B--> q_dead
     """
     return {
         'states': [0, 1, 2, 3],
@@ -345,18 +348,17 @@ def _build_ban_dfa() -> Dict:
         'initial': 0,
         'accepting': frozenset([1]),
         'transitions': {
-            (0, 0): 3,  # q_start --A--> dead
-            (0, 1): 1,  # q_start --B--> q_even
-            (1, 0): 2,  # q_even  --A--> q_odd
-            (1, 1): 3,  # q_even  --B--> dead
-            (2, 0): 1,  # q_odd   --A--> q_even
-            (2, 1): 3,  # q_odd   --B--> dead
-            (3, 0): 3,  # dead    --A--> dead
-            (3, 1): 3,  # dead    --B--> dead
+            (0, 0): 3,  # q_start  --A--> dead
+            (0, 1): 1,  # q_start  --B--> q_b_even
+            (1, 0): 2,  # q_b_even --A--> q_b_odd
+            (1, 1): 1,  # q_b_even --B--> q_b_even   (FIX: was → dead)
+            (2, 0): 1,  # q_b_odd  --A--> q_b_even
+            (2, 1): 2,  # q_b_odd  --B--> q_b_odd    (FIX: was → dead)
+            (3, 0): 3,  # dead --A--> dead
+            (3, 1): 3,  # dead --B--> dead
         },
     }
-
-
+ 
 def _build_bban_dfa() -> Dict:
     """
     Hand-constructed minimal DFA for bbaN: { B^n A^{2m} | n >= 1, m >= 0 }.

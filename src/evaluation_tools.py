@@ -167,7 +167,7 @@ def evaluation_from_generation(model,
         
     model.eval()
     with torch.no_grad():
-        for idx, s in enumerate(tqdm(evaluation_dataset.data)):
+        for idx, s in enumerate(evaluation_dataset.data):
             total += 1
             
             if model.architecture not in ('autoregressive', 'RE'):

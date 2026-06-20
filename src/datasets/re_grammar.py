@@ -3,13 +3,16 @@
 """
 REGrammar: wraps RE_data generators into the FormalGrammar interface.
 
-re_data.py now uses the project token scheme directly:
+Grammar rule definitions are taken VERBATIM from `re_data.grammar_rules`, which
+is the canonical source of truth. The mapping below uses the same check
+functions that re_data's `grammar_rules` lambda uses, in the same composition.
+If you ever update this file, update it from re_data.grammar_rules — not from
+notes, not from the table below.
+
+Project token scheme (matches constants.py and re_data.py):
   SOS=3, EOS=2, PAD=4, MASK=5
   A=0, B=1, C=6
   open_paren=0, close_paren=1, open_bracket=6, close_bracket=7
-
-No remapping is needed — grammar check functions in re_data.py operate
-on project token IDs, and generated sequences are already in project scheme.
 
 Grammar vocab_sizes:
   aNbN, abN, baN, bbaN, aNbM, aNbNaN  → vocab_size=6  (A=0, B=1)
@@ -21,13 +24,45 @@ Grammar vocab_sizes:
   not_nested_parentheses_and_brackets  → vocab_size=8  (open_p=0, close_p=1,
                                                          open_b=6, close_b=7)
 
-Rule assignments per language category (table):
-  L1 = baN                               regular         rule1=#a even,          rule2=starts with b
-  L2 = bbaN                              regular         rule1=#a even,          rule2=b's before a's
-  L3 = aNbN                              context-free    rule1=#a=#b,            rule2=a's before b's
-  L4 = Dyck (parentheses_and_brackets)   context-free    rule1=paired/nested [],  rule2=paired/nested ()
-  L5 = aNbNcN                            context-sensitive rule1=#a=#b=#c,       rule2=a's before b's before c's
-  L6 = CS Dyck (not_nested_…)            context-sensitive rule1=paired [],      rule2=paired ()
+Canonical rule mapping per re_data.grammar_rules:
+
+  L1 = baN
+       regular: starts with b AND total #a is even (multiple b's allowed)
+       rule1 = check_even_number_of_as
+       rule2 = check_begins_with_b
+
+  L2 = bbaN
+       regular: all b's before any a (n>=1 b's), #a-after-last-b is even
+       rule1 = check_even_number_of_as_end   ← NOT check_even_number_of_as
+       rule2 = check_bs_before_as
+
+  L3 = aNbN
+       context-free: a^n b^n
+       rule1 = check_same_number_as_bs
+       rule2 = check_as_before_bs
+
+  L4 = parentheses_and_brackets
+       context-free: strict Dyck over {(), []} with joint nesting
+       rule1 = check_matched_parentheses_and_brackets   ← SINGLE joint-stack check
+       rule2 = (always True)
+       NOTE: re_data exposes L4 as a single combined check. The two-rule
+       framework collapses for this grammar — there is no decomposition into
+       "matched ( )" and "matched [ ]" that reproduces the joint-stack semantics
+       (e.g., '( [ ) ]' satisfies both bracket-only and paren-only checks
+       independently but fails the joint Dyck check). Reporting rule2=True for
+       this grammar is the canonical-faithful choice; do not "decompose" L4
+       without adding new check functions to re_data.
+
+  L5 = aNbNcN
+       context-sensitive: a^n b^n c^n
+       rule1 = check_same_number_as_bs_cs
+       rule2 = check_as_before_bs_before_cs
+
+  L6 = not_nested_parentheses_and_brackets
+       context-sensitive: parens and brackets each independently matched
+       rule1 = check_matched_parentheses    ← parens, ignoring brackets
+       rule2 = check_matched_brackets       ← brackets, ignoring parens
+       Order matches re_data's `grammar_rules` lambda for consistency.
 """
 
 import torch
@@ -47,31 +82,36 @@ _VOCAB_SIZES = {
     'not_nested_parentheses_and_brackets': 8,
 }
 
-# Maps each grammar to (rule1_fn, rule2_fn).
-# rule1 and rule2 are the two independent structural properties.
+# Maps each grammar to (rule1_fn, rule2_fn). The conjunction
+# rule1 AND rule2 AND format must equal re_data.grammar_rules[grammar] AND format
+# for every sequence. Each entry here must match re_data.grammar_rules exactly.
 _GRAMMAR_RULES = {
-    # L1 = {bα}: rule1=#a even, rule2=starts with b
-    'baN': (rd.check_even_number_of_as, rd.check_begins_with_b),
-    # L2 = {b^n a^{2m}}: rule1=#a even, rule2=b's before a's
-    'bbaN': (rd.check_even_number_of_as, rd.check_bs_before_as),
-    # L3 = {a^n b^n}: rule1=#a=#b, rule2=a's before b's
-    'aNbN': (rd.check_same_number_as_bs, rd.check_as_before_bs),
-    # L4 = Dyck: rule1=paired and nested [], rule2=paired and nested ()
-    'parentheses_and_brackets': (rd.check_matched_brackets, rd.check_matched_parentheses),
-    # L5 = {a^n b^n c^n}: rule1=#a=#b=#c, rule2=a's before b's before c's
-    'aNbNcN': (rd.check_same_number_as_bs_cs, rd.check_as_before_bs_before_cs),
-    # L6 = CS Dyck (not nested): rule1=paired [], rule2=paired ()
-    'not_nested_parentheses_and_brackets': (rd.check_matched_brackets, rd.check_matched_parentheses),
-    # remaining grammars: use combined grammar rule as rule1, rule2 always True
-    'abN': (rd.check_same_number_as_bs, lambda _: True),
-    'aNbM': (rd.check_as_before_bs, lambda _: True),
+    # ── L1–L6: canonical-aligned (see docstring) ────────────────────────────
+    'baN':    (rd.check_even_number_of_as,     rd.check_begins_with_b),
+    'bbaN':   (rd.check_even_number_of_as_end, rd.check_bs_before_as),
+    'aNbN':   (rd.check_same_number_as_bs,     rd.check_as_before_bs),
+    'parentheses_and_brackets': (
+        rd.check_matched_parentheses_and_brackets, lambda _: True,
+    ),
+    'aNbNcN': (rd.check_same_number_as_bs_cs,  rd.check_as_before_bs_before_cs),
+    'not_nested_parentheses_and_brackets': (
+        rd.check_matched_parentheses, rd.check_matched_brackets,
+    ),
+
+    # ── other supported grammars (single-rule, rule2 trivially True) ────────
+    'abN':         (rd.check_same_number_as_bs, lambda _: True),
+    'aNbM':        (rd.check_as_before_bs,      lambda _: True),
     'aNbNaN': (
-        lambda x: rd.check_twice_many_as_than_bs(x) and rd.check_bs_in_the_middle(x) and rd.check_bs_together(x),
+        lambda x: rd.check_twice_many_as_than_bs(x)
+                  and rd.check_bs_in_the_middle(x)
+                  and rd.check_bs_together(x),
         lambda _: True,
     ),
     'parentheses': (rd.check_matched_parentheses, lambda _: True),
-    'brackets': (rd.check_matched_brackets, lambda _: True),
-    'separated_parentheses_and_brackets': (rd.check_separated_brackets_and_parentheses, lambda _: True),
+    'brackets':    (rd.check_matched_brackets,    lambda _: True),
+    'separated_parentheses_and_brackets': (
+        rd.check_separated_brackets_and_parentheses, lambda _: True,
+    ),
 }
 
 
@@ -115,7 +155,7 @@ class REGrammar(FormalGrammar):
     with content tokens starting at 0. No remapping layer is needed.
 
     Each grammar exposes two independent structural rules (rule1, rule2) per
-    the language category table in the module docstring.
+    the canonical mapping in _GRAMMAR_RULES, which mirrors re_data.grammar_rules.
     """
 
     SUPPORTED = set(_VOCAB_SIZES.keys())
@@ -202,6 +242,10 @@ class REGrammar(FormalGrammar):
 
         aNbN:   n in [1, l//2]   (SOS + n a's + n b's + EOS <= l+2)
         aNbNcN: n in [1, l//3]   (SOS + n a's + n b's + n c's + EOS <= l+2)
+
+        n=0 is excluded because the data generators in re_data start at n=1
+        (see generate_aNbN_grammar_data and generate_aNbNcN_grammar_data:
+        `lengths = np.linspace(start=1, ...)`).
         """
         if self.grammar_name == 'aNbN':
             return range(1, self.l // 2 + 1)
@@ -212,14 +256,19 @@ class REGrammar(FormalGrammar):
         )
 
     def bbaN_valid_nm_pairs(self) -> frozenset:
-        """Valid (n, m) pairs for bbaN: n>=1, m>=1, n + 2m <= l.
+        """Valid (n, m) pairs for bbaN per the canonical rule check.
 
-        Constraint: SOS + n b's + 2m a's + EOS <= total length (l+2),
+        Per re_data.check_bs_before_as, a sequence in L2 must contain at least
+        one b — so n >= 1. Per re_data.check_even_number_of_as_end with m as
+        half the trailing a-count, m >= 0 is allowed (pure b^n with no a's is
+        valid, corresponding to (n, 0)).
+
+        Length constraint: SOS + n b's + 2m a's + EOS <= total length (l+2),
         so n + 2m <= l.
         """
         pairs = set()
-        for n in range(1, self.l + 1):
-            for m in range(1, (self.l - n) // 2 + 1):
+        for n in range(1, self.l + 1):                  # n >= 1 (canonical)
+            for m in range(0, (self.l - n) // 2 + 1):   # m >= 0 (FIX: was 1)
                 if n + 2 * m <= self.l:
                     pairs.add((n, m))
         return frozenset(pairs)
