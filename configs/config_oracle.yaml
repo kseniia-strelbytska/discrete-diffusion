@@ -1,7 +1,7 @@
 seed: 42
 device: auto
-decoding_strategy: ebsampler
-sampling_strategy: categorical
+decoding_strategy: schedule_driven
+sampling_strategy: greedy
 eb_gamma: 0.9
 # "baN"
 # "bbaN"
@@ -13,17 +13,17 @@ eb_gamma: 0.9
 # not_nested_parentheses_and_brackets L=32   strat=ebsampler  samp=categorical  γ=0.9
 temperature: 1.0  # logit scaling (scale-invariant for greedy; kept for consistency)
 data:
-  l: 32 
+  l: 128 
   train_split: 0.9
   batch_size: 64
-  grammar: not_nested_parentheses_and_brackets
+  grammar: baN
 model:
   architecture: oracle # classic (torch-native) or v2 (QKV low-level) or RPE or FIRE
-  max_len: 34    
+  max_len: 130    
   vocab_size: 7
   n_head: 4
   n_layers: 4
-  embed_dim: 34
+  embed_dim: 130
   dim_feedforward: 1024
   dropout: 0.1
   layer_norm_eps: 0.0002
@@ -46,7 +46,7 @@ validation:
   val_every: 1000
 evaluation:
   eval_every: 4000
-  n_samples: 10
+  n_samples: 100
   eval_dataset: unconditional # limited or randomised or complete
   eval_type: random # full or random
   cutoff: 258
@@ -59,5 +59,5 @@ wandb:
 paths:
   models_dir: models
   figures_dir: figures
-  experiment_name: accuracy-16-oracle-ebsampler
+  experiment_name: anomaly-20-oracle-uniform-baN
 notes: "Investigate oracle model with varying number of denoising steps (T) to see how it affects a perfect predictor"

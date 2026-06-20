@@ -400,7 +400,7 @@ def main():
         ).to(device)
     else:
         raise ValueError(f"Invalid model architecture: {cfg.model.architecture}")
-
+    
     print(f'Model eb: {getattr(cfg, 'eb_gamma', 0.1)}')
 
     if args.mode == "train":

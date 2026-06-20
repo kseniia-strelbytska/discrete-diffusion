@@ -181,7 +181,7 @@ class ScheduledUnmasker(nn.Module):
                         except ValueError as e:
                             error_message = self._error_fmt(i, X, error_changed_mask, error_probs, error_logits, e)
                             break
-
+                                        
                     content_idx, content_probs = self._content_probs(logits, temperature)
                     masked_mask = (X == MASK_token)
 
@@ -289,7 +289,6 @@ class ScheduledUnmasker(nn.Module):
                     X[remaining_masked] = chosen_mu[remaining_masked]
                     steps.append(X.clone())
                     timesteps_log.append(0.0)
-
             self.last_n_steps = len(steps) - 1
             
         if return_steps:
