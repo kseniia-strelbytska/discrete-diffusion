@@ -16,13 +16,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import torch
 import torch.nn as nn
-from datasets.constants import SOS_token, EOS_token, PAD_token, MASK_token
-
-# Content token IDs
-A = 0; B = 1; C = 6
-OPEN_P = 0; CLOSE_P = 1   # parentheses
-OPEN_B = 6; CLOSE_B = 7   # brackets
-
+from datasets.constants import *
 
 # ─── shared helpers ───────────────────────────────────────────────────────────
 

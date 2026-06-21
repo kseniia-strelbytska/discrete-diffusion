@@ -1,0 +1,366 @@
+
+############################################################
+# T-sweep started: 2026-06-21 08:27:16
+############################################################
+Config: configs/config_oracle.yaml
+Output: results/T-sweep-nonDyck-3
+Workers: 28  (device: cpu)
+
+Fixed config:
+  seed=42  n_samples=100  device_for_cells=cpu
+  temperature=1.0  eval_dataset=unconditional
+
+Sweep axes:
+  GRAMMARS        = ['baN', 'bbaN', 'aNbN', 'aNbNcN']
+  LENGTHS         = [32]
+  T_VALUES        = [1, 2, 4, 8, 16, 32, 64, 128, 256]    (AR fixed at L+2)
+  STRATEGIES      = ['uniform', 'gaussian', 'ar', 'ebsampler']
+  SAMPLERS        = ['greedy', 'categorical']
+  EB_GAMMAS       = [0.1, 0.5, 0.9, 2.0, 5.0, 10.0]
+  GAUSSIAN_SIGMAS = [1.0, 2.0, 5.0, 10.0, 20.0, 50.0, 100.0]
+
+Grid: 1016 cells after filtering.
+  by strategy: ar=8, ebsampler=432, gaussian=504, uniform=72
+Cells to run: 1016
+
+[1/1016  eta=74.6min]
+>> baN     L=32   T=1    strat=gaussian   samp=greedy       σ=2.0
+  built (baN, L=32, T=1)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.0020 ± 0.0040 (5 reps)  steps=1.0/2  n_corr=0  elapsed=1.5s
+[2/1016  eta=41.2min]
+>> baN     L=32   T=1    strat=uniform    samp=greedy       —
+  built (baN, L=32, T=1)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.0000 ± 0.0000 (5 reps)  steps=1.0/1  n_corr=0  elapsed=2.5s
+[3/1016  eta=28.4min]
+>> baN     L=32   T=2    strat=uniform    samp=greedy       —
+  built (baN, L=32, T=2)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.0000 ± 0.0000 (5 reps)  steps=2.0/2  n_corr=0  elapsed=2.7s
+[4/1016  eta=21.3min]
+>> baN     L=32   T=1    strat=uniform    samp=categorical  —
+  built (baN, L=32, T=1)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.4960 ± 0.0314 (5 reps)  steps=1.0/1  n_corr=0  elapsed=2.3s
+[5/1016  eta=17.3min]
+>> baN     L=32   T=4    strat=uniform    samp=greedy       —
+  built (baN, L=32, T=4)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.0000 ± 0.0000 (5 reps)  steps=4.0/4  n_corr=0  elapsed=2.6s
+[6/1016  eta=14.4min]
+>> baN     L=32   T=1    strat=gaussian   samp=greedy       σ=20.0
+  built (baN, L=32, T=1)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.1120 ± 0.0264 (5 reps)  steps=1.1/2  n_corr=0  elapsed=2.1s
+[7/1016  eta=12.4min]
+>> baN     L=32   T=2    strat=gaussian   samp=greedy       σ=5.0
+  built (baN, L=32, T=2)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.0780 ± 0.0279 (5 reps)  steps=2.0/3  n_corr=0  elapsed=2.1s
+[8/1016  eta=11.0min]
+>> baN     L=32   T=1    strat=gaussian   samp=greedy       σ=5.0
+  built (baN, L=32, T=1)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.0120 ± 0.0075 (5 reps)  steps=1.0/2  n_corr=0  elapsed=2.2s
+[9/1016  eta=9.8min]
+>> baN     L=32   T=1    strat=gaussian   samp=greedy       σ=1.0
+  built (baN, L=32, T=1)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.0000 ± 0.0000 (5 reps)  steps=1.0/1  n_corr=0  elapsed=2.2s
+[10/1016  eta=8.8min]
+>> baN     L=32   T=1    strat=gaussian   samp=greedy       σ=100.0
+  built (baN, L=32, T=1)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.2840 ± 0.0422 (5 reps)  steps=1.3/2  n_corr=0  elapsed=2.3s
+[11/1016  eta=8.1min]
+>> baN     L=32   T=1    strat=gaussian   samp=greedy       σ=50.0
+  built (baN, L=32, T=1)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.2180 ± 0.0397 (5 reps)  steps=1.2/2  n_corr=0  elapsed=2.3s
+[12/1016  eta=8.0min]
+>> baN     L=32   T=1    strat=gaussian   samp=greedy       σ=10.0
+  built (baN, L=32, T=1)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.0540 ± 0.0185 (5 reps)  steps=1.1/2  n_corr=0  elapsed=2.7s
+[13/1016  eta=7.6min]
+>> baN     L=32   T=2    strat=uniform    samp=categorical  —
+  built (baN, L=32, T=2)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.3880 ± 0.0306 (5 reps)  steps=1.7/2  n_corr=0  elapsed=3.2s
+[14/1016  eta=7.6min]
+>> baN     L=32   T=2    strat=gaussian   samp=greedy       σ=2.0
+  built (baN, L=32, T=2)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.3940 ± 0.0445 (5 reps)  steps=2.0/3  n_corr=0  elapsed=3.5s
+[15/1016  eta=7.2min]
+>> baN     L=32   T=4    strat=uniform    samp=categorical  —
+  built (baN, L=32, T=4)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.4260 ± 0.0174 (5 reps)  steps=3.5/4  n_corr=0  elapsed=3.6s
+[16/1016  eta=6.9min]
+>> baN     L=32   T=8    strat=uniform    samp=greedy       —
+  built (baN, L=32, T=8)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.0760 ± 0.0265 (5 reps)  steps=8.0/8  n_corr=0  elapsed=4.1s
+[17/1016  eta=6.6min]
+>> baN     L=32   T=2    strat=gaussian   samp=greedy       σ=1.0
+  built (baN, L=32, T=2)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.5380 ± 0.0412 (5 reps)  steps=2.0/2  n_corr=0  elapsed=3.8s
+[18/1016  eta=7.0min]
+>> baN     L=32   T=2    strat=gaussian   samp=greedy       σ=10.0
+  built (baN, L=32, T=2)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.0620 ± 0.0172 (5 reps)  steps=2.1/3  n_corr=0  elapsed=3.1s
+[19/1016  eta=6.8min]
+>> baN     L=32   T=2    strat=gaussian   samp=greedy       σ=50.0
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.2760 ± 0.0361 (5 reps)  steps=2.3/3  n_corr=0  elapsed=2.7s
+[20/1016  eta=6.5min]
+>> baN     L=32   T=2    strat=gaussian   samp=greedy       σ=20.0
+  built (baN, L=32, T=2)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.1240 ± 0.0250 (5 reps)  steps=2.1/3  n_corr=0  elapsed=2.9s
+[21/1016  eta=6.3min]
+>> baN     L=32   T=2    strat=gaussian   samp=greedy       σ=100.0
+  built (baN, L=32, T=2)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.3560 ± 0.0372 (5 reps)  steps=2.4/3  n_corr=0  elapsed=2.8s
+[22/1016  eta=6.2min]
+>> baN     L=32   T=8    strat=uniform    samp=categorical  —
+  built (baN, L=32, T=8)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.5220 ± 0.0293 (5 reps)  steps=7.5/8  n_corr=0  elapsed=5.5s
+[23/1016  eta=6.4min]
+>> baN     L=32   T=4    strat=gaussian   samp=greedy       σ=5.0
+  built (baN, L=32, T=4)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.2220 ± 0.0412 (5 reps)  steps=4.0/5  n_corr=0  elapsed=3.7s
+[24/1016  eta=6.5min]
+>> baN     L=32   T=4    strat=gaussian   samp=greedy       σ=100.0
+  built (baN, L=32, T=4)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.3300 ± 0.0477 (5 reps)  steps=4.4/5  n_corr=0  elapsed=4.0s
+[25/1016  eta=6.4min]
+>> baN     L=32   T=4    strat=gaussian   samp=greedy       σ=50.0
+  built (baN, L=32, T=4)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.3220 ± 0.0325 (5 reps)  steps=4.3/5  n_corr=0  elapsed=4.3s
+[26/1016  eta=6.5min]
+>> baN     L=32   T=4    strat=gaussian   samp=greedy       σ=20.0
+  built (baN, L=32, T=4)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.2500 ± 0.0358 (5 reps)  steps=4.1/5  n_corr=0  elapsed=4.9s
+[27/1016  eta=6.5min]
+>> baN     L=32   T=4    strat=gaussian   samp=greedy       σ=10.0
+  built (baN, L=32, T=4)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.2160 ± 0.0432 (5 reps)  steps=4.0/5  n_corr=0  elapsed=5.2s
+[28/1016  eta=6.5min]
+>> baN     L=32   T=4    strat=gaussian   samp=greedy       σ=2.0
+  built (baN, L=32, T=4)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.4380 ± 0.0466 (5 reps)  steps=4.0/5  n_corr=0  elapsed=5.8s
+[29/1016  eta=6.3min]
+>> baN     L=32   T=16   strat=uniform    samp=greedy       —
+  built (baN, L=32, T=16)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.3280 ± 0.0440 (5 reps)  steps=15.9/16  n_corr=0  elapsed=8.7s
+[30/1016  eta=6.4min]
+>> baN     L=32   T=8    strat=gaussian   samp=greedy       σ=20.0
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.5440 ± 0.0372 (5 reps)  steps=7.7/9  n_corr=0  elapsed=5.0s
+[31/1016  eta=6.2min]
+>> baN     L=32   T=4    strat=gaussian   samp=greedy       σ=1.0
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.4380 ± 0.0183 (5 reps)  steps=4.0/4  n_corr=0  elapsed=6.5s
+[32/1016  eta=6.5min]
+>> baN     L=32   T=16   strat=uniform    samp=categorical  —
+  built (baN, L=32, T=16)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.6280 ± 0.0449 (5 reps)  steps=15.2/16  n_corr=0  elapsed=9.9s
+[33/1016  eta=6.9min]
+>> baN     L=32   T=32   strat=uniform    samp=greedy       —
+  built (baN, L=32, T=32)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.5780 ± 0.0808 (5 reps)  steps=31.4/32  n_corr=0  elapsed=11.3s
+[34/1016  eta=6.8min]
+>> baN     L=32   T=8    strat=gaussian   samp=greedy       σ=50.0
+  built (baN, L=32, T=8)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.5460 ± 0.0242 (5 reps)  steps=8.0/9  n_corr=0  elapsed=7.2s
+[35/1016  eta=6.6min]
+>> baN     L=32   T=32   strat=uniform    samp=categorical  —
+  built (baN, L=32, T=32)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.7860 ± 0.0372 (5 reps)  steps=31.1/32  n_corr=0  elapsed=11.4s
+[36/1016  eta=6.6min]
+>> baN     L=32   T=8    strat=gaussian   samp=greedy       σ=100.0
+  built (baN, L=32, T=8)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.5560 ± 0.0273 (5 reps)  steps=8.2/9  n_corr=0  elapsed=6.9s
+[37/1016  eta=6.9min]
+>> baN     L=32   T=8    strat=gaussian   samp=greedy       σ=10.0
+  built (baN, L=32, T=8)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.4680 ± 0.0312 (5 reps)  steps=7.4/9  n_corr=0  elapsed=9.0s
+[38/1016  eta=7.0min]
+>> baN     L=32   T=8    strat=gaussian   samp=greedy       σ=5.0
+  built (baN, L=32, T=8)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.5280 ± 0.0319 (5 reps)  steps=7.4/9  n_corr=0  elapsed=9.8s
+[39/1016  eta=7.3min]
+>> baN     L=32   T=8    strat=gaussian   samp=greedy       σ=1.0
+  built (baN, L=32, T=8)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.6500 ± 0.0283 (5 reps)  steps=7.9/9  n_corr=0  elapsed=11.6s
+[40/1016  eta=7.1min]
+>> baN     L=32   T=8    strat=gaussian   samp=greedy       σ=2.0
+  built (baN, L=32, T=8)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.7040 ± 0.0080 (5 reps)  steps=7.7/9  n_corr=0  elapsed=11.5s
+[41/1016  eta=8.4min]
+>> baN     L=32   T=16   strat=gaussian   samp=greedy       σ=20.0
+  built (baN, L=32, T=16)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.7160 ± 0.0287 (5 reps)  steps=14.8/17  n_corr=0  elapsed=12.2s
+[42/1016  eta=8.5min]
+>> baN     L=32   T=16   strat=gaussian   samp=greedy       σ=50.0
+  built (baN, L=32, T=16)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.6980 ± 0.0354 (5 reps)  steps=15.4/17  n_corr=0  elapsed=12.6s
+[43/1016  eta=8.4min]
+>> baN     L=32   T=16   strat=gaussian   samp=greedy       σ=100.0
+  built (baN, L=32, T=16)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.6900 ± 0.0510 (5 reps)  steps=15.7/17  n_corr=0  elapsed=12.6s
+[44/1016  eta=9.4min]
+>> baN     L=32   T=16   strat=gaussian   samp=greedy       σ=10.0
+  built (baN, L=32, T=16)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.6860 ± 0.0320 (5 reps)  steps=14.4/17  n_corr=0  elapsed=17.3s
+[45/1016  eta=9.9min]
+>> baN     L=32   T=16   strat=gaussian   samp=greedy       σ=5.0
+  built (baN, L=32, T=16)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.7140 ± 0.0233 (5 reps)  steps=14.4/17  n_corr=0  elapsed=19.4s
+[46/1016  eta=9.9min]
+>> baN     L=32   T=64   strat=uniform    samp=categorical  —
+  built (baN, L=32, T=64)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.8780 ± 0.0560 (5 reps)  steps=60.5/63  n_corr=0  elapsed=25.3s
+[47/1016  eta=10.0min]
+>> baN     L=32   T=16   strat=gaussian   samp=greedy       σ=1.0
+  built (baN, L=32, T=16)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.6300 ± 0.0390 (5 reps)  steps=15.1/16  n_corr=0  elapsed=21.3s
+[48/1016  eta=9.8min]
+>> baN     L=32   T=16   strat=gaussian   samp=greedy       σ=2.0
+  built (baN, L=32, T=16)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.7020 ± 0.0564 (5 reps)  steps=14.8/17  n_corr=0  elapsed=21.4s
+[49/1016  eta=9.9min]
+>> baN     L=32   T=32   strat=gaussian   samp=greedy       σ=20.0
+  built (baN, L=32, T=32)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.8300 ± 0.0303 (5 reps)  steps=29.1/33  n_corr=0  elapsed=18.3s
+[50/1016  eta=10.2min]
+>> baN     L=32   T=64   strat=uniform    samp=greedy       —
+  built (baN, L=32, T=64)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.7820 ± 0.0312 (5 reps)  steps=61.6/63  n_corr=0  elapsed=29.2s
+[51/1016  eta=10.1min]
+>> baN     L=32   T=32   strat=gaussian   samp=greedy       σ=10.0
+  built (baN, L=32, T=32)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.8160 ± 0.0162 (5 reps)  steps=28.4/33  n_corr=0  elapsed=20.7s
+[52/1016  eta=10.9min]
+>> baN     L=32   T=32   strat=gaussian   samp=greedy       σ=100.0
+  built (baN, L=32, T=32)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.8060 ± 0.0150 (5 reps)  steps=30.9/33  n_corr=0  elapsed=22.4s
+[53/1016  eta=11.2min]
+>> baN     L=32   T=32   strat=gaussian   samp=greedy       σ=50.0
+  built (baN, L=32, T=32)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.8380 ± 0.0147 (5 reps)  steps=30.3/33  n_corr=0  elapsed=25.2s
+[54/1016  eta=13.3min]
+>> baN     L=32   T=32   strat=gaussian   samp=greedy       σ=1.0
+  built (baN, L=32, T=32)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.7740 ± 0.0377 (5 reps)  steps=29.9/33  n_corr=0  elapsed=34.5s
+[55/1016  eta=13.5min]
+>> baN     L=32   T=32   strat=gaussian   samp=greedy       σ=5.0
+  built (baN, L=32, T=32)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.8200 ± 0.0063 (5 reps)  steps=28.4/33  n_corr=0  elapsed=35.4s
+[56/1016  eta=13.4min]
+>> baN     L=32   T=1    strat=gaussian   samp=categorical  σ=1.0
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.4960 ± 0.0314 (5 reps)  steps=1.0/1  n_corr=0  elapsed=2.0s
+[57/1016  eta=13.6min]
+>> baN     L=32   T=1    strat=gaussian   samp=categorical  σ=2.0
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.4980 ± 0.0319 (5 reps)  steps=1.0/2  n_corr=0  elapsed=2.0s
+[58/1016  eta=13.5min]
+>> baN     L=32   T=1    strat=gaussian   samp=categorical  σ=5.0
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.5000 ± 0.0374 (5 reps)  steps=1.0/2  n_corr=0  elapsed=2.1s
+[59/1016  eta=13.7min]
+>> baN     L=32   T=32   strat=gaussian   samp=greedy       σ=2.0
+  built (baN, L=32, T=32)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.8000 ± 0.0268 (5 reps)  steps=29.2/33  n_corr=0  elapsed=39.9s
+[60/1016  eta=13.5min]
+>> baN     L=32   T=1    strat=gaussian   samp=categorical  σ=10.0
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.4720 ± 0.0293 (5 reps)  steps=1.0/2  n_corr=0  elapsed=2.1s
+[61/1016  eta=13.3min]
+>> baN     L=32   T=1    strat=gaussian   samp=categorical  σ=20.0
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.5160 ± 0.0136 (5 reps)  steps=1.0/2  n_corr=0  elapsed=2.1s
+[62/1016  eta=13.5min]
+>> baN     L=32   T=1    strat=gaussian   samp=categorical  σ=50.0
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.5440 ± 0.0520 (5 reps)  steps=1.1/2  n_corr=0  elapsed=2.1s
+[63/1016  eta=13.3min]
+>> baN     L=32   T=1    strat=gaussian   samp=categorical  σ=100.0
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.5280 ± 0.0527 (5 reps)  steps=1.1/2  n_corr=0  elapsed=2.1s
+[64/1016  eta=13.5min]
+>> baN     L=32   T=2    strat=gaussian   samp=categorical  σ=1.0
+  built (baN, L=32, T=2)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.5140 ± 0.0150 (5 reps)  steps=2.0/2  n_corr=0  elapsed=3.5s
+[65/1016  eta=13.7min]
+>> baN     L=32   T=2    strat=gaussian   samp=categorical  σ=2.0
+  built (baN, L=32, T=2)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.5060 ± 0.0377 (5 reps)  steps=2.0/3  n_corr=0  elapsed=3.5s
+[66/1016  eta=13.5min]
+>> baN     L=32   T=2    strat=gaussian   samp=categorical  σ=5.0
+  built (baN, L=32, T=2)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.5180 ± 0.0325 (5 reps)  steps=2.0/3  n_corr=0  elapsed=3.4s
+[67/1016  eta=13.6min]
+>> baN     L=32   T=2    strat=gaussian   samp=categorical  σ=10.0
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.5200 ± 0.0335 (5 reps)  steps=2.0/3  n_corr=0  elapsed=2.9s
+[68/1016  eta=13.7min]
+>> baN     L=32   T=2    strat=gaussian   samp=categorical  σ=20.0
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.5160 ± 0.0332 (5 reps)  steps=2.0/3  n_corr=0  elapsed=2.8s
+[69/1016  eta=13.5min]
+>> baN     L=32   T=2    strat=gaussian   samp=categorical  σ=50.0
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.5240 ± 0.0413 (5 reps)  steps=1.9/3  n_corr=0  elapsed=2.7s
+[70/1016  eta=13.5min]
+>> baN     L=32   T=64   strat=gaussian   samp=greedy       σ=100.0
+  built (baN, L=32, T=64)  vocab=6  |X|=100
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.8840 ± 0.0258 (5 reps)  steps=60.3/64  n_corr=0  elapsed=42.5s
+[71/1016  eta=13.4min]
+>> baN     L=32   T=2    strat=gaussian   samp=categorical  σ=100.0
+  diversity metrics failed: ImportError: python-Levenshtein is required. Install with: pip install python-Levenshtein
+   → both_rules=0.5540 ± 0.0622 (5 reps)  steps=2.0/3  n_corr=0  elapsed=2.8s
