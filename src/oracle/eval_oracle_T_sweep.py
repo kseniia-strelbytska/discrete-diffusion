@@ -83,7 +83,7 @@ from schedules import CategoricalSchedule, GaussianSchedule
 # ---------------------------------------------------------------------------
 GRAMMARS = ['baN', 'bbaN', 'aNbN', 'aNbNcN']
 # GRAMMARS = ['parentheses_and_brackets', 'not_nested_parentheses_and_brackets']
-LENGTHS  = [32]
+LENGTHS  = [128]
 SAMPLING_STRATEGIES = ['greedy', 'categorical']
 
 T_VALUES = [1, 2, 4, 8, 16, 32, 64, 128, 256]
