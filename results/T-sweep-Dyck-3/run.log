@@ -1,0 +1,263 @@
+
+############################################################
+# T-sweep started: 2026-06-21 14:13:59
+############################################################
+Config: configs/config_oracle.yaml
+Output: results/T-sweep-Dyck-3
+Workers: 28  (device: cpu)
+
+Fixed config:
+  seed=42  n_samples=100  device_for_cells=cpu
+  temperature=1.0  eval_dataset=unconditional
+
+Sweep axes:
+  GRAMMARS        = ['baN', 'bbaN', 'aNbN', 'aNbNcN']
+  LENGTHS         = [128]
+  T_VALUES        = [1, 2, 4, 8, 16, 32, 64, 128, 256]    (AR fixed at L+2)
+  STRATEGIES      = ['uniform', 'gaussian', 'ar', 'ebsampler']
+  SAMPLERS        = ['greedy', 'categorical']
+  EB_GAMMAS       = [0.1, 0.5, 0.9, 2.0, 5.0, 10.0]
+  GAUSSIAN_SIGMAS = [1.0, 2.0, 5.0, 10.0, 20.0, 50.0, 100.0]
+
+Grid: 1016 cells after filtering.
+  by strategy: ar=8, ebsampler=432, gaussian=504, uniform=72
+Cells to run: 1016
+
+
+############################################################
+# T-sweep started: 2026-06-21 14:14:15
+############################################################
+Config: configs/config_oracle.yaml
+Output: results/T-sweep-Dyck-3
+Workers: 28  (device: cpu)
+
+Fixed config:
+  seed=42  n_samples=100  device_for_cells=cpu
+  temperature=1.0  eval_dataset=unconditional
+
+Sweep axes:
+  GRAMMARS        = ['baN', 'bbaN', 'aNbN', 'aNbNcN']
+  LENGTHS         = [128]
+  T_VALUES        = [1, 2, 4, 8, 16, 32, 64, 128, 256]    (AR fixed at L+2)
+  STRATEGIES      = ['uniform', 'gaussian', 'ar', 'ebsampler']
+  SAMPLERS        = ['greedy', 'categorical']
+  EB_GAMMAS       = [0.1, 0.5, 0.9, 2.0, 5.0, 10.0]
+  GAUSSIAN_SIGMAS = [1.0, 2.0, 5.0, 10.0, 20.0, 50.0, 100.0]
+
+Grid: 1016 cells after filtering.
+  by strategy: ar=8, ebsampler=432, gaussian=504, uniform=72
+Cells to run: 1016
+
+
+############################################################
+# T-sweep started: 2026-06-21 14:14:51
+############################################################
+Config: configs/config_oracle.yaml
+Output: results/T-sweep-Dyck-3
+Workers: 28  (device: cpu)
+
+Fixed config:
+  seed=42  n_samples=100  device_for_cells=cpu
+  temperature=1.0  eval_dataset=unconditional
+
+Sweep axes:
+  GRAMMARS        = ['parentheses_and_brackets', 'not_nested_parentheses_and_brackets']
+  LENGTHS         = [32]
+  T_VALUES        = [1, 2, 4, 8, 16, 32, 64, 128]    (AR fixed at L+2)
+  STRATEGIES      = ['uniform', 'gaussian', 'ar', 'ebsampler']
+  SAMPLERS        = ['greedy', 'categorical']
+  EB_GAMMAS       = [0.1, 0.5, 0.9, 2.0, 5.0, 10.0]
+  GAUSSIAN_SIGMAS = [1.0, 2.0, 5.0, 10.0, 20.0, 50.0, 100.0]
+
+Grid: 452 cells after filtering.
+  by strategy: ar=4, ebsampler=192, gaussian=224, uniform=32
+Cells to run: 452
+
+[1/452  eta=7221.0min]
+>> parentheses_and_brackets L=32   T=1    strat=uniform    samp=greedy       —
+  built (parentheses_and_brackets, L=32, T=1)  vocab=8  |X|=100
+   → both_rules=0.0000 ± 0.0000 (5 reps)  steps=1.0/1  n_corr=0  elapsed=958.4s
+[2/452  eta=3603.9min]
+>> parentheses_and_brackets L=32   T=1    strat=gaussian   samp=greedy       σ=2.0
+  built (parentheses_and_brackets, L=32, T=1)  vocab=8  |X|=100
+   → both_rules=0.0000 ± 0.0000 (5 reps)  steps=1.0/1  n_corr=0  elapsed=953.8s
+[3/452  eta=2402.5min]
+>> parentheses_and_brackets L=32   T=1    strat=gaussian   samp=greedy       σ=10.0
+  built (parentheses_and_brackets, L=32, T=1)  vocab=8  |X|=100
+   → both_rules=0.0380 ± 0.0172 (5 reps)  steps=1.0/2  n_corr=19  elapsed=955.8s
+[4/452  eta=1798.8min]
+>> parentheses_and_brackets L=32   T=1    strat=gaussian   samp=greedy       σ=100.0
+  built (parentheses_and_brackets, L=32, T=1)  vocab=8  |X|=100
+   → both_rules=0.1960 ± 0.0224 (5 reps)  steps=1.2/2  n_corr=98  elapsed=956.2s
+[5/452  eta=1439.2min]
+>> parentheses_and_brackets L=32   T=1    strat=uniform    samp=categorical  —
+  built (parentheses_and_brackets, L=32, T=1)  vocab=8  |X|=100
+   → both_rules=0.0000 ± 0.0000 (5 reps)  steps=1.0/1  n_corr=0  elapsed=958.7s
+[6/452  eta=1199.5min]
+>> parentheses_and_brackets L=32   T=1    strat=gaussian   samp=greedy       σ=20.0
+  built (parentheses_and_brackets, L=32, T=1)  vocab=8  |X|=100
+   → both_rules=0.0960 ± 0.0242 (5 reps)  steps=1.1/2  n_corr=48  elapsed=960.8s
+[7/452  eta=1025.8min]
+>> parentheses_and_brackets L=32   T=1    strat=gaussian   samp=greedy       σ=1.0
+  built (parentheses_and_brackets, L=32, T=1)  vocab=8  |X|=100
+   → both_rules=0.0000 ± 0.0000 (5 reps)  steps=1.0/1  n_corr=0  elapsed=960.9s
+[8/452  eta=896.2min]
+>> parentheses_and_brackets L=32   T=1    strat=gaussian   samp=greedy       σ=50.0
+  built (parentheses_and_brackets, L=32, T=1)  vocab=8  |X|=100
+   → both_rules=0.1640 ± 0.0206 (5 reps)  steps=1.2/2  n_corr=82  elapsed=961.4s
+[9/452  eta=794.9min]
+>> parentheses_and_brackets L=32   T=1    strat=gaussian   samp=greedy       σ=5.0
+  built (parentheses_and_brackets, L=32, T=1)  vocab=8  |X|=100
+   → both_rules=0.0040 ± 0.0049 (5 reps)  steps=1.0/2  n_corr=2  elapsed=961.7s
+[10/452  eta=730.6min]
+>> parentheses_and_brackets L=32   T=2    strat=uniform    samp=categorical  —
+  built (parentheses_and_brackets, L=32, T=2)  vocab=8  |X|=100
+   → both_rules=0.0020 ± 0.0040 (5 reps)  steps=1.2/2  n_corr=1  elapsed=984.6s
+[11/452  eta=709.7min]
+>> parentheses_and_brackets L=32   T=2    strat=uniform    samp=greedy       —
+  built (parentheses_and_brackets, L=32, T=2)  vocab=8  |X|=100
+   → both_rules=0.0340 ± 0.0150 (5 reps)  steps=2.0/2  n_corr=17  elapsed=1059.9s
+[12/452  eta=669.5min]
+>> parentheses_and_brackets L=32   T=2    strat=gaussian   samp=greedy       σ=20.0
+  built (parentheses_and_brackets, L=32, T=2)  vocab=8  |X|=100
+   → both_rules=0.0120 ± 0.0075 (5 reps)  steps=2.0/3  n_corr=6  elapsed=1088.1s
+[13/452  eta=618.0min]
+>> parentheses_and_brackets L=32   T=2    strat=gaussian   samp=greedy       σ=1.0
+  built (parentheses_and_brackets, L=32, T=2)  vocab=8  |X|=100
+   → both_rules=0.0000 ± 0.0000 (5 reps)  steps=2.0/2  n_corr=0  elapsed=1090.8s
+[14/452  eta=575.7min]
+>> parentheses_and_brackets L=32   T=2    strat=gaussian   samp=greedy       σ=2.0
+  built (parentheses_and_brackets, L=32, T=2)  vocab=8  |X|=100
+   → both_rules=0.0000 ± 0.0000 (5 reps)  steps=2.0/2  n_corr=0  elapsed=1096.8s
+[15/452  eta=551.1min]
+>> parentheses_and_brackets L=32   T=2    strat=gaussian   samp=greedy       σ=10.0
+  built (parentheses_and_brackets, L=32, T=2)  vocab=8  |X|=100
+   → both_rules=0.0020 ± 0.0040 (5 reps)  steps=2.0/2  n_corr=1  elapsed=1127.7s
+[16/452  eta=518.7min]
+>> parentheses_and_brackets L=32   T=2    strat=gaussian   samp=greedy       σ=5.0
+  built (parentheses_and_brackets, L=32, T=2)  vocab=8  |X|=100
+   → both_rules=0.0020 ± 0.0040 (5 reps)  steps=2.0/3  n_corr=1  elapsed=1134.6s
+[17/452  eta=526.6min]
+>> parentheses_and_brackets L=32   T=4    strat=uniform    samp=categorical  —
+  built (parentheses_and_brackets, L=32, T=4)  vocab=8  |X|=100
+   → both_rules=0.0600 ± 0.0190 (5 reps)  steps=2.5/4  n_corr=30  elapsed=1227.7s
+[18/452  eta=543.8min]
+>> parentheses_and_brackets L=32   T=4    strat=uniform    samp=greedy       —
+  built (parentheses_and_brackets, L=32, T=4)  vocab=8  |X|=100
+   → both_rules=0.1100 ± 0.0283 (5 reps)  steps=3.9/4  n_corr=55  elapsed=1346.4s
+[19/452  eta=749.0min]
+>> parentheses_and_brackets L=32   T=8    strat=uniform    samp=categorical  —
+  built (parentheses_and_brackets, L=32, T=8)  vocab=8  |X|=100
+   → both_rules=0.2120 ± 0.0508 (5 reps)  steps=5.8/8  n_corr=106  elapsed=1964.6s
+[20/452  eta=781.5min]
+>> parentheses_and_brackets L=32   T=2    strat=gaussian   samp=greedy       σ=100.0
+  built (parentheses_and_brackets, L=32, T=2)  vocab=8  |X|=100
+   → both_rules=0.0360 ± 0.0136 (5 reps)  steps=2.0/3  n_corr=18  elapsed=1209.5s
+[21/452  eta=742.7min]
+>> parentheses_and_brackets L=32   T=8    strat=uniform    samp=greedy       —
+  built (parentheses_and_brackets, L=32, T=8)  vocab=8  |X|=100
+   → both_rules=0.2820 ± 0.0445 (5 reps)  steps=7.8/8  n_corr=141  elapsed=2164.0s
+[22/452  eta=710.2min]
+>> parentheses_and_brackets L=32   T=2    strat=gaussian   samp=greedy       σ=50.0
+  built (parentheses_and_brackets, L=32, T=2)  vocab=8  |X|=100
+   → both_rules=0.0460 ± 0.0136 (5 reps)  steps=2.0/3  n_corr=23  elapsed=1219.2s
+[23/452  eta=864.2min]
+>> parentheses_and_brackets L=32   T=4    strat=gaussian   samp=greedy       σ=100.0
+  built (parentheses_and_brackets, L=32, T=4)  vocab=8  |X|=100
+   → both_rules=0.2420 ± 0.0172 (5 reps)  steps=3.6/5  n_corr=121  elapsed=1810.5s
+[24/452  eta=830.7min]
+>> parentheses_and_brackets L=32   T=4    strat=gaussian   samp=greedy       σ=1.0
+  built (parentheses_and_brackets, L=32, T=4)  vocab=8  |X|=100
+   → both_rules=0.0300 ± 0.0200 (5 reps)  steps=2.3/4  n_corr=15  elapsed=1831.5s
+[25/452  eta=811.3min]
+>> parentheses_and_brackets L=32   T=4    strat=gaussian   samp=greedy       σ=2.0
+  built (parentheses_and_brackets, L=32, T=4)  vocab=8  |X|=100
+   → both_rules=0.0320 ± 0.0075 (5 reps)  steps=2.1/4  n_corr=16  elapsed=1886.3s
+[26/452  eta=780.9min]
+>> parentheses_and_brackets L=32   T=4    strat=gaussian   samp=greedy       σ=50.0
+  built (parentheses_and_brackets, L=32, T=4)  vocab=8  |X|=100
+   → both_rules=0.2360 ± 0.0383 (5 reps)  steps=3.5/5  n_corr=118  elapsed=1890.2s
+[27/452  eta=801.9min]
+>> parentheses_and_brackets L=32   T=4    strat=gaussian   samp=greedy       σ=5.0
+  built (parentheses_and_brackets, L=32, T=4)  vocab=8  |X|=100
+   → both_rules=0.1080 ± 0.0279 (5 reps)  steps=2.5/5  n_corr=54  elapsed=2090.6s
+[28/452  eta=777.7min]
+>> parentheses_and_brackets L=32   T=4    strat=gaussian   samp=greedy       σ=20.0
+  built (parentheses_and_brackets, L=32, T=4)  vocab=8  |X|=100
+   → both_rules=0.1960 ± 0.0320 (5 reps)  steps=3.3/5  n_corr=98  elapsed=2113.0s
+[29/452  eta=770.5min]
+>> parentheses_and_brackets L=32   T=4    strat=gaussian   samp=greedy       σ=10.0
+  built (parentheses_and_brackets, L=32, T=4)  vocab=8  |X|=100
+   → both_rules=0.1780 ± 0.0279 (5 reps)  steps=3.1/5  n_corr=89  elapsed=2200.8s
+[30/452  eta=832.7min]
+>> parentheses_and_brackets L=32   T=16   strat=uniform    samp=categorical  —
+  built (parentheses_and_brackets, L=32, T=16)  vocab=8  |X|=100
+   → both_rules=0.5020 ± 0.0611 (5 reps)  steps=13.2/16  n_corr=251  elapsed=3544.1s
+[31/452  eta=852.4min]
+>> parentheses_and_brackets L=32   T=16   strat=uniform    samp=greedy       —
+  built (parentheses_and_brackets, L=32, T=16)  vocab=8  |X|=100
+   → both_rules=0.4540 ± 0.0488 (5 reps)  steps=15.7/16  n_corr=227  elapsed=3758.4s
+[32/452  eta=903.3min]
+>> parentheses_and_brackets L=32   T=8    strat=gaussian   samp=greedy       σ=100.0
+  built (parentheses_and_brackets, L=32, T=8)  vocab=8  |X|=100
+   → both_rules=0.5560 ± 0.0564 (5 reps)  steps=7.8/9  n_corr=278  elapsed=2986.8s
+[33/452  eta=878.6min]
+>> parentheses_and_brackets L=32   T=8    strat=gaussian   samp=greedy       σ=1.0
+  built (parentheses_and_brackets, L=32, T=8)  vocab=8  |X|=100
+   → both_rules=0.1740 ± 0.0258 (5 reps)  steps=5.6/9  n_corr=87  elapsed=3159.7s
+[34/452  eta=872.8min]
+>> parentheses_and_brackets L=32   T=8    strat=gaussian   samp=greedy       σ=50.0
+  built (parentheses_and_brackets, L=32, T=8)  vocab=8  |X|=100
+   → both_rules=0.5260 ± 0.0224 (5 reps)  steps=7.6/9  n_corr=263  elapsed=3123.7s
+[35/452  eta=864.7min]
+>> parentheses_and_brackets L=32   T=8    strat=gaussian   samp=greedy       σ=2.0
+  built (parentheses_and_brackets, L=32, T=8)  vocab=8  |X|=100
+   → both_rules=0.1540 ± 0.0463 (5 reps)  steps=5.5/8  n_corr=77  elapsed=3292.4s
+[36/452  eta=868.8min]
+>> parentheses_and_brackets L=32   T=8    strat=gaussian   samp=greedy       σ=20.0
+  built (parentheses_and_brackets, L=32, T=8)  vocab=8  |X|=100
+   → both_rules=0.5080 ± 0.0440 (5 reps)  steps=7.1/9  n_corr=254  elapsed=3406.2s
+[37/452  eta=864.9min]
+>> parentheses_and_brackets L=32   T=8    strat=gaussian   samp=greedy       σ=5.0
+  built (parentheses_and_brackets, L=32, T=8)  vocab=8  |X|=100
+   → both_rules=0.2860 ± 0.0287 (5 reps)  steps=6.1/9  n_corr=143  elapsed=3530.4s
+[38/452  eta=857.4min]
+>> parentheses_and_brackets L=32   T=8    strat=gaussian   samp=greedy       σ=10.0
+  built (parentheses_and_brackets, L=32, T=8)  vocab=8  |X|=100
+   → both_rules=0.4640 ± 0.0768 (5 reps)  steps=6.7/9  n_corr=232  elapsed=3623.2s
+[39/452  eta=1116.4min]
+>> parentheses_and_brackets L=32   T=32   strat=uniform    samp=categorical  —
+  built (parentheses_and_brackets, L=32, T=32)  vocab=8  |X|=100
+   → both_rules=0.7200 ± 0.0261 (5 reps)  steps=29.0/32  n_corr=360  elapsed=6317.3s
+[40/452  eta=1151.3min]
+>> parentheses_and_brackets L=32   T=32   strat=uniform    samp=greedy       —
+  built (parentheses_and_brackets, L=32, T=32)  vocab=8  |X|=100
+   → both_rules=0.6580 ± 0.0471 (5 reps)  steps=31.4/32  n_corr=329  elapsed=6699.1s
+[41/452  eta=1181.6min]
+>> parentheses_and_brackets L=32   T=16   strat=gaussian   samp=greedy       σ=1.0
+  built (parentheses_and_brackets, L=32, T=16)  vocab=8  |X|=100
+   → both_rules=0.4580 ± 0.0387 (5 reps)  steps=13.1/16  n_corr=229  elapsed=5836.6s
+[42/452  eta=1222.8min]
+>> parentheses_and_brackets L=32   T=16   strat=gaussian   samp=greedy       σ=2.0
+  built (parentheses_and_brackets, L=32, T=16)  vocab=8  |X|=100
+   → both_rules=0.5000 ± 0.0297 (5 reps)  steps=13.0/16  n_corr=250  elapsed=6161.5s
+[43/452  eta=1216.4min]
+>> parentheses_and_brackets L=32   T=16   strat=gaussian   samp=greedy       σ=50.0
+  built (parentheses_and_brackets, L=32, T=16)  vocab=8  |X|=100
+   → both_rules=0.7440 ± 0.0280 (5 reps)  steps=15.1/17  n_corr=372  elapsed=5492.2s
+[44/452  eta=1209.4min]
+>> parentheses_and_brackets L=32   T=16   strat=gaussian   samp=greedy       σ=100.0
+  built (parentheses_and_brackets, L=32, T=16)  vocab=8  |X|=100
+   → both_rules=0.7020 ± 0.0160 (5 reps)  steps=15.6/17  n_corr=351  elapsed=5044.7s
+[45/452  eta=1259.7min]
+>> parentheses_and_brackets L=32   T=16   strat=gaussian   samp=greedy       σ=20.0
+  built (parentheses_and_brackets, L=32, T=16)  vocab=8  |X|=100
+   → both_rules=0.7580 ± 0.0214 (5 reps)  steps=14.6/17  n_corr=379  elapsed=6184.2s
+[46/452  eta=1253.7min]
+>> parentheses_and_brackets L=32   T=16   strat=gaussian   samp=greedy       σ=5.0
+  built (parentheses_and_brackets, L=32, T=16)  vocab=8  |X|=100
+   → both_rules=0.5920 ± 0.0264 (5 reps)  steps=13.6/17  n_corr=296  elapsed=6550.0s
+[47/452  eta=1253.7min]
+>> parentheses_and_brackets L=32   T=16   strat=gaussian   samp=greedy       σ=10.0
+  built (parentheses_and_brackets, L=32, T=16)  vocab=8  |X|=100
+   → both_rules=0.6920 ± 0.0264 (5 reps)  steps=14.0/17  n_corr=346  elapsed=6557.6s

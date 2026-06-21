@@ -103,3 +103,117 @@ tests/test_grammar_oracles.py::TestCrossGrammar::test_baN_seqs_invalid_for_bbaN 
 tests/test_grammar_oracles.py::TestCrossGrammar::test_marginals_sum_to_one_at_each_position PASSED                                                                      [100%]
 
 ======================================================================= 38 passed in 1412.84s (0:23:32) =======================================================================
+
+Diversity metrics:
+Here is a complete breakdown of how every diversity metric is calculated in your `diversity_metrics.py` file.
+
+Before any metrics are calculated, every sequence undergoes **preprocessing** (`_strip`). The script removes the leading `<SOS>` token, strips everything from the first `<EOS>` token onward, and removes any trailing `<PAD>` tokens. All metrics below are calculated strictly on this stripped "content" sequence.
+
+---
+
+### 1. Universal Metrics
+
+*(Applied to all grammars)*
+
+* **`uniqueness`**
+* **Calculation:** The number of strictly distinct sequences divided by the total number of sequences in the evaluated batch.
+* **Formula:** $| \text{Unique Sequences} | \ / \ N$
+
+
+* **`duplication_rate`**
+* **Calculation:** Simply the inverse of uniqueness.
+* **Formula:** $1 - \text{uniqueness}$
+
+
+* **`mean_lev_dist_normalized`**
+* **Calculation:** The sum of the pairwise Levenshtein (edit) distances between all sequences, divided by the sum of their combined lengths.
+* *Note:* If the batch size is larger than 200, the script randomly subsamples exactly 200 sequences (using a fixed seed of 42 for reproducibility) to prevent the calculation from becoming excessively slow. `lev_n_used` reports how many sequences were actually used.
+* **Formula:** 
+$$\text{mean\_lev\_dist\_normalized} = \frac{\sum_{i<j} \text{lev}(s_i, s_j)}{\sum_{i<j}(|s_i|+|s_j|)}$$
+
+
+
+
+* **`bigram_diversity` & `trigram_diversity**`
+* **Calculation:** The number of *unique* n-grams generated across the entire batch divided by the *total* number of n-grams generated. Sequences shorter than the n-gram size ($k=2$ or $k=3$) are entirely ignored.
+* **Formula:** 
+$$\text{n-gram\_diversity} = \frac{| \bigcup_i \{k\text{-grams in } s_i\} |}{\sum_i |\{k\text{-grams in } s_i\}|}$$
+
+
+
+
+
+---
+
+### 2. DFA Coverage Metrics
+
+*(Applied to `baN`, `bbaN`)*
+
+These metrics run the generated sequences through a hand-coded Deterministic Finite Automaton (DFA) representing the ideal grammar rules.
+
+* **`dfa_state_coverage`**
+* **Calculation:** The number of unique DFA states visited by *any* sequence in the batch, divided by the total number of available states in that grammar's DFA.
+
+
+* **`dfa_transition_coverage`**
+* **Calculation:** The number of specific state-to-state transitions triggered by *any* sequence in the batch, divided by the total number of possible valid transitions in the DFA.
+
+
+
+---
+
+### 3. N-Distribution Metrics
+
+*(Applied to `aNbN`, `aNbNcN`)*
+
+These metrics look at the distribution of the parameter $n$ (which your script calculates by simply counting the number of 'A' tokens in the sequence).
+
+* **`n_entropy`**
+* **Calculation:** The Shannon entropy of the observed $n$ values across the batch, measured in nats (using the natural logarithm). If the model only ever outputs one specific length of $n$, the entropy is 0.
+* **Formula:** 
+$$H(n) = -\sum_{k} p_k \ln(p_k)$$
+
+
+
+
+* **`n_coverage`**
+* **Calculation:** The number of unique $n$ values the model generated, divided by the total number of theoretically valid $n$ values for that grammar's target length (pulled from `valid_n_range`).
+
+
+
+---
+
+### 4. N, M-Distribution Metrics
+
+*(Applied to `bbaN`)*
+
+For the `bbaN` grammar (defined in the code as $B^n A^{2m}$), the script tracks both $n$ (count of 'B' tokens) and $m$ (count of 'A' tokens divided by 2). Any sequence with an odd number of 'A' tokens is thrown out for this calculation.
+
+* **`n_entropy` & `m_entropy**`
+* **Calculation:** The Shannon entropy calculated independently for the distribution of observed $n$ values and $m$ values across the batch.
+
+
+* **`nm_joint_coverage`**
+* **Calculation:** The number of unique $(n, m)$ pairs generated, divided by the total number of valid $(n, m)$ pairs for the target length (pulled from `valid_nm_pairs`).
+
+
+
+---
+
+### 5. Dyck Structure Metrics
+
+*(Applied to `parentheses_and_brackets`, `not_nested_parentheses_and_brackets`)*
+
+These evaluate the nesting depth and bracket/parentheses ratios.
+
+* **`max_depth_ratio_mean` & `max_depth_ratio_std**`
+* **Calculation:** For each sequence, the script steps through token by token, adding $+1$ for any open bracket/paren and $-1$ for any close bracket/paren to find the absolute maximum depth reached. This max depth is then divided by $(L_{content}/2)$, because the theoretical maximum depth of a Dyck sequence is exactly half its length. The script outputs the mean and standard deviation of this ratio across the batch.
+* *Note:* The script intentionally conflates parentheses and brackets into a single "depth" score for cross-grammar comparability.
+
+
+* **`brackets_parens_ratio_mean` & `brackets_parens_ratio_std**`
+* **Calculation:** For each sequence, this is the count of opening brackets divided by the count of opening parentheses. It outputs the mean and standard deviation across the batch.
+
+
+* **`n_zero_paren_sequences`**
+* **Calculation:** A simple absolute count of how many sequences contained zero opening parentheses. These sequences are excluded from the `brackets_parens_ratio` calculation to prevent divide-by-zero errors.

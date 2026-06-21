@@ -12,11 +12,12 @@ from tqdm import tqdm
 import random
 
 GRAMMARS = ["aNbN", "aNbNcN", "baN", "bbaN", "parentheses_and_brackets", "not_nested_parentheses_and_brackets"]
-STRATEGIES = ["ar", "ebsampler", "gaussian", "uniform"]
+# GRAMMARS = ['parentheses_and_brackets', 'not_nested_parentheses_and_brackets']
+STRATEGIES = ["ebsampler", "gaussian", "uniform"]
 SAMPLING_STRATEGIES = ["categorical", "greedy"]
 L = 32
 
-def main():
+def monotonicity_plot(name='monotonicity_dyck_grammars.png'):
     random.seed(42)
     # make a line plot with 4 subplots (2x2):
     xs = [[] for _ in range(len(GRAMMARS))]
@@ -35,6 +36,7 @@ def main():
             logits = oracle(masked_input)[0]
             
             xs[grammar] = logits[:, token_idx][1:]  # placeholder for actual data
+            print(xs[grammar])
             axes[token_idx].plot(xs[grammar], label=GRAMMARS[grammar])
     
     # for token_idx in range(2):
@@ -58,7 +60,55 @@ def main():
     #         axes[2 + token_idx].plot(xs[grammar], label=GRAMMARS[grammar])
     
     plt.legend(loc='upper right', bbox_to_anchor=(1.2, 1))
-    plt.savefig("monotonicity_empty_grammars.png")
+    plt.savefig(name)
+
+# Map each language to its corresponding metrics
+DIVERSITY_METRICS = {
+    "baN": [
+        "uniqueness"
+    ],
+    "bbaN": [
+        "nm_joint_coverage"
+    ],
+    "aNbN": [
+        "n_coverage"
+    ],
+    "aNbNcN": [
+        "n_entropy",
+        "n_coverage"
+    ],
+    "parentheses_and_brackets": [
+        "uniqueness"
+    ],
+    "not_nested_parentheses_and_brackets": [
+        "uniqueness"
+    ]
+}
+
+NEEDED_SETTINGS = {
+    "ar": [
+        "sampling_strategy",
+        "n_steps_mean"
+    ],
+    "ebsampler": [
+        "sampling_strategy",
+        "eb_gamma",
+        "n_steps_mean"
+    ],
+    "gaussian": [
+        "sampling_strategy",
+        "sigma",
+        "n_steps_mean"
+    ],
+    "uniform": [
+        "sampling_strategy",
+        "n_steps_mean"
+    ]       
+}
+
+def main():
+    # monotonicity_plot(name='monotonicity_dyck_grammars.png')
+    # exit(0)
     
     # get file as argument
     parser = argparse.ArgumentParser()
@@ -82,21 +132,50 @@ def main():
     For each (grammar, strategy, sampler), filter rows with mean_both_rules >= 0.95, take the minimum n_steps_mean. 
     If no rows clear 0.95, write "—"
     """
-    for strategy in STRATEGIES:
-        for grammar in GRAMMARS:
-            for sampler in SAMPLING_STRATEGIES:
-                filtered = df[(df.grammar==grammar) & (df.strategy==strategy) & (df.sampling_strategy==sampler)]
-                filtered = filtered[filtered.mean_both_rules >= 0.95]
-                # format each print in rigid columns
-                if len(filtered) == 0:
-                    print(f"{grammar:<40} {strategy:<20} {sampler:>20}: —")
-                else:
-                    min_steps = filtered.n_steps_mean.min()
-                    print(f"{grammar:<40} {strategy:<20} {sampler:>20}: {min_steps}")
     
-    # display slice
-    print("Results:")
-    print(working_slice)
+    # save the results with all possible diversity metrics as columns in a new dataframe
+    results = pd.DataFrame(columns=['grammar', 'strategy', 'sampling_strategy'] + ['mean_both_rules', 'n_steps_mean'] + ['n_entropy', 'm_entropy', 'nm_joint_coverage', 'n_coverage', 'dfa_state_coverage', 'dfa_transition_coverage', 'max_depth_ratio_mean', 'max_depth_ratio_std', 'brackets_parens_ratio_mean', 'brackets_parens_ratio_std', 'n_zero_paren_sequences'])
+    
+    diversity = False
+    
+    # for grammar in GRAMMARS:
+    #     for strategy in STRATEGIES:
+    #         for sampler in SAMPLING_STRATEGIES:
+    #             filtered = df[(df.grammar==grammar) & (df.strategy==strategy) & (df.sampling_strategy==sampler)]
+    #             filtered = filtered[filtered.mean_both_rules >= 0.95]
+    #             # format each print in rigid columns
+    #             if len(filtered) == 0:
+    #                 print(f"{grammar:<40} {strategy:<20} {sampler:>20}: —")
+    #             else:
+    #                 # find the line with the smallest n_steps_mean and print it
+    #                 line = filtered.loc[filtered.n_steps_mean.idxmin()]
+    #                 if diversity:
+    #                     important_traits = DIVERSITY_METRICS[grammar]
+    #                     line_important_traits = line[important_traits + ['mean_both_rules', 'n_steps_mean']]
+                        
+    #                     min_steps = filtered.n_steps_mean.min()
+    #                     print(f"{grammar:<40} {strategy:<20} {sampler:>20}: {min_steps:>5.2f} steps, mean_both_rules: {line.mean_both_rules:.4f}, important traits: {line_important_traits.to_dict()}")
+    #                 else:
+    #                     min_steps = filtered.n_steps_mean.min()
+    #                     print(f"{grammar:<40} {strategy:<20} {sampler:>20}: {min_steps:>5.2f} steps, mean_both_rules: {line.mean_both_rules:.4f}")
+
+    with open('results_summary.txt', 'w') as f:
+        sys.stdout = f  # Change the standard output to the file we created.
+        for grammar in GRAMMARS:
+            for strategy in STRATEGIES:
+                for sampler in SAMPLING_STRATEGIES:
+                    best_rows = df[(df.grammar==grammar) & (df.strategy==strategy) & (df.sampling_strategy == sampler)].sort_values(by='mean_both_rules', ascending=False).head(5)
+                    
+                    for idx, best_row in best_rows.iterrows():
+                        results = pd.concat([results, pd.DataFrame([best_row])], ignore_index=True)
+                        
+                        settings = NEEDED_SETTINGS[strategy]
+                        settings += DIVERSITY_METRICS[grammar]
+                        settings_str = ', '.join([f"{setting}={best_row[setting]}" for setting in settings])
+                        
+                        print(f"{grammar:<40} {strategy:<20}: best settings: {settings_str}, mean_both_rules: {best_row.mean_both_rules:.4f}")
+                
+            print('' + '-'*80 + '\n')
     
 if __name__ == "__main__":
     main()

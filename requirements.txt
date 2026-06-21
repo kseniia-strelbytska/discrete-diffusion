@@ -8,3 +8,4 @@ wandb
 pytest
 python-Levenshtein
 pandas
+seaborn

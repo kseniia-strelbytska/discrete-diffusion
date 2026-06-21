@@ -178,6 +178,8 @@ def evaluation_from_generation(model,
             else:
                 y_pred = get_prediction(model, s, max_tokens=cutoff)  # autoregressive generation; no batch dimension
 
+            print(y_pred)
+
             n_steps_per_seq.append(int(unmaskModel.last_n_steps))
             
             # `grammar.evaluate()` uses Python loops/indexing; it's much faster on CPU tensors
