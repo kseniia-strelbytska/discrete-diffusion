@@ -62,6 +62,38 @@ def monotonicity_plot(name='monotonicity_dyck_grammars.png'):
     plt.legend(loc='upper right', bbox_to_anchor=(1.2, 1))
     plt.savefig(name)
 
+def plot_accuracy_vs_compute(df, name = 'accuracy_vs_compute.png'):
+    for grammar in GRAMMARS:
+        for decoder in STRATEGIES:
+            for sampler in SAMPLING_STRATEGIES:
+                mode = 'role of gamma' if decoder == 'ebsampler' else 'role of compute'
+                id = f"{mode}_{grammar}_{decoder}_{sampler}"
+                print(id)
+                
+                selected = df[(df.grammar == grammar) & (df.strategy == decoder) & (df.sampling_strategy == sampler)]
+                if decoder == 'ebsampler':
+                    selected = selected.drop_duplicates(subset=['eb_gamma'])
+                    selected = selected.sort_values(by='n_steps_mean')
+                    plt.plot(selected.n_steps_mean, selected.mean_both_rules, marker='o')
+                    for _, row in selected.iterrows():
+                        plt.annotate(f"γ={row.eb_gamma}", (row.n_steps_mean, row.mean_both_rules),
+                                     textcoords='offset points', xytext=(4, 4), fontsize=7)
+                else:
+                    selected = selected.sort_values(by='n_steps_mean')
+                    plt.plot(selected.n_steps_mean, selected.mean_both_rules)
+                max_acc = selected.mean_both_rules.max()
+                plt.axhline(y=max_acc, color='gray', linestyle=':', linewidth=1, alpha=0.5)
+                plt.text(260, max_acc, f'{max_acc:.3f}', va='bottom', ha='right', fontsize=7, color='gray')
+                plt.xlabel('n_steps_mean')
+                plt.xlim(0, 260)
+                plt.ylim(0, 1.05)
+                plt.ylabel('mean_both_rules')
+                plt.title(f'Accuracy vs Compute for {grammar} with {decoder} and {sampler}')
+                plt.savefig(f"./x_figures/{id}.png")
+                plt.clf()  # Clear the figure for the next plot
+                
+    exit(0)
+
 # Map each language to its corresponding metrics
 DIVERSITY_METRICS = {
     "baN": [
@@ -122,6 +154,9 @@ def main():
     
     # read csv
     df = pd.read_csv(resolved_path)
+    
+    plot_accuracy_vs_compute(df, name='accuracy_vs_compute.png')
+    exit(0)
     
     # Q1: Does AR actually hit 1.0 on every grammar? CONFRIMED
     working_slice = df[df.strategy=='ar'][['grammar', 'sampling_strategy', 'mean_both_rules', 'n_steps_mean']]
