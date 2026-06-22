@@ -209,8 +209,8 @@ class REGrammar(FormalGrammar):
     def evaluate(self, seq):
         r1 = self.does_satisfy_rule1(seq)
         r2 = self.does_satisfy_rule2(seq)
-        grammatical = r1 and r2
         fmt = self.does_satisfy_format(seq)
+        grammatical = r1 and r2 and fmt # Format matters! Otherwise, e.g., 3 0 4 4 4 1 2 is accepted for aNbN
         return np.array([int(r1), int(r2), int(grammatical), int(fmt)])
 
     def generate_seq(self):

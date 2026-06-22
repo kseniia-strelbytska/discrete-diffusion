@@ -234,6 +234,9 @@ def main():
     grammar = get_grammar(cfg.data.grammar, cfg.data.l)
     grammar.generate_seq()  # generates the data and stores in grammar.data
     
+    print(grammar.evaluate(torch.tensor([3, 0, 4, 0, 1, 1, 4, 4], dtype=torch.long)))  # sanity check: should be valid
+    exit(0)
+    
     print(f'Sample of generated grammar data:\n{grammar.data[0:5, 0:20]}')
 
     schedule = get_schedule(cfg, args)

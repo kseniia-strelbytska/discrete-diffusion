@@ -11,11 +11,20 @@ import torch
 from tqdm import tqdm
 import random
 
-GRAMMARS = ["aNbN", "aNbNcN", "baN", "bbaN", "parentheses_and_brackets", "not_nested_parentheses_and_brackets"]
+GRAMMARS = ["baN", "bbaN", "aNbN", "parentheses_and_brackets", "aNbNcN", "not_nested_parentheses_and_brackets"]
 # GRAMMARS = ['parentheses_and_brackets', 'not_nested_parentheses_and_brackets']
 STRATEGIES = ["ebsampler", "gaussian", "uniform"]
 SAMPLING_STRATEGIES = ["categorical", "greedy"]
 L = 32
+
+GRAMMAR_MAPPING = {
+    "baN": "L1",
+    "bbaN": "L2",
+    "aNbN": "L3",
+    "parentheses_and_brackets": "L4",
+    "aNbNcN": "L5",
+    "not_nested_parentheses_and_brackets": "L6"
+}
 
 def monotonicity_plot(name='monotonicity_dyck_grammars.png'):
     random.seed(42)
@@ -62,7 +71,7 @@ def monotonicity_plot(name='monotonicity_dyck_grammars.png'):
     plt.legend(loc='upper right', bbox_to_anchor=(1.2, 1))
     plt.savefig(name)
 
-def plot_accuracy_vs_compute(df, name = 'accuracy_vs_compute.png'):
+def plot_accuracy_vs_compute(df):
     for grammar in GRAMMARS:
         for decoder in STRATEGIES:
             for sampler in SAMPLING_STRATEGIES:
@@ -79,8 +88,17 @@ def plot_accuracy_vs_compute(df, name = 'accuracy_vs_compute.png'):
                         plt.annotate(f"γ={row.eb_gamma}", (row.n_steps_mean, row.mean_both_rules),
                                      textcoords='offset points', xytext=(4, 4), fontsize=7)
                 else:
-                    selected = selected.sort_values(by='n_steps_mean')
+                    selected = selected.sort_values(by='n_steps_mean').reset_index(drop=True)
                     plt.plot(selected.n_steps_mean, selected.mean_both_rules)
+                    acc = selected['mean_both_rules'].values
+                    for i in range(1, len(acc) - 1):
+                        is_peak = acc[i] > acc[i-1] and acc[i] >= acc[i+1]
+                        is_trough = acc[i] < acc[i-1] and acc[i] <= acc[i+1]
+                        if is_peak or is_trough:
+                            row = selected.iloc[i]
+                            label = f"(T={int(row['T'])}, σ={row.sigma})" if decoder == 'gaussian' else f"T={int(row['T'])}"
+                            plt.annotate(label, (row.n_steps_mean, row.mean_both_rules),
+                                         textcoords='offset points', xytext=(4, 4), fontsize=7)
                 max_acc = selected.mean_both_rules.max()
                 plt.axhline(y=max_acc, color='gray', linestyle=':', linewidth=1, alpha=0.5)
                 plt.text(260, max_acc, f'{max_acc:.3f}', va='bottom', ha='right', fontsize=7, color='gray')
@@ -91,8 +109,55 @@ def plot_accuracy_vs_compute(df, name = 'accuracy_vs_compute.png'):
                 plt.title(f'Accuracy vs Compute for {grammar} with {decoder} and {sampler}')
                 plt.savefig(f"./x_figures/{id}.png")
                 plt.clf()  # Clear the figure for the next plot
-                
-    exit(0)
+    
+def plot_accuracy_vs_compute_uniform(df):
+    decoder = 'uniform'
+    for sampler in SAMPLING_STRATEGIES:
+        plt.figure(figsize=(10, 6))
+        for grammar in GRAMMARS:
+            selected = df[(df.grammar == grammar) & (df.strategy == decoder) & (df.sampling_strategy == sampler)]
+            selected = selected.sort_values(by='n_steps_mean')
+            
+            idx_of_1_step = selected[selected.n_steps_mean == 1].index
+            if not idx_of_1_step.empty:
+                print(selected.loc[idx_of_1_step, ['grammar', 'n_steps_mean', 'sampling_strategy','mean_both_rules']])
+            
+            plt.plot(selected.n_steps_mean, selected.mean_both_rules, label=GRAMMAR_MAPPING[grammar])
+
+        id = f"clean_figure_role_of_compute_{decoder}_{sampler}"
+        plt.xlabel('compute (denoising steps made)')
+        plt.xlim(0, 260)
+        plt.ylabel('Accuracy (satisfying both rules)')
+        plt.ylim(0, 1.05)
+        plt.legend(loc='lower right')
+        plt.title(f'Accuracy vs Compute for {decoder} ({sampler} sampling)')
+        plt.savefig(f"./x_clean_figures/{id}.png")
+        plt.clf()  # Clear the figure for the next plot
+
+def plot_categorical_and_greedy(df):
+    plt.subplots(2, 3, figsize=(15, 10))
+    grammar_positions = [(0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2)]
+    
+    for grammar in GRAMMARS:
+        pos = grammar_positions[GRAMMARS.index(grammar)]
+        ax = plt.subplot2grid((2, 3), pos)
+        
+        decoder = 'uniform'
+        for sampler in SAMPLING_STRATEGIES:
+            selected = df[(df.grammar == grammar) & (df.strategy == decoder) & (df.sampling_strategy == sampler)]
+            selected = selected.sort_values(by='n_steps_mean')
+            ax.plot(selected.n_steps_mean, selected.mean_both_rules, label=f"{sampler}")
+    
+        id = f"clean_figure_greedy_and_categorical_{decoder}"
+        ax.set_title(f"{GRAMMAR_MAPPING[grammar]}")
+        ax.set_xlabel('n_steps_mean')
+        ax.set_ylabel('mean_both_rules')
+        ax.set_xlim(0, 260)
+        ax.set_ylim(0, 1.05)
+        ax.legend(loc='lower right', fontsize=8)
+    
+    plt.suptitle(f'Accuracy vs Compute under {decoder} strategy', fontsize=12)
+    plt.savefig(f"./x_clean_figures/{id}.png")
 
 # Map each language to its corresponding metrics
 DIVERSITY_METRICS = {
@@ -155,7 +220,10 @@ def main():
     # read csv
     df = pd.read_csv(resolved_path)
     
-    plot_accuracy_vs_compute(df, name='accuracy_vs_compute.png')
+    # plot_accuracy_vs_compute(df)
+    # plot_accuracy_vs_compute_uniform(df)
+    plot_categorical_and_greedy(df)
+    
     exit(0)
     
     # Q1: Does AR actually hit 1.0 on every grammar? CONFRIMED
