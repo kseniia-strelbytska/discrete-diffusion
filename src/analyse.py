@@ -26,6 +26,36 @@ GRAMMAR_MAPPING = {
     "not_nested_parentheses_and_brackets": "L6"
 }
 
+def wilson_ci(k, n, z=1.96):
+    """95% Wilson score interval for a binomial proportion k/n."""
+    if n <= 0:
+        return float('nan'), float('nan')
+    phat   = k / n
+    denom  = 1.0 + z * z / n
+    center = (phat + z * z / (2 * n)) / denom
+    half   = (z / denom) * np.sqrt(phat * (1 - phat) / n + z * z / (4 * n * n))
+    return center - half, center + half
+
+
+def add_wilson_ci(df, n_per_rep=100, stat='both_rules'):
+    """Add ci_low_<stat>/ci_high_<stat> columns (Wilson 95%) if not already present.
+
+    Pools all generations in a cell: k correct out of n total, where n is the
+    sweep's n_eval_total column when available, else reconstructed as
+    n_reps * n_per_rep (per-rep sample count, 100 in these runs).
+    """
+    lo_col, hi_col = f'ci_low_{stat}', f'ci_high_{stat}'
+    if lo_col in df.columns and hi_col in df.columns:
+        return df
+    df = df.copy()
+    n_total = df['n_eval_total'] if 'n_eval_total' in df.columns else df['n_reps'] * n_per_rep
+    k = (df[f'mean_{stat}'] * n_total).round()
+    cis = [wilson_ci(ki, ni) for ki, ni in zip(k, n_total)]
+    df[lo_col] = [c[0] for c in cis]
+    df[hi_col] = [c[1] for c in cis]
+    return df
+
+
 def monotonicity_plot(name='monotonicity_dyck_grammars.png'):
     random.seed(42)
     # make a line plot with 4 subplots (2x2):
@@ -134,19 +164,23 @@ def plot_accuracy_vs_compute_uniform(df):
         plt.savefig(f"./x_clean_figures/{id}.png")
         plt.clf()  # Clear the figure for the next plot
 
-def plot_categorical_and_greedy(df):
+def plot_categorical_and_greedy(df, n_per_rep=100):
+    df = add_wilson_ci(df, n_per_rep=n_per_rep)
     plt.subplots(2, 3, figsize=(15, 10))
     grammar_positions = [(0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2)]
-    
+
     for grammar in GRAMMARS:
         pos = grammar_positions[GRAMMARS.index(grammar)]
         ax = plt.subplot2grid((2, 3), pos)
-        
+
         decoder = 'uniform'
         for sampler in SAMPLING_STRATEGIES:
             selected = df[(df.grammar == grammar) & (df.strategy == decoder) & (df.sampling_strategy == sampler)]
             selected = selected.sort_values(by='n_steps_mean')
-            ax.plot(selected.n_steps_mean, selected.mean_both_rules, label=f"{sampler}")
+            line, = ax.plot(selected.n_steps_mean, selected.mean_both_rules, label=f"{sampler}")
+            ax.fill_between(selected.n_steps_mean,
+                            selected.ci_low_both_rules, selected.ci_high_both_rules,
+                            color=line.get_color(), alpha=0.2, linewidth=0)
     
         id = f"clean_figure_greedy_and_categorical_{decoder}"
         ax.set_title(f"{GRAMMAR_MAPPING[grammar]}")
@@ -210,6 +244,9 @@ def main():
     # get file as argument
     parser = argparse.ArgumentParser()
     parser.add_argument('--file', type=str, required=True, help='Path to the CSV file')
+    parser.add_argument('--n-per-rep', type=int, default=100,
+                        help='Per-rep eval sample count, used to reconstruct Wilson CIs '
+                             'when the CSV lacks an n_eval_total column (default 100).')
     args = parser.parse_args()
     # folder in parent directory, resolve path
     resolved_path = Path(args.file).parent.resolve()
@@ -222,8 +259,8 @@ def main():
     
     # plot_accuracy_vs_compute(df)
     # plot_accuracy_vs_compute_uniform(df)
-    plot_categorical_and_greedy(df)
-    
+    plot_categorical_and_greedy(df, n_per_rep=args.n_per_rep)
+
     exit(0)
     
     # Q1: Does AR actually hit 1.0 on every grammar? CONFRIMED

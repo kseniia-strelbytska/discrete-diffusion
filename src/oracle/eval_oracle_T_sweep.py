@@ -255,6 +255,22 @@ def evaluate_cell(*, oracle, grammar, eval_dataset, strategy, sampler,
 # Aggregation
 # ---------------------------------------------------------------------------
 
+def wilson_ci(k, n, z=1.96):
+    """95% Wilson score interval for a binomial proportion k/n (z=1.96).
+
+    Pooled over all generations in the cell (k correct out of n total), this
+    is a more honest precision estimate than the std across the n_reps reps,
+    which with only ~5 reps is itself very noisy. Returns (lo, hi); NaNs if n==0.
+    """
+    if n <= 0:
+        return float('nan'), float('nan')
+    phat   = k / n
+    denom  = 1.0 + z * z / n
+    center = (phat + z * z / (2 * n)) / denom
+    half   = (z / denom) * np.sqrt(phat * (1 - phat) / n + z * z / (4 * n * n))
+    return center - half, center + half
+
+
 def aggregate_reps(stats_per_rep, n_steps_all):
     if not stats_per_rep:
         out = {f'mean_{n}': float('nan') for n in STATS_NAMES}
@@ -330,6 +346,8 @@ def _build_csv_fields():
     for n in STATS_NAMES:
         fields.append(f'mean_{n}')
         fields.append(f'std_{n}')
+    fields.extend([f'n_eval_total',
+                   f'ci_low_{PRIMARY_STAT}', f'ci_high_{PRIMARY_STAT}'])
     fields.extend(['n_steps_mean', 'n_steps_max', 'deterministic', 'elapsed_s'])
     fields.extend(DIVERSITY_FIELDS)
     return fields
@@ -459,6 +477,12 @@ def _process_cell(cell_spec, shared_cfg):
     agg = aggregate_reps(stats_per_rep, all_n_steps)
     det = is_deterministic(strategy, sampler)
 
+    # Wilson 95% CI on the primary stat, pooled over all generations in the cell.
+    n_per_rep   = cached['eval_ds'].data.shape[0]
+    n_eval_total = int(n_per_rep) * len(stats_per_rep)
+    k_correct    = int(round(agg[f'mean_{PRIMARY_STAT}'] * n_eval_total))
+    ci_lo, ci_hi = wilson_ci(k_correct, n_eval_total)
+
     div_metrics, div_dist = {}, None
     if hasattr(cached['grammar'], 'diversity_metrics'):
         try:
@@ -476,6 +500,9 @@ def _process_cell(cell_spec, shared_cfg):
         'eb_gamma':          float(pv) if strategy == 'ebsampler' else '',
         'T':                 T, 'n_reps': n_reps, 'deterministic': det,
         'elapsed_s':         round(elapsed, 2),
+        'n_eval_total':      n_eval_total,
+        f'ci_low_{PRIMARY_STAT}':  round(ci_lo, 6),
+        f'ci_high_{PRIMARY_STAT}': round(ci_hi, 6),
         'n_steps_mean':      round(agg['n_steps_mean'], 4),
         'n_steps_max':       agg['n_steps_max'],
     }
