@@ -76,6 +76,25 @@ DIVERSITY_METRIC = {
     "not_nested_parentheses_and_brackets": "uniqueness",
 }
 
+# Full metric panel for the Gaussian-vs-uniform comparison (label -> CSV column).
+# accuracy first, then the diversity suite. Columns absent for a grammar show blank.
+ALL_METRICS = [
+    ("both-rules acc", "mean_both_rules"),
+    ("uniqueness", "uniqueness"),
+    ("norm. Lev. dist", "mean_lev_dist_normalized"),
+    ("bigram div", "bigram_diversity"),
+    ("trigram div", "trigram_diversity"),
+    ("DFA state cov", "dfa_state_coverage"),
+    ("DFA trans cov", "dfa_transition_coverage"),
+    ("n-entropy", "n_entropy"),
+    ("n-coverage", "n_coverage"),
+    ("m-entropy", "m_entropy"),
+    ("nm-joint cov", "nm_joint_coverage"),
+]
+
+# stable colours for the three diffusion decoders (AR excluded from sweep figures)
+DECODER_COLOR = {"uniform": "#1f77b4", "gaussian": "#e08214", "ebsampler": "#2ca02c"}
+
 
 # ---- load / prepare ------------------------------------------------------- #
 def load():
@@ -355,13 +374,13 @@ def fig5_baN_anomaly(df, out):
         axes[0].plot(line["T"], line["accuracy"], marker="o", color=c, ls=ls,
                      label=SAMPLER_DISPLAY[s], lw=2)
     axes[0].axhline(0.5, color="grey", ls=":", lw=1)
-    axes[0].text(line["T"].min(), 0.5, " chance for one parity bit", fontsize=8,
+    axes[0].text(line["T"].min(), 0.5, " ½ (one parity bit)", fontsize=8,
                  color="grey", va="bottom")
     axes[0].set_xscale("log", base=2)
     axes[0].set_xlabel("Denoising steps T  (uniform schedule)")
     axes[0].set_ylabel("Both-rules accuracy")
     axes[0].set_ylim(-0.03, 1.03)
-    axes[0].set_title("baᴺ: greedy collapses, categorical floors at ½", fontsize=11)
+    axes[0].set_title("baᴺ: greedy collapses to 0; categorical stays well above", fontsize=11)
     axes[0].legend()
     axes[0].grid(True, ls="--", alpha=0.3)
 
@@ -433,6 +452,242 @@ def fig6_monotonicity(out):
 
 
 # =========================================================================== #
+# Fig 7 -- decoder comparison: accuracy vs compute (generalises fig1 to all 3
+#   diffusion decoders). 6 grammar panels; colour = decoder, line style = sampler;
+#   each line is the best-per-budget envelope (best sigma/gamma at each NFE).
+# =========================================================================== #
+def fig7_decoder_compute(best, out):
+    decoders = ["uniform", "gaussian", "ebsampler"]
+    gorder = [g for g in GRAMMAR_ORDER if g in set(best["grammar"])]
+    fig, axes = plt.subplots(2, 3, figsize=(14, 8), sharey=True)
+    for ax, g in zip(axes.flat, gorder):
+        sub = best[best["grammar"] == g]
+        for dec in decoders:
+            for s, dash in [("greedy", ""), ("categorical", (3, 2))]:
+                line = sub[(sub.decoder == dec) & (sub.sampler == s)] \
+                    .dropna(subset=["accuracy", "compute"]).sort_values("compute")
+                if line.empty:
+                    continue
+                ax.plot(line["compute"], line["accuracy"], color=DECODER_COLOR[dec],
+                        lw=1.8, marker="o", ms=3.5,
+                        ls=(0, dash) if dash else "-", alpha=0.9)
+        ax.axhline(ACC_THRESH, color="grey", ls=":", lw=1, zorder=1)
+        ax.set_xscale("log")
+        ax.set_ylim(-0.03, 1.03)
+        ax.set_title(GRAMMAR_DISPLAY.get(g, g), fontsize=11)
+        ax.text(0.97, 0.05, f"L={GRAMMAR_L[g]}", transform=ax.transAxes,
+                ha="right", va="bottom", fontsize=8, color="dimgrey")
+        ax.grid(True, ls="--", alpha=0.3)
+    for ax in axes[-1]:
+        ax.set_xlabel("Mean denoising steps  (NFE, log)")
+    for ax in axes[:, 0]:
+        ax.set_ylabel("Both-rules accuracy")
+    handles = [plt.Line2D([], [], color=DECODER_COLOR[d], lw=2, label=DECODER_DISPLAY[d])
+               for d in decoders]
+    handles += [plt.Line2D([], [], color="black", lw=2, ls="-", label="Greedy"),
+                plt.Line2D([], [], color="black", lw=2, ls=(0, (3, 2)), label="Categorical"),
+                plt.Line2D([], [], color="grey", ls=":", label=f"{int(ACC_THRESH*100)}% accuracy")]
+    fig.legend(handles=handles, loc="lower center", ncol=6, frameon=False,
+               bbox_to_anchor=(0.5, -0.01), fontsize=9)
+    fig.suptitle("Decoder comparison — accuracy vs. compute  "
+                 "(best-per-budget envelope, optimal denoiser)", fontsize=12.5)
+    fig.tight_layout(rect=(0, 0.04, 1, 0.97))
+    fig.savefig(out, dpi=200, bbox_inches="tight")
+    plt.close(fig)
+
+
+# =========================================================================== #
+# Fig 8 -- decoder comparison: accuracy-diversity trade-off (generalises fig2).
+# =========================================================================== #
+def fig8_decoder_tradeoff(best, out):
+    decoders = ["uniform", "gaussian", "ebsampler"]
+    gorder = [g for g in GRAMMAR_ORDER if g in set(best["grammar"])]
+    fig, axes = plt.subplots(2, 3, figsize=(14, 8))
+    for ax, g in zip(axes.flat, gorder):
+        sub = best[best["grammar"] == g]
+        for dec in decoders:
+            for s, dash in [("greedy", ""), ("categorical", (3, 2))]:
+                line = sub[(sub.decoder == dec) & (sub.sampler == s)] \
+                    .dropna(subset=["accuracy", "diversity"]).sort_values("compute")
+                if line.empty:
+                    continue
+                ax.plot(line["accuracy"], line["diversity"], color=DECODER_COLOR[dec],
+                        lw=1.6, marker="o", ms=3.5,
+                        ls=(0, dash) if dash else "-", alpha=0.9)
+        ax.set_xlim(-0.03, 1.03)
+        ax.set_title(GRAMMAR_DISPLAY.get(g, g), fontsize=11)
+        ax.set_xlabel("Both-rules accuracy")
+        ax.set_ylabel(f"diversity: {DIVERSITY_METRIC[g]}")
+        ax.grid(True, ls="--", alpha=0.3)
+    handles = [plt.Line2D([], [], color=DECODER_COLOR[d], lw=2, label=DECODER_DISPLAY[d])
+               for d in decoders]
+    handles += [plt.Line2D([], [], color="black", lw=2, ls="-", label="Greedy"),
+                plt.Line2D([], [], color="black", lw=2, ls=(0, (3, 2)), label="Categorical")]
+    fig.legend(handles=handles, loc="lower center", ncol=5, frameon=False,
+               bbox_to_anchor=(0.5, -0.01), fontsize=9)
+    fig.suptitle("Decoder comparison — accuracy–diversity trade-off  "
+                 "(best-per-budget envelope)", fontsize=12.5)
+    fig.tight_layout(rect=(0, 0.04, 1, 0.97))
+    fig.savefig(out, dpi=200, bbox_inches="tight")
+    plt.close(fig)
+
+
+# =========================================================================== #
+# Fig 9 -- the Gaussian schedule itself (regenerated from src GaussianSchedule).
+#   Left: masking probability sweeping right->left across positions at several t
+#   (sigma=10). Right: at fixed t=0.5, how sigma morphs the boundary from a sharp
+#   left-to-right front (sigma small ~ autoregressive) to a flat profile (sigma
+#   large ~ uniform). This is the analytic claim of the source note, made visual.
+# =========================================================================== #
+def fig9_gaussian_schedule(out, L=128):
+    sys.path.insert(0, str(ROOT / "src"))
+    import torch
+    from schedules.gaussian_schedule import GaussianSchedule
+
+    def pmask(sigma, t):
+        return GaussianSchedule(sigma).p_mask(torch.tensor(float(t)), L, "cpu").numpy().ravel()
+
+    fig, axes = plt.subplots(1, 2, figsize=(13, 4.8))
+    pos = np.arange(L)
+    # left: the right->left sweep at sigma=10
+    ts = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
+    cmap = sns.color_palette("viridis", len(ts))
+    for t, c in zip(ts, cmap):
+        axes[0].plot(pos, pmask(10.0, t), color=c, lw=1.8, label=f"t={t:.1f}")
+    axes[0].set_title("Masking front sweeps right→left  (σ=10)", fontsize=11)
+    axes[0].set_xlabel("Position i")
+    axes[0].set_ylabel(r"$p_{\mathrm{mask},i}(t)=\Phi((i-\mu(t))/\sigma)$")
+    axes[0].legend(fontsize=8, ncol=2, title="timestep")
+    axes[0].grid(True, ls="--", alpha=0.3)
+    # right: sigma morphs sharp(AR) -> flat(uniform) at t=0.5
+    for sigma, c in zip([2, 10, 50, 100], sns.color_palette("rocket", 4)):
+        axes[1].plot(pos, pmask(sigma, 0.5), color=c, lw=2, label=f"σ={sigma}")
+    axes[1].set_title("σ interpolates autoregressive ↔ uniform  (t=0.5)", fontsize=11)
+    axes[1].set_xlabel("Position i")
+    axes[1].set_ylabel(r"$p_{\mathrm{mask},i}(0.5)$")
+    axes[1].legend(fontsize=8, title="width")
+    axes[1].grid(True, ls="--", alpha=0.3)
+    axes[1].text(0.03, 0.04, "small σ: sharp front ≈ left-to-right (AR)\n"
+                             "large σ: flat ≈ uniform schedule",
+                 transform=axes[1].transAxes, fontsize=8, color="dimgrey", va="bottom")
+    fig.suptitle(f"The Gaussian noise schedule  (L={L}):  a positional masking front "
+                 "controlled by σ", fontsize=12.5)
+    fig.tight_layout(rect=(0, 0, 1, 0.95))
+    fig.savefig(out, dpi=200, bbox_inches="tight")
+    plt.close(fig)
+
+
+# =========================================================================== #
+# Fig 10 -- Gaussian: effect of T and sigma on accuracy, across grammars and
+#   samplers. One heatmap per (grammar, sampler): x=requested T, y=sigma,
+#   colour=both-rules accuracy. Reads directly off the gaussian rows of the CSV.
+# =========================================================================== #
+def fig10_gaussian_T_sigma(df, out):
+    g_df = df[df.decoder == "gaussian"].copy()
+    g_df["Tn"] = pd.to_numeric(g_df["T"], errors="coerce")
+    g_df["sig"] = pd.to_numeric(g_df["sigma"], errors="coerce")
+    gorder = [g for g in GRAMMAR_ORDER if g in set(g_df["grammar"])]
+    samplers = ["greedy", "categorical"]
+    fig, axes = plt.subplots(len(gorder), len(samplers),
+                             figsize=(10, 2.5 * len(gorder)))
+    for r, g in enumerate(gorder):
+        for c, s in enumerate(samplers):
+            ax = axes[r, c]
+            sub = g_df[(g_df.grammar == g) & (g_df.sampler == s)]
+            piv = sub.pivot_table(index="sig", columns="Tn", values="accuracy",
+                                  aggfunc="mean")
+            piv = piv.sort_index(ascending=False)  # large sigma on top
+            sns.heatmap(piv, ax=ax, cmap="viridis", vmin=0, vmax=1,
+                        cbar=(c == len(samplers) - 1), annot=True, fmt=".2f",
+                        annot_kws={"size": 6}, linewidths=0.3, linecolor="white")
+            if r == 0:
+                ax.set_title(f"{SAMPLER_DISPLAY[s]} sampling", fontsize=11)
+            ax.set_ylabel(GRAMMAR_DISPLAY.get(g, g).split("  ")[0] + "\nσ"
+                          if c == 0 else "")
+            ax.set_xlabel("requested T" if r == len(gorder) - 1 else "")
+            ax.tick_params(labelsize=7)
+    fig.suptitle("Gaussian schedule: both-rules accuracy across T (x) and σ (y)\n"
+                 "for every grammar and sampler", fontsize=12.5)
+    fig.tight_layout(rect=(0, 0, 1, 0.98))
+    fig.savefig(out, dpi=200, bbox_inches="tight")
+    plt.close(fig)
+
+
+# =========================================================================== #
+# Fig 11 -- Gaussian vs uniform across ALL metrics. Operating point per
+#   (grammar, sampler): the highest-accuracy cell AT MAXIMUM COMPUTE (max T), so
+#   both schedules are fully iterative and the comparison is degeneracy-free.
+#   Heatmap of (Gaussian - uniform); blank where a metric is undefined for the
+#   grammar. One panel per sampler.
+# =========================================================================== #
+def _op_point_maxT(df, g, dec, s):
+    sub = df[(df.grammar == g) & (df.decoder == dec) & (df.sampler == s)].copy()
+    sub["Tn"] = pd.to_numeric(sub["T"], errors="coerce")
+    sub = sub[sub["Tn"] == sub["Tn"].max()]
+    if sub.empty:
+        return None
+    return sub.loc[sub["accuracy"].idxmax()]
+
+
+def fig11_gaussian_vs_uniform(df, out):
+    gate = df["n_correct_too_low"].astype(str).str.lower().isin(["true", "1", "1.0", "yes"])
+    dfx = df.copy()
+    gorder = [g for g in GRAMMAR_ORDER if g in set(df["grammar"])]
+    disp = [GRAMMAR_DISPLAY.get(g, g).split("  ")[0] for g in gorder]
+    samplers = ["greedy", "categorical"]
+
+    # raw Gaussian-minus-uniform delta matrices (metric x grammar), one per sampler
+    mats = {}
+    for s in samplers:
+        mat = np.full((len(ALL_METRICS), len(gorder)), np.nan)
+        for j, g in enumerate(gorder):
+            ru = _op_point_maxT(dfx, g, "uniform", s)
+            rg = _op_point_maxT(dfx, g, "gaussian", s)
+            if ru is None or rg is None:
+                continue
+            for i, (_, col) in enumerate(ALL_METRICS):
+                if col not in df.columns:
+                    continue
+                if col != "mean_both_rules" and (bool(gate.loc[ru.name]) or bool(gate.loc[rg.name])):
+                    continue  # diversity unreliable at this operating point
+                vu = pd.to_numeric(pd.Series([ru[col]]), errors="coerce").iloc[0]
+                vg = pd.to_numeric(pd.Series([rg[col]]), errors="coerce").iloc[0]
+                if np.isnan(vu) or np.isnan(vg):
+                    continue
+                mat[i, j] = vg - vu
+        mats[s] = mat
+
+    # per-metric (row) scale shared across both panels, so colour is comparable
+    # within a metric and not swamped by the unbounded entropy rows. Annotation
+    # stays the RAW delta.
+    stacked = np.concatenate([mats[s] for s in samplers], axis=1)
+    row_absmax = np.nanmax(np.abs(stacked), axis=1)
+    row_absmax[~np.isfinite(row_absmax) | (row_absmax == 0)] = 1.0
+
+    fig, axes = plt.subplots(1, 2, figsize=(13, 6.4))
+    for ax, s in zip(axes, samplers):
+        mat = mats[s]
+        norm = mat / row_absmax[:, None]
+        sns.heatmap(norm, ax=ax, cmap="RdBu_r", center=0, vmin=-1, vmax=1,
+                    annot=mat, fmt=".2f", annot_kws={"size": 7},
+                    xticklabels=disp, yticklabels=[m for m, _ in ALL_METRICS],
+                    linewidths=0.4, linecolor="white",
+                    cbar_kws={"label": "Δ (within-metric normalised)"})
+        ax.set_title(f"{SAMPLER_DISPLAY[s]} sampling", fontsize=11)
+        ax.tick_params(axis="x", rotation=30, labelsize=8)
+        for lbl in ax.get_xticklabels():
+            lbl.set_ha("right")
+        ax.tick_params(axis="y", labelsize=8)
+    fig.suptitle("Gaussian vs. uniform across all metrics  "
+                 "(annotation = raw Gaussian − uniform at the max-compute, best-accuracy "
+                 "operating point;\ncolour normalised per metric row; red = Gaussian higher)",
+                 fontsize=11.5)
+    fig.tight_layout(rect=(0, 0, 1, 0.93))
+    fig.savefig(out, dpi=200, bbox_inches="tight")
+    plt.close(fig)
+
+
+# =========================================================================== #
 # Outlier analysis report
 # =========================================================================== #
 def write_outlier_report(df, best, pairs, out):
@@ -441,7 +696,7 @@ def write_outlier_report(df, best, pairs, out):
 
     w("# Outlier & anomaly analysis")
     w()
-    w("Source: `results/combined_6_grammar.csv` (oracle sweep, 1468 rows). "
+    w(f"Source: `results/combined_6_grammar.csv` (oracle sweep, {len(df)} rows). "
       "All figures regenerated from this file by `make_paper_figures.py`.")
     w()
     w("## 0. Two length regimes (not an anomaly — document it)")
@@ -580,6 +835,19 @@ def main():
     except Exception as e:  # oracle import is optional / environment-dependent
         fig6_ok = False
         print(f"[warn] fig6 (monotonicity) skipped: {e}")
+
+    # decoder-comparison + Gaussian-focused figures
+    fig7_decoder_compute(best, HERE / "fig7_decoder_comparison_compute.png")
+    fig8_decoder_tradeoff(best, HERE / "fig8_decoder_comparison_tradeoff.png")
+    try:
+        fig9_gaussian_schedule(HERE / "fig9_gaussian_schedule.png")
+        fig9_ok = True
+    except Exception as e:  # schedule import is environment-dependent
+        fig9_ok = False
+        print(f"[warn] fig9 (gaussian schedule) skipped: {e}")
+    fig10_gaussian_T_sigma(df, HERE / "fig10_gaussian_T_sigma.png")
+    fig11_gaussian_vs_uniform(df, HERE / "fig11_gaussian_vs_uniform.png")
+
     write_outlier_report(df, best, pairs, HERE / "outlier_analysis.md")
 
     print("Wrote to", HERE)
@@ -589,6 +857,12 @@ def main():
         print("  ", f)
     if fig6_ok:
         print("   fig6_oracle_monotonicity.png")
+    for f in ["fig7_decoder_comparison_compute.png", "fig8_decoder_comparison_tradeoff.png"]:
+        print("  ", f)
+    if fig9_ok:
+        print("   fig9_gaussian_schedule.png")
+    for f in ["fig10_gaussian_T_sigma.png", "fig11_gaussian_vs_uniform.png"]:
+        print("  ", f)
     print("   outlier_analysis.md")
 
 

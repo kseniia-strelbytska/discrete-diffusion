@@ -194,26 +194,45 @@ class REGrammar(FormalGrammar):
             return False
 
     def does_satisfy_format(self, seq):
+        # Universal, grammar-independent structural format check. A correctly
+        # formatted, fully-denoised sequence must look exactly like:
+        #     SOS, <one or more content tokens>, EOS, PAD, PAD, ...
+        # Every other shape is rejected.
         if isinstance(seq, np.ndarray):
             seq = torch.from_numpy(seq)
-        if (seq == MASK_token).long().sum() != 0:
+        seq = seq.flatten()
+
+        # Must be non-empty and fully denoised: no MASK tokens may remain.
+        if seq.numel() == 0:
             return False
-        sos_count = (seq == SOS_token).long().sum()
-        eos_count = (seq == EOS_token).long().sum()
-        if sos_count != 1 or eos_count != 1:
+        if (seq == MASK_token).any():
             return False
-        if seq[0] != SOS_token:
+
+        # Exactly one SOS, and it must be the very first token.
+        if (seq == SOS_token).long().sum() != 1 or seq[0] != SOS_token:
             return False
-        
+
+        # Exactly one EOS, and it must come strictly after the SOS.
+        if (seq == EOS_token).long().sum() != 1:
+            return False
         eos_position = (seq == EOS_token).nonzero(as_tuple=True)[0].item()
-        PAD_tokens_between_SOS_and_EOS = seq[1:eos_position] == PAD_token
-        if PAD_tokens_between_SOS_and_EOS.any():
+        # eos at index 0 is impossible (SOS is there); index 1 means there is no
+        # content between SOS and EOS, which is not a valid sequence.
+        if eos_position < 2:
             return False
-        
-        non_PAD_tokens_after_EOS = seq[eos_position + 1:] != PAD_token
-        if non_PAD_tokens_after_EOS.any():
+
+        # The content strictly between SOS and EOS must be real content tokens
+        # only: no PAD, MASK, SOS or EOS may appear inside this region.
+        content = seq[1:eos_position]
+        special = torch.tensor([SOS_token, EOS_token, PAD_token, MASK_token],
+                               device=content.device)
+        if torch.isin(content, special).any():
             return False
-        
+
+        # Everything after the EOS must be PAD (only trailing padding allowed).
+        if (seq[eos_position + 1:] != PAD_token).any():
+            return False
+
         return True
 
     def evaluate(self, seq):
