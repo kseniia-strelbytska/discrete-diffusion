@@ -86,8 +86,8 @@ GRAMMARS = ['parentheses_and_brackets', 'not_nested_parentheses_and_brackets']
 LENGTHS  = [32]
 SAMPLING_STRATEGIES = ['greedy', 'categorical']
 
-T_VALUES = [1, 2, 4, 8, 16, 32, 64, 128]
-GAUSSIAN_SIGMAS = [1.0, 2.0, 5.0, 10.0, 20.0, 50.0, 100.0]
+T_VALUES = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512]
+GAUSSIAN_SIGMAS = [1.0, 2.0, 5.0, 10.0, 20.0, 50.0, 100.0, 256.0]
 EB_GAMMAS       = [0.1, 0.5, 0.9, 2.0, 5.0, 10.0]
 
 STRATEGIES = {
@@ -98,7 +98,7 @@ STRATEGIES = {
     'ar':        {'decoder': 'ar',              'param_name': None,       'param_values': [None],
                   'T_sweep': False, 'fixed_T_fn': lambda L: L + 2},
     'ebsampler': {'decoder': 'ebsampler',       'param_name': 'eb_gamma', 'param_values': EB_GAMMAS,
-                  'T_sweep': True, 'fixed_T_fn': None},
+                  'T_sweep': False, 'fixed_T_fn': lambda L: L},
 }
 
 STATS_NAMES = ['rule1', 'rule2', 'both_rules', 'format']
