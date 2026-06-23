@@ -106,8 +106,19 @@ class ScheduledUnmasker(nn.Module):
             device=logits.device, dtype=torch.long,
         )
         raw = logits[:, content_idx]
-        scaled = raw / temperature if temperature > 0 else raw
-        probs = scaled if self.oracle else torch.softmax(scaled, dim=-1)
+        if self.oracle:
+            # The oracle returns an already-normalised distribution. Apply temperature in
+            # probability space as p^(1/T) / sum, which preserves EXACT zeros (invalid
+            # tokens stay unsamplable) and is the identity at T=1. The old `raw/temperature`
+            # was a silent no-op because the categorical sampler renormalises.
+            if temperature and temperature > 0 and temperature != 1.0:
+                powered = raw.clamp_min(0.0) ** (1.0 / temperature)
+                probs = powered / powered.sum(dim=-1, keepdim=True).clamp_min(1e-12)
+            else:
+                probs = raw
+        else:
+            scaled = raw / temperature if temperature > 0 else raw
+            probs = torch.softmax(scaled, dim=-1)
         return content_idx, probs
 
     def _error_fmt(self, step, X, error_changed_mask, error_probs, error_logits, exc):

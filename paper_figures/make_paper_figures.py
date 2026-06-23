@@ -103,6 +103,17 @@ def load():
     df["sampler"] = df["sampling_strategy"].astype(str).str.lower().str.strip()
     df["accuracy"] = pd.to_numeric(df["mean_both_rules"], errors="coerce")
     df["acc_std"] = pd.to_numeric(df["std_both_rules"], errors="coerce").fillna(0.0)
+    # Error band = pooled 95% Wilson CI (computed by the sweep driver) rather than the
+    # std across only ~5 reps, which is itself very noisy and is 0 on saturated cells.
+    # Fall back to mean±std only if the CI columns are absent.
+    if "ci_low_both_rules" in df.columns and "ci_high_both_rules" in df.columns:
+        df["acc_lo"] = pd.to_numeric(df["ci_low_both_rules"], errors="coerce").clip(0, 1)
+        df["acc_hi"] = pd.to_numeric(df["ci_high_both_rules"], errors="coerce").clip(0, 1)
+        df["acc_lo"] = df["acc_lo"].fillna((df["accuracy"] - df["acc_std"]).clip(0, 1))
+        df["acc_hi"] = df["acc_hi"].fillna((df["accuracy"] + df["acc_std"]).clip(0, 1))
+    else:
+        df["acc_lo"] = (df["accuracy"] - df["acc_std"]).clip(0, 1)
+        df["acc_hi"] = (df["accuracy"] + df["acc_std"]).clip(0, 1)
     df["compute"] = pd.to_numeric(df["n_steps_mean"], errors="coerce")
     df["T"] = pd.to_numeric(df["T"], errors="coerce")
     df["hparam"] = np.where(df["decoder"] == "gaussian", df["sigma"],
@@ -156,9 +167,7 @@ def fig1_accuracy_vs_compute(df, out, schedule="uniform"):
                 continue
             ax.plot(line["compute"], line["accuracy"], color=col, lw=2,
                     marker="o", ms=4, label=SAMPLER_DISPLAY[s], zorder=3)
-            ax.fill_between(line["compute"],
-                            (line["accuracy"] - line["acc_std"]).clip(0, 1),
-                            (line["accuracy"] + line["acc_std"]).clip(0, 1),
+            ax.fill_between(line["compute"], line["acc_lo"], line["acc_hi"],
                             color=col, alpha=0.13, lw=0)
             coll = line[line["uniqueness"] < COLLAPSE_FLOOR]
             ax.scatter(coll["compute"], coll["accuracy"], s=110, facecolors="none",

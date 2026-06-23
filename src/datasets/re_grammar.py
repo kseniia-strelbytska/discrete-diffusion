@@ -236,8 +236,16 @@ class REGrammar(FormalGrammar):
         return True
 
     def evaluate(self, seq):
-        r1 = self.does_satisfy_rule1(seq)
-        r2 = self.does_satisfy_rule2(seq)
+        if isinstance(seq, np.ndarray):
+            seq = torch.from_numpy(seq)
+        # Rule checks run on the content up to (and including) the first EOS, so tokens
+        # emitted after a valid EOS do not leak into the per-rule counts. Format is still
+        # checked on the FULL sequence, so trailing non-PAD garbage is rejected there —
+        # this keeps `grammatical` identical while making mean_rule1/mean_rule2 meaningful.
+        eos_positions = (seq == EOS_token).nonzero(as_tuple=True)[0]
+        eval_seq = seq[:eos_positions[0] + 1] if len(eos_positions) > 0 else seq
+        r1 = self.does_satisfy_rule1(eval_seq)
+        r2 = self.does_satisfy_rule2(eval_seq)
         fmt = self.does_satisfy_format(seq)
         grammatical = r1 and r2 and fmt # Format matters! Otherwise, e.g., 3 0 4 4 4 1 2 is accepted for aNbN
         return np.array([int(r1), int(r2), int(grammatical), int(fmt)])
