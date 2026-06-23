@@ -234,7 +234,13 @@ def main():
     grammar = get_grammar(cfg.data.grammar, cfg.data.l)
     grammar.generate_seq()  # generates the data and stores in grammar.data
     
-    print(grammar.evaluate(torch.tensor([3, 0, 4, 0, 1, 1, 4, 4], dtype=torch.long)))  # sanity check: should be valid
+    print(grammar.evaluate(torch.tensor([3, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1, 0,
+        1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0,
+        0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0,
+        0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1,
+        0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0,
+        0, 1, 1, 1, 0, 1, 1, 4, 2, 4], dtype=torch.long)))
+    
     exit(0)
     
     print(f'Sample of generated grammar data:\n{grammar.data[0:5, 0:20]}')
@@ -644,7 +650,7 @@ def main():
                 print(f"  diversity metrics failed: {type(_e).__name__}: {_e}")
 
         exit(0)
-
+        
         # test different seeds
         # model.load_state_dict(torch.load(MODELS_DIR / f'anbn_diffusion_v8/diffusion_epochs={32500}'))
         # unmask = ScheduledUnmasker(model, T=1500, device=device)

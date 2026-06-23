@@ -177,7 +177,7 @@ def evaluation_from_generation(model,
                     y_pred, steps, timesteps_log, error_message = unmaskModel(s, ((s == MASK_token).sum() / torch.numel(s)), temperature=temperature, return_steps=True)
             else:
                 y_pred = get_prediction(model, s, max_tokens=cutoff)  # autoregressive generation; no batch dimension
-
+            
             n_steps_per_seq.append(int(unmaskModel.last_n_steps))
             
             # `grammar.evaluate()` uses Python loops/indexing; it's much faster on CPU tensors
@@ -187,6 +187,9 @@ def evaluation_from_generation(model,
             stats += y_pred_stats
             seq_str = ''.join([str(i) for i in y_pred_cpu.tolist()])
             sequences.append(seq_str)
+            
+            if y_pred_stats[2] == 1:
+                print(y_pred_stats, y_pred)
 
             # Collect sequences satisfying both_rules AND format
             if y_pred_stats[2] == 1 and y_pred_stats[3] == 1:

@@ -204,6 +204,16 @@ class REGrammar(FormalGrammar):
             return False
         if seq[0] != SOS_token:
             return False
+        
+        eos_position = (seq == EOS_token).nonzero(as_tuple=True)[0].item()
+        PAD_tokens_between_SOS_and_EOS = seq[1:eos_position] == PAD_token
+        if PAD_tokens_between_SOS_and_EOS.any():
+            return False
+        
+        non_PAD_tokens_after_EOS = seq[eos_position + 1:] != PAD_token
+        if non_PAD_tokens_after_EOS.any():
+            return False
+        
         return True
 
     def evaluate(self, seq):
