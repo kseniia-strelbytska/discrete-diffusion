@@ -16,28 +16,30 @@ from tqdm import tqdm
 from transformers.optimization import get_inverse_sqrt_schedule
 import wandb
 
-from anbn import anbnGrammar
-from constants import EOS_token, MASK_token, PAD_token, SOS_token
-from evaluation_tools import EvaluationDataset, evaluation_from_generation
-from initialgrammar import initialGrammar
+from datasets.anbn import anbnGrammar
+from datasets.initialgrammar import initialGrammar
+from datasets.re_grammar import REGrammar
+from datasets.constants import EOS_token, MASK_token, PAD_token, SOS_token
+from datasets.dataset import get_fixed_dataset
+from evaluation_tools import evaluation_from_generation
+from datasets.evaluation_dataset import EvaluationDataset
 from loss import rblb
 from noise_schedule_unmask import ScheduledUnmasker
-from dataset import get_fixed_dataset
 from schedules import GaussianSchedule, CategoricalSchedule, NoiseScheduleDataset
 from trainer import train
-from investigate_token_distribution import investigate_dataset
+from eval_scripts.investigate_token_distribution import investigate_dataset
 from attention_maps import attach_attention_hooks, extract_attention_maps, plot_attention_maps, remove_hooks
 
-from model import TransformerClassifier
-from model_v2 import v2TransformerClassifier
-from model_RPE import RPETransformerClassifier
-from model_RPE_KQ import RPEKQTransformerClassifier
-from model_FIRE import FIRETransformerClassifier
-from model_T5 import T5RPETransformerClassifier
-from AR_model_AR import ARTransformerClassifier
-from AR_model_RE import TransformerDecoder
-from model_timestep import TimestepTransformerClassifier
-from deterministic_token_distribution import oracleModel
+from models.model import TransformerClassifier
+from models.model_v2 import v2TransformerClassifier
+from models.model_RPE import RPETransformerClassifier
+from models.model_RPE_KQ import RPEKQTransformerClassifier
+from models.model_FIRE import FIRETransformerClassifier
+from models.model_T5 import T5RPETransformerClassifier
+from models.AR_model_AR import ARTransformerClassifier
+from models.AR_model_RE import TransformerDecoder
+from models.model_timestep import TimestepTransformerClassifier
+from oracle.grammar_oracles import oracleModel
 
 def dict_to_ns(d):
     return SimpleNamespace(
@@ -83,7 +85,7 @@ def parse_args():
     parser.add_argument(
         "--config",
         type=str,
-        default="./config.yaml",
+        default="../configs/config.yaml",
         help="Path to the configuration file.",
     )
     parser.add_argument("--verbose", action="store_true", help="Enable verbose output.")
@@ -147,8 +149,13 @@ def get_grammar(cfg_data_grammar, cfg_data_l):
         return anbnGrammar(cfg_data_l)
     if cfg_data_grammar == "initial":
         return initialGrammar(cfg_data_l)
+    if cfg_data_grammar in REGrammar.SUPPORTED:
+        return REGrammar(cfg_data_grammar, cfg_data_l)
 
-    raise ValueError(f"Invalid grammar type: {cfg_data_grammar}")
+    raise ValueError(
+        f"Invalid grammar type: {cfg_data_grammar!r}. "
+        f"Valid options: 'anbn', 'initial', or any of {sorted(REGrammar.SUPPORTED)}"
+    )
 
 
 def main():
@@ -226,6 +233,17 @@ def main():
 
     grammar = get_grammar(cfg.data.grammar, cfg.data.l)
     grammar.generate_seq()  # generates the data and stores in grammar.data
+    
+    print(grammar.evaluate(torch.tensor([3, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1, 0,
+        1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0,
+        0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0,
+        0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1,
+        0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0,
+        0, 1, 1, 1, 0, 1, 1, 4, 2, 4], dtype=torch.long)))
+    
+    # exit(0)
+    
+    print(f'Sample of generated grammar data:\n{grammar.data[0:5, 0:20]}')
 
     schedule = get_schedule(cfg, args)
     print(f"Noise schedule: {schedule.__class__.__name__}")
@@ -385,11 +403,14 @@ def main():
         ).to(device)
     elif cfg.model.architecture == "oracle":
         model = oracleModel(
+            grammar_name=cfg.data.grammar,
             vocab_size=cfg.model.vocab_size,
-            device=device
+            device=device,
         ).to(device)
     else:
         raise ValueError(f"Invalid model architecture: {cfg.model.architecture}")
+    
+    print(f'Model eb: {getattr(cfg, 'eb_gamma', 0.1)}')
 
     if args.mode == "train":
         # output = PROJECT_ROOT / "all_masks.txt"
@@ -422,8 +443,10 @@ def main():
             evaluation_dataset=evaluation_dataset,
             verbose=args.verbose,
             save_mode=args.save,
-            strategy=cfg.strategy,
+            decoding_strategy=cfg.decoding_strategy,
+            sampling_strategy=cfg.sampling_strategy,
             temperature=cfg.temperature,
+            eb_gamma=getattr(cfg, 'eb_gamma', 0.1),
             wandb=wandb,
             loss_type=cfg.training.loss_type,
             gaussian_noise=isinstance(schedule, GaussianSchedule),
@@ -438,9 +461,12 @@ def main():
                                      T=cfg.model.T,
                                      denoise=cfg.training.denoise,
                                      oracle=(cfg.model.architecture == "oracle"),
-                                     oracle_model=oracleModel(vocab_size=model.vocab_size, device=device) if cfg.model.architecture != "oracle" else None,
-                                     schedule=schedule)
-        
+                                     oracle_model=oracleModel(grammar_name=cfg.data.grammar, vocab_size=model.vocab_size, device=device) if cfg.model.architecture != "oracle" else None,
+                                     schedule=schedule,
+                                     decoding_strategy=cfg.decoding_strategy,
+                                     sampling_strategy=cfg.sampling_strategy,
+                                     eb_gamma=getattr(cfg, 'eb_gamma', 0.1))
+
         sample = torch.full((cfg.model.max_len,), MASK_token, dtype=torch.long).to(device)
         res = unmasker(sample, ((sample == MASK_token).sum() / torch.numel(sample)), return_steps=False)
         
@@ -471,8 +497,11 @@ def main():
                                      T=cfg.model.T,
                                      denoise=cfg.training.denoise,
                                      oracle=(cfg.model.architecture == "oracle"),
-                                     oracle_model=oracleModel(vocab_size=model.vocab_size, device=device) if cfg.model.architecture != "oracle" else None,
-                                     schedule=schedule)
+                                     oracle_model=oracleModel(grammar_name=cfg.data.grammar, vocab_size=model.vocab_size, device=device) if cfg.model.architecture != "oracle" else None,
+                                     schedule=schedule,
+                                     decoding_strategy=cfg.decoding_strategy,
+                                     sampling_strategy=cfg.sampling_strategy,
+                                     eb_gamma=getattr(cfg, 'eb_gamma', 0.1))
 
         investigate_dataset(model, 
                             unmasker, 
@@ -512,13 +541,15 @@ def main():
                 #     / "n_embed=128_ff=1024_drop=0.1_27012026_221030/model_epochs=96500",
                 #     map_location=torch.device("cpu"),
                 # )
-                
+
                 torch.load(
                     PROJECT_ROOT / "models/sweep1-RPE-uniform-T100_12062026_214734/model_epochs=80000", map_location=torch.device('cpu')
                 )
             )
-        
+
             model = model.to(device)
+
+        all_correct_sequences = []
 
         for iter_eval_dataset in [
             cfg.evaluation.eval_dataset
@@ -533,35 +564,93 @@ def main():
                 sampling_eps=cfg.model.sampling_eps,
                 device=device,
             )
-            
+
             print(current_evaluation_dataset.data.shape)
-            
+            print(f'Sample of evaluation data: {current_evaluation_dataset.data[:5]}')
+
             iter_output_path = dirs.output_path.parent / f"outputs_{iter_eval_dataset}.txt"
             iter_figure_path = dirs.figure_path.parent / f"figures_{iter_eval_dataset}"
             iter_figure_path.mkdir(parents=True, exist_ok=True)
-            
-            evals = evaluation_from_generation(
-                model,
-                grammar,
-                evaluation_dataset=current_evaluation_dataset,
-                strategy=cfg.strategy,
-                temperature=cfg.temperature,
-                T=cfg.model.T,
-                write_steps=True,
-                device=device,
-                figures_path=iter_figure_path,
-                loss_log_path=dirs.loss_log_path,
-                output_path=iter_output_path,
-                save_mode=args.save,
-                schedule=schedule,
-                gaussian_noise=isinstance(schedule, GaussianSchedule),
-                sigma=schedule.sigma if isinstance(schedule, GaussianSchedule) else 1.0,
-                cutoff=cfg.evaluation.cutoff,
-                investigate=True
-            )
+
+            stats, stats_eos, total_eos, sequences, sequences_eos, n_steps_per_seq, correct_sequences = \
+                evaluation_from_generation(
+                    model,
+                    grammar,
+                    evaluation_dataset=current_evaluation_dataset,
+                    decoding_strategy=cfg.decoding_strategy,
+                    sampling_strategy=cfg.sampling_strategy,
+                    temperature=cfg.temperature,
+                    eb_gamma=getattr(cfg, 'eb_gamma', 0.1),
+                    T=cfg.model.T,
+                    write_steps=True,
+                    device=device,
+                    figures_path=iter_figure_path,
+                    loss_log_path=dirs.loss_log_path,
+                    output_path=iter_output_path,
+                    save_mode=args.save,
+                    schedule=schedule,
+                    gaussian_noise=isinstance(schedule, GaussianSchedule),
+                    sigma=schedule.sigma if isinstance(schedule, GaussianSchedule) else 1.0,
+                    cutoff=cfg.evaluation.cutoff,
+                    investigate=True
+                )
+
+            all_correct_sequences.extend(correct_sequences)
+
+            stat_names = ['rule1', 'rule2', 'both_rules', 'format']
+            print(f"\n=== Accuracy ({iter_eval_dataset}) ===")
+            for name, val in zip(stat_names, stats):
+                print(f"  {name}: {float(val):.4f}")
+            if total_eos > 0:
+                print(f"  finished ({total_eos}/{len(sequences)} = {total_eos/len(sequences):.2%}):")
+                for name, val in zip(stat_names, stats_eos):
+                    print(f"    {name}: {float(val):.4f}")
+            if n_steps_per_seq:
+                print(f"  n_steps: mean={np.mean(n_steps_per_seq):.1f}  max={int(np.max(n_steps_per_seq))}")
+
+        # ---- Diversity metrics (over all correct sequences across eval datasets) ----
+        if hasattr(grammar, 'diversity_metrics') and all_correct_sequences:
+            try:
+                import json as _json
+                div = grammar.diversity_metrics(all_correct_sequences)
+                print(f"\n=== Diversity (n_correct={div.get('n_correct', 0)}) ===")
+                _div_display = [
+                    ('uniqueness',               'uniqueness'),
+                    ('duplication_rate',         'duplication_rate'),
+                    ('mean_lev_dist_normalized', 'lev_dist_norm'),
+                    ('bigram_diversity',         'bigram_div'),
+                    ('trigram_diversity',        'trigram_div'),
+                    ('dfa_state_coverage',       'dfa_state_cov'),
+                    ('dfa_transition_coverage',  'dfa_trans_cov'),
+                    ('n_entropy',                'n_entropy'),
+                    ('n_coverage',               'n_coverage'),
+                    ('m_entropy',                'm_entropy'),
+                    ('nm_joint_coverage',        'nm_joint_cov'),
+                    ('max_depth_ratio_mean',     'depth_ratio_mean'),
+                    ('brackets_parens_ratio_mean', 'bp_ratio_mean'),
+                ]
+                for key, label in _div_display:
+                    val = div.get(key, float('nan'))
+                    if not (isinstance(val, float) and math.isnan(val)):
+                        print(f"  {label}: {val:.4f}" if isinstance(val, float) else f"  {label}: {val}")
+
+                if args.save:
+                    div_dist = grammar.diversity_distributions(all_correct_sequences)
+                    div_out = {
+                        'metrics': {k: (None if isinstance(v, float) and math.isnan(v) else v)
+                                    for k, v in div.items()},
+                        'distributions': {k: (v.tolist() if hasattr(v, 'tolist') else v)
+                                          for k, v in div_dist.items()},
+                    }
+                    div_path = dirs.figure_path.parent / 'diversity.json'
+                    with open(div_path, 'w') as _f:
+                        _json.dump(div_out, _f, indent=2)
+                    print(f"  diversity saved → {div_path}")
+            except Exception as _e:
+                print(f"  diversity metrics failed: {type(_e).__name__}: {_e}")
 
         exit(0)
-
+        
         # test different seeds
         # model.load_state_dict(torch.load(MODELS_DIR / f'anbn_diffusion_v8/diffusion_epochs={32500}'))
         # unmask = ScheduledUnmasker(model, T=1500, device=device)

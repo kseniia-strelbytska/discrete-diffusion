@@ -1,0 +1,47 @@
+seed: 42
+device: auto
+decoding_strategy: schedule_driven
+sampling_strategy: categorical
+temperature: 0.1  # logit scaling temperature
+data:
+  l: 256
+  train_split: 0.9
+  batch_size: 128
+  grammar: anbn
+model:
+  architecture: classic # classic (torch-native) or v2 (QKV low-level) or RPE or FIRE or autoregressive or RE
+  max_len: 258       
+  vocab_size: 6
+  n_head: 4
+  n_layers: 7
+  embed_dim: 256
+  dim_feedforward: 1024
+  dropout: 0.1
+  layer_norm_eps: 0.006
+  T: 100 # set to 0 if using autoregressive architecture; otherwise, the number of diffusion steps
+  sampling_eps: 0.00001
+  eos_weight: 1.0
+  inverse_t: False
+training:
+  epochs: 100000
+  learning_rate: 0.002
+  num_warmup_steps: 1000
+  weight_decay: 0.0
+  loss_type: eq8 # eq8, eq9, or cross_entropy (for autoregressive)
+  denoise: "0" # "0" or eps
+validation:
+  val_every: 1000
+evaluation:
+  eval_every: 5000
+  n_samples: 200
+  eval_dataset: complete # limited or randomised or complete
+  eval_type: full # full or random
+  cutoff: 258 # max prediction length cutoff (for autoregressive only)
+wandb:
+  project: "discrete-diffusion"
+  group: "classic_upd"
+paths:
+  models_dir: models
+  figures_dir: figures
+  experiment_name: classic_upd
+notes: "Testing the updated (scaling by sqrt(dim_model) + add dropout after pos encoding) classic model"

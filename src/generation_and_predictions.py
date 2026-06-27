@@ -1,7 +1,7 @@
 import torch 
 import torch.nn as nn
 import itertools
-from constants import EOS_token, SOS_token, PAD_token, MASK_token
+from datasets.constants import EOS_token, SOS_token, PAD_token, MASK_token
 
 # greedy decoding (greedily select position with the most confidence to unmask)
 def get_prediction_masked(model, input, device):

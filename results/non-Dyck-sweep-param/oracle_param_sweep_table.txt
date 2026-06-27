@@ -1,0 +1,100 @@
+
+=== Dataset: unconditional ===
+Config                                                      rule1 (mean ± std)         rule2 (mean ± std)         both_rules (mean ± std)    format (mean ± std)        n_steps (mean / max)  n_reps
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+aNbN    L=128  strat=ar         samp=categorical  —         1.0000 ± 0.0000            1.0000 ± 0.0000            1.0000 ± 0.0000            1.0000 ± 0.0000            129.0 / 129         4
+aNbN    L=128  strat=ar         samp=greedy       —         1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              129.0 / 129         1
+aNbN    L=128  strat=ebsampler  samp=categorical  γ=0.1     0.9950 ± 0.0050            1.0000 ± 0.0000            0.9950 ± 0.0050            0.9925 ± 0.0043            25.6 / 56           4
+aNbN    L=128  strat=ebsampler  samp=categorical  γ=0.5     0.5175 ± 0.0536            1.0000 ± 0.0000            0.5175 ± 0.0536            0.5175 ± 0.0536            8.2 / 26            4
+aNbN    L=128  strat=ebsampler  samp=categorical  γ=0.9     0.2650 ± 0.0320            1.0000 ± 0.0000            0.2650 ± 0.0320            0.2650 ± 0.0320            5.0 / 20            4
+aNbN    L=128  strat=ebsampler  samp=categorical  γ=2.0     0.1500 ± 0.0187            1.0000 ± 0.0000            0.1500 ± 0.0187            0.1500 ± 0.0187            2.6 / 11            4
+aNbN    L=128  strat=ebsampler  samp=categorical  γ=10.0    0.0200 ± 0.0187            1.0000 ± 0.0000            0.0200 ± 0.0187            0.0200 ± 0.0187            1.1 / 3             4
+aNbN    L=128  strat=ebsampler  samp=greedy       γ=0.1     1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              56.0 / 56           1
+aNbN    L=128  strat=ebsampler  samp=greedy       γ=0.5     1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              26.0 / 26           1
+aNbN    L=128  strat=ebsampler  samp=greedy       γ=0.9     1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              21.0 / 21           1
+aNbN    L=128  strat=ebsampler  samp=greedy       γ=2.0     1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              14.0 / 14           1
+aNbN    L=128  strat=ebsampler  samp=greedy       γ=10.0    0.0000 (det.)              1.0000 (det.)              0.0000 (det.)              0.0000 (det.)              5.0 / 5             1
+aNbN    L=128  strat=gaussian   samp=categorical  σ=0.5     0.8075 ± 0.0228            1.0000 ± 0.0000            0.8075 ± 0.0228            0.8075 ± 0.0228            107.4 / 128         4
+aNbN    L=128  strat=gaussian   samp=categorical  σ=2.0     0.8075 ± 0.0334            1.0000 ± 0.0000            0.8075 ± 0.0334            0.8075 ± 0.0334            106.0 / 129         4
+aNbN    L=128  strat=gaussian   samp=categorical  σ=5.0     0.8500 ± 0.0224            1.0000 ± 0.0000            0.8500 ± 0.0224            0.8475 ± 0.0217            109.2 / 129         4
+aNbN    L=128  strat=gaussian   samp=categorical  σ=10.0    0.9075 ± 0.0179            1.0000 ± 0.0000            0.9075 ± 0.0179            0.9050 ± 0.0206            113.0 / 129         4
+aNbN    L=128  strat=gaussian   samp=categorical  σ=20.0    0.9000 ± 0.0308            1.0000 ± 0.0000            0.9000 ± 0.0308            0.9000 ± 0.0308            112.2 / 129         4
+aNbN    L=128  strat=gaussian   samp=greedy       σ=0.5     1.0000 ± 0.0000            1.0000 ± 0.0000            1.0000 ± 0.0000            1.0000 ± 0.0000            126.5 / 128         4
+aNbN    L=128  strat=gaussian   samp=greedy       σ=2.0     1.0000 ± 0.0000            1.0000 ± 0.0000            1.0000 ± 0.0000            1.0000 ± 0.0000            124.8 / 129         4
+aNbN    L=128  strat=gaussian   samp=greedy       σ=5.0     1.0000 ± 0.0000            1.0000 ± 0.0000            1.0000 ± 0.0000            1.0000 ± 0.0000            123.0 / 129         4
+aNbN    L=128  strat=gaussian   samp=greedy       σ=10.0    1.0000 ± 0.0000            1.0000 ± 0.0000            1.0000 ± 0.0000            1.0000 ± 0.0000            121.6 / 129         4
+aNbN    L=128  strat=gaussian   samp=greedy       σ=20.0    0.9975 ± 0.0043            1.0000 ± 0.0000            0.9975 ± 0.0043            0.9975 ± 0.0043            121.6 / 129         4
+aNbN    L=128  strat=uniform    samp=categorical  —         0.8500 ± 0.0394            1.0000 ± 0.0000            0.8500 ± 0.0394            0.8250 ± 0.0364            106.6 / 128         4
+aNbN    L=128  strat=uniform    samp=greedy       —         0.9700 ± 0.0141            1.0000 ± 0.0000            0.9700 ± 0.0141            0.9650 ± 0.0180            123.3 / 128         4
+aNbNcN  L=128  strat=ar         samp=categorical  —         1.0000 ± 0.0000            1.0000 ± 0.0000            1.0000 ± 0.0000            1.0000 ± 0.0000            129.0 / 129         4
+aNbNcN  L=128  strat=ar         samp=greedy       —         1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              129.0 / 129         1
+aNbNcN  L=128  strat=ebsampler  samp=categorical  γ=0.1     1.0000 ± 0.0000            1.0000 ± 0.0000            1.0000 ± 0.0000            1.0000 ± 0.0000            23.5 / 42           4
+aNbNcN  L=128  strat=ebsampler  samp=categorical  γ=0.5     0.4425 ± 0.0602            1.0000 ± 0.0000            0.4425 ± 0.0602            0.4425 ± 0.0602            7.5 / 22            4
+aNbNcN  L=128  strat=ebsampler  samp=categorical  γ=0.9     0.2350 ± 0.0357            1.0000 ± 0.0000            0.2350 ± 0.0357            0.2350 ± 0.0357            4.3 / 16            4
+aNbNcN  L=128  strat=ebsampler  samp=categorical  γ=2.0     0.1050 ± 0.0229            1.0000 ± 0.0000            0.1050 ± 0.0229            0.1050 ± 0.0229            2.5 / 10            4
+aNbNcN  L=128  strat=ebsampler  samp=categorical  γ=10.0    0.0100 ± 0.0122            1.0000 ± 0.0000            0.0100 ± 0.0122            0.0100 ± 0.0122            1.0 / 2             4
+aNbNcN  L=128  strat=ebsampler  samp=greedy       γ=0.1     1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              42.0 / 42           1
+aNbNcN  L=128  strat=ebsampler  samp=greedy       γ=0.5     1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              22.0 / 22           1
+aNbNcN  L=128  strat=ebsampler  samp=greedy       γ=0.9     1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              16.0 / 16           1
+aNbNcN  L=128  strat=ebsampler  samp=greedy       γ=2.0     1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              13.0 / 13           1
+aNbNcN  L=128  strat=ebsampler  samp=greedy       γ=10.0    0.0000 (det.)              1.0000 (det.)              0.0000 (det.)              0.0000 (det.)              5.0 / 5             1
+aNbNcN  L=128  strat=gaussian   samp=categorical  σ=0.5     0.7925 ± 0.0377            1.0000 ± 0.0000            0.7925 ± 0.0377            0.7925 ± 0.0377            104.5 / 128         4
+aNbNcN  L=128  strat=gaussian   samp=categorical  σ=2.0     0.7875 ± 0.0083            1.0000 ± 0.0000            0.7875 ± 0.0083            0.7875 ± 0.0083            102.3 / 129         4
+aNbNcN  L=128  strat=gaussian   samp=categorical  σ=5.0     0.8550 ± 0.0269            1.0000 ± 0.0000            0.8550 ± 0.0269            0.8550 ± 0.0269            108.4 / 129         4
+aNbNcN  L=128  strat=gaussian   samp=categorical  σ=10.0    0.8750 ± 0.0180            1.0000 ± 0.0000            0.8750 ± 0.0180            0.8750 ± 0.0180            109.2 / 129         4
+aNbNcN  L=128  strat=gaussian   samp=categorical  σ=20.0    0.8675 ± 0.0438            1.0000 ± 0.0000            0.8675 ± 0.0438            0.8675 ± 0.0438            109.2 / 129         4
+aNbNcN  L=128  strat=gaussian   samp=greedy       σ=0.5     1.0000 ± 0.0000            1.0000 ± 0.0000            1.0000 ± 0.0000            1.0000 ± 0.0000            126.6 / 128         4
+aNbNcN  L=128  strat=gaussian   samp=greedy       σ=2.0     1.0000 ± 0.0000            1.0000 ± 0.0000            1.0000 ± 0.0000            1.0000 ± 0.0000            124.8 / 129         4
+aNbNcN  L=128  strat=gaussian   samp=greedy       σ=5.0     1.0000 ± 0.0000            1.0000 ± 0.0000            1.0000 ± 0.0000            1.0000 ± 0.0000            123.1 / 129         4
+aNbNcN  L=128  strat=gaussian   samp=greedy       σ=10.0    1.0000 ± 0.0000            1.0000 ± 0.0000            1.0000 ± 0.0000            1.0000 ± 0.0000            121.4 / 129         4
+aNbNcN  L=128  strat=gaussian   samp=greedy       σ=20.0    0.9975 ± 0.0043            1.0000 ± 0.0000            0.9975 ± 0.0043            0.9975 ± 0.0043            121.0 / 129         4
+aNbNcN  L=128  strat=uniform    samp=categorical  —         0.7350 ± 0.0335            1.0000 ± 0.0000            0.7350 ± 0.0335            0.7250 ± 0.0296            93.8 / 128          4
+aNbNcN  L=128  strat=uniform    samp=greedy       —         0.9150 ± 0.0206            1.0000 ± 0.0000            0.9150 ± 0.0206            0.9150 ± 0.0206            117.4 / 128         4
+baN     L=128  strat=ar         samp=categorical  —         1.0000 ± 0.0000            1.0000 ± 0.0000            1.0000 ± 0.0000            1.0000 ± 0.0000            129.0 / 129         4
+baN     L=128  strat=ar         samp=greedy       —         1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              129.0 / 129         1
+baN     L=128  strat=ebsampler  samp=categorical  γ=0.1     1.0000 ± 0.0000            1.0000 ± 0.0000            1.0000 ± 0.0000            1.0000 ± 0.0000            128.0 / 128         4
+baN     L=128  strat=ebsampler  samp=categorical  γ=0.5     1.0000 ± 0.0000            1.0000 ± 0.0000            1.0000 ± 0.0000            1.0000 ± 0.0000            128.0 / 128         4
+baN     L=128  strat=ebsampler  samp=categorical  γ=0.9     0.5350 ± 0.0335            1.0000 ± 0.0000            0.5350 ± 0.0335            1.0000 ± 0.0000            64.0 / 64           4
+baN     L=128  strat=ebsampler  samp=categorical  γ=2.0     0.5075 ± 0.0668            1.0000 ± 0.0000            0.5075 ± 0.0668            0.9975 ± 0.0043            43.0 / 43           4
+baN     L=128  strat=ebsampler  samp=categorical  γ=10.0    0.5150 ± 0.0403            1.0000 ± 0.0000            0.5150 ± 0.0403            0.8550 ± 0.0335            9.0 / 9             4
+baN     L=128  strat=ebsampler  samp=greedy       γ=0.1     1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              128.0 / 128         1
+baN     L=128  strat=ebsampler  samp=greedy       γ=0.5     1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              128.0 / 128         1
+baN     L=128  strat=ebsampler  samp=greedy       γ=0.9     0.0000 (det.)              1.0000 (det.)              0.0000 (det.)              1.0000 (det.)              64.0 / 64           1
+baN     L=128  strat=ebsampler  samp=greedy       γ=2.0     0.0000 (det.)              1.0000 (det.)              0.0000 (det.)              1.0000 (det.)              43.0 / 43           1
+baN     L=128  strat=ebsampler  samp=greedy       γ=10.0    0.0000 (det.)              1.0000 (det.)              0.0000 (det.)              1.0000 (det.)              9.0 / 9             1
+baN     L=128  strat=gaussian   samp=categorical  σ=0.5     0.8750 ± 0.0541            1.0000 ± 0.0000            0.8750 ± 0.0541            0.7675 ± 0.0593            126.2 / 128         4
+baN     L=128  strat=gaussian   samp=categorical  σ=2.0     0.8500 ± 0.0158            1.0000 ± 0.0000            0.8500 ± 0.0158            0.8125 ± 0.0083            124.3 / 129         4
+baN     L=128  strat=gaussian   samp=categorical  σ=5.0     0.8950 ± 0.0112            1.0000 ± 0.0000            0.8950 ± 0.0112            0.9050 ± 0.0112            122.2 / 129         4
+baN     L=128  strat=gaussian   samp=categorical  σ=10.0    0.9325 ± 0.0311            1.0000 ± 0.0000            0.9325 ± 0.0311            0.9450 ± 0.0150            121.1 / 129         4
+baN     L=128  strat=gaussian   samp=categorical  σ=20.0    0.9475 ± 0.0179            1.0000 ± 0.0000            0.9475 ± 0.0179            0.9525 ± 0.0083            120.1 / 129         4
+baN     L=128  strat=gaussian   samp=greedy       σ=0.5     0.7400 ± 0.0224            1.0000 ± 0.0000            0.7400 ± 0.0224            0.7525 ± 0.0295            126.2 / 128         4
+baN     L=128  strat=gaussian   samp=greedy       σ=2.0     0.8425 ± 0.0327            1.0000 ± 0.0000            0.8425 ± 0.0327            0.8900 ± 0.0212            124.4 / 129         4
+baN     L=128  strat=gaussian   samp=greedy       σ=5.0     0.9075 ± 0.0228            1.0000 ± 0.0000            0.9075 ± 0.0228            0.9725 ± 0.0130            122.9 / 129         4
+baN     L=128  strat=gaussian   samp=greedy       σ=10.0    0.8900 ± 0.0300            1.0000 ± 0.0000            0.8900 ± 0.0300            0.9550 ± 0.0180            121.4 / 129         4
+baN     L=128  strat=gaussian   samp=greedy       σ=20.0    0.9375 ± 0.0130            1.0000 ± 0.0000            0.9375 ± 0.0130            0.9925 ± 0.0043            121.0 / 129         4
+baN     L=128  strat=uniform    samp=categorical  —         0.8450 ± 0.0304            1.0000 ± 0.0000            0.8450 ± 0.0304            0.9925 ± 0.0083            126.9 / 128         4
+baN     L=128  strat=uniform    samp=greedy       —         0.6025 ± 0.0402            1.0000 ± 0.0000            0.6025 ± 0.0402            0.9975 ± 0.0043            127.4 / 128         4
+bbaN    L=128  strat=ar         samp=categorical  —         1.0000 ± 0.0000            1.0000 ± 0.0000            1.0000 ± 0.0000            1.0000 ± 0.0000            129.0 / 129         4
+bbaN    L=128  strat=ar         samp=greedy       —         1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              129.0 / 129         1
+bbaN    L=128  strat=ebsampler  samp=categorical  γ=0.1     0.8975 ± 0.0043            1.0000 ± 0.0000            0.8975 ± 0.0043            0.8975 ± 0.0043            52.0 / 109          4
+bbaN    L=128  strat=ebsampler  samp=categorical  γ=0.5     0.3325 ± 0.0109            1.0000 ± 0.0000            0.3325 ± 0.0109            0.1000 ± 0.0255            11.7 / 42           4
+bbaN    L=128  strat=ebsampler  samp=categorical  γ=0.9     0.2900 ± 0.0224            1.0000 ± 0.0000            0.2900 ± 0.0224            0.0825 ± 0.0130            6.3 / 28            4
+bbaN    L=128  strat=ebsampler  samp=categorical  γ=2.0     0.2150 ± 0.0472            1.0000 ± 0.0000            0.2150 ± 0.0472            0.0250 ± 0.0180            2.9 / 13            4
+bbaN    L=128  strat=ebsampler  samp=categorical  γ=10.0    0.0750 ± 0.0229            1.0000 ± 0.0000            0.0750 ± 0.0229            0.0000 ± 0.0000            1.1 / 3             4
+bbaN    L=128  strat=ebsampler  samp=greedy       γ=0.1     1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              111.0 / 111         1
+bbaN    L=128  strat=ebsampler  samp=greedy       γ=0.5     1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              46.0 / 46           1
+bbaN    L=128  strat=ebsampler  samp=greedy       γ=0.9     1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              31.0 / 31           1
+bbaN    L=128  strat=ebsampler  samp=greedy       γ=2.0     0.0000 (det.)              1.0000 (det.)              0.0000 (det.)              1.0000 (det.)              19.0 / 19           1
+bbaN    L=128  strat=ebsampler  samp=greedy       γ=10.0    1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              1.0000 (det.)              7.0 / 7             1
+bbaN    L=128  strat=gaussian   samp=categorical  σ=0.5     0.5475 ± 0.0879            1.0000 ± 0.0000            0.5475 ± 0.0879            0.5125 ± 0.0864            93.8 / 128          4
+bbaN    L=128  strat=gaussian   samp=categorical  σ=2.0     0.6075 ± 0.0415            1.0000 ± 0.0000            0.6075 ± 0.0415            0.5100 ± 0.0464            91.3 / 129          4
+bbaN    L=128  strat=gaussian   samp=categorical  σ=5.0     0.7750 ± 0.0287            1.0000 ± 0.0000            0.7750 ± 0.0287            0.6875 ± 0.0383            103.9 / 129         4
+bbaN    L=128  strat=gaussian   samp=categorical  σ=10.0    0.8375 ± 0.0432            1.0000 ± 0.0000            0.8375 ± 0.0432            0.7525 ± 0.0421            106.4 / 129         4
+bbaN    L=128  strat=gaussian   samp=categorical  σ=20.0    0.8800 ± 0.0367            1.0000 ± 0.0000            0.8800 ± 0.0367            0.8150 ± 0.0502            108.1 / 129         4
+bbaN    L=128  strat=gaussian   samp=greedy       σ=0.5     0.7375 ± 0.0572            1.0000 ± 0.0000            0.7375 ± 0.0572            0.7550 ± 0.0472            126.2 / 128         4
+bbaN    L=128  strat=gaussian   samp=greedy       σ=2.0     0.9075 ± 0.0179            1.0000 ± 0.0000            0.9075 ± 0.0179            0.8950 ± 0.0112            124.5 / 129         4
+bbaN    L=128  strat=gaussian   samp=greedy       σ=5.0     0.9275 ± 0.0192            1.0000 ± 0.0000            0.9275 ± 0.0192            0.9075 ± 0.0164            122.2 / 129         4
+bbaN    L=128  strat=gaussian   samp=greedy       σ=10.0    0.9825 ± 0.0083            1.0000 ± 0.0000            0.9825 ± 0.0083            0.9450 ± 0.0087            121.2 / 129         4
+bbaN    L=128  strat=gaussian   samp=greedy       σ=20.0    0.9800 ± 0.0071            1.0000 ± 0.0000            0.9800 ± 0.0071            0.9625 ± 0.0179            120.3 / 129         4
+bbaN    L=128  strat=uniform    samp=categorical  —         0.8600 ± 0.0141            1.0000 ± 0.0000            0.8600 ± 0.0141            0.8150 ± 0.0357            105.6 / 128         4
+bbaN    L=128  strat=uniform    samp=greedy       —         0.9925 ± 0.0043            1.0000 ± 0.0000            0.9925 ± 0.0043            0.9825 ± 0.0043            126.4 / 128         4

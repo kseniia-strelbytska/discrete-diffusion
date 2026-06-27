@@ -1,7 +1,11 @@
 torch
-numpy 
+numpy
 matplotlib
 tqdm
 pyyaml
 transformers
 wandb
+pytest
+python-Levenshtein
+pandas
+seaborn

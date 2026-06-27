@@ -1,0 +1,12 @@
+{
+  "max_depth_ratios": [
+    0.8,
+    0.5625
+  ],
+  "brackets_parens_ratios": [
+    0.875,
+    1.6666666666666667
+  ],
+  "n_correct": 2,
+  "n_with_parens": 2
+}

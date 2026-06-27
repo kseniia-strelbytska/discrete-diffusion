@@ -1,0 +1,42 @@
+seed: 42
+device: auto
+decoding_strategy: schedule_driven
+sampling_strategy: greedy
+temperature: 1.0  # logit scaling (scale-invariant for greedy)
+data:
+  l: 256
+  train_split: 0.9
+  batch_size: 64
+  grammar: anbn
+model:
+  max_len: 258       
+  vocab_size: 6
+  n_head: 4
+  n_layers: 4
+  embed_dim: 256
+  dim_feedforward: 1024
+  dropout: 0.1
+  layer_norm_eps: 0.0002
+  T: 500
+  sampling_eps: 0.00001
+  eos_weight: 10.0
+  inverse_t: False
+training:
+  epochs: 50000
+  learning_rate: 0.001
+  num_warmup_steps: 1000
+  weight_decay: 0.0
+  loss_type: eq8 # eq8 or eq9
+  denoise: "0" # "0" or eps
+validation:
+  val_every: 1000
+evaluation:
+  eval_every: 5000
+  n_samples: 20
+  eval_dataset: randomised # limited or randomised or complete
+  eval_type: full # full or random
+paths:
+  models_dir: models
+  figures_dir: figures
+  experiment_name: greedy_decoding
+notes: "assessing greedy decoding"

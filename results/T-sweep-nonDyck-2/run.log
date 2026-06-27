@@ -1,0 +1,2478 @@
+
+############################################################
+# T-sweep started: 2026-06-20 11:45:38
+############################################################
+Config: configs/config_oracle.yaml
+Output: results/T-sweep-nonDyck-2
+Workers: 28  (device: cpu)
+
+Fixed config:
+  seed=42  n_samples=10  device_for_cells=cpu
+  temperature=1.0  eval_dataset=unconditional
+
+Sweep axes:
+  GRAMMARS        = ['baN', 'bbaN', 'aNbN', 'aNbNcN']
+  LENGTHS         = [128]
+  T_VALUES        = [4, 8, 16, 32, 64, 128]    (AR fixed at L+2)
+  STRATEGIES      = ['uniform', 'gaussian', 'ar', 'ebsampler']
+  SAMPLERS        = ['greedy', 'categorical']
+  EB_GAMMAS       = [0.1, 0.5, 0.9, 2.0, 5.0, 10.0]
+  GAUSSIAN_SIGMAS = [1.0, 2.0, 5.0, 10.0, 20.0, 50.0]
+
+Grid: 632 cells after filtering.
+  by strategy: ar=8, ebsampler=288, gaussian=288, uniform=48
+Cells to run: 632
+
+
+Log: results/T-sweep-nonDyck-2/run.log
+
+############################################################
+# T-sweep started: 2026-06-20 11:46:38
+############################################################
+Config: configs/config_oracle.yaml
+Output: results/T-sweep-nonDyck-2
+Workers: 8  (device: cpu)
+
+Fixed config:
+  seed=42  n_samples=10  device_for_cells=cpu
+  temperature=1.0  eval_dataset=unconditional
+
+Sweep axes:
+  GRAMMARS        = ['baN', 'bbaN', 'aNbN', 'aNbNcN']
+  LENGTHS         = [128]
+  T_VALUES        = [4, 8, 16, 32, 64, 128]    (AR fixed at L+2)
+  STRATEGIES      = ['uniform', 'gaussian', 'ar', 'ebsampler']
+  SAMPLERS        = ['greedy', 'categorical']
+  EB_GAMMAS       = [0.1, 0.5, 0.9, 2.0, 5.0, 10.0]
+  GAUSSIAN_SIGMAS = [1.0, 2.0, 5.0, 10.0, 20.0, 50.0]
+
+Grid: 632 cells after filtering.
+  by strategy: ar=8, ebsampler=288, gaussian=288, uniform=48
+Cells to run: 632
+
+[1/632  eta=46.4min]
+>> baN     L=128  T=4    strat=uniform    samp=greedy       —
+  built (baN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=4.0/4  n_corr=0  elapsed=2.8s
+[2/632  eta=25.4min]
+>> baN     L=128  T=4    strat=uniform    samp=categorical  —
+  built (baN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.4250 ± 0.0829 (4 reps)  steps=3.6/4  n_corr=15  elapsed=3.1s
+[3/632  eta=17.8min]
+>> baN     L=128  T=8    strat=uniform    samp=greedy       —
+  built (baN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=8.0/8  n_corr=0  elapsed=3.4s
+[4/632  eta=13.8min]
+>> baN     L=128  T=8    strat=uniform    samp=categorical  —
+  built (baN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=0.4250 ± 0.0829 (4 reps)  steps=7.3/8  n_corr=17  elapsed=3.5s
+[5/632  eta=13.2min]
+>> baN     L=128  T=16   strat=uniform    samp=greedy       —
+  built (baN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=16.0/16  n_corr=0  elapsed=4.6s
+[6/632  eta=15.7min]
+>> baN     L=128  T=16   strat=uniform    samp=categorical  —
+  built (baN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=0.5250 ± 0.0829 (4 reps)  steps=15.8/16  n_corr=21  elapsed=4.6s
+[7/632  eta=13.6min]
+>> baN     L=128  T=32   strat=uniform    samp=greedy       —
+  built (baN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=0.0500 ± 0.0500 (4 reps)  steps=32.0/32  n_corr=2  elapsed=7.4s
+
+############################################################
+# T-sweep started: 2026-06-20 11:46:56
+############################################################
+Config: configs/config_oracle.yaml
+Output: results/T-sweep-nonDyck-2
+Workers: 128  (device: cpu)
+
+Fixed config:
+  seed=42  n_samples=10  device_for_cells=cpu
+  temperature=1.0  eval_dataset=unconditional
+
+Sweep axes:
+  GRAMMARS        = ['baN', 'bbaN', 'aNbN', 'aNbNcN']
+  LENGTHS         = [128]
+  T_VALUES        = [4, 8, 16, 32, 64, 128]    (AR fixed at L+2)
+  STRATEGIES      = ['uniform', 'gaussian', 'ar', 'ebsampler']
+  SAMPLERS        = ['greedy', 'categorical']
+  EB_GAMMAS       = [0.1, 0.5, 0.9, 2.0, 5.0, 10.0]
+  GAUSSIAN_SIGMAS = [1.0, 2.0, 5.0, 10.0, 20.0, 50.0]
+
+Grid: 632 cells after filtering.
+  by strategy: ar=8, ebsampler=288, gaussian=288, uniform=48
+Cells to run: 632
+
+
+############################################################
+# T-sweep started: 2026-06-20 11:47:24
+############################################################
+Config: configs/config_oracle.yaml
+Output: results/T-sweep-nonDyck-2
+Workers: 28  (device: cpu)
+
+Fixed config:
+  seed=42  n_samples=10  device_for_cells=cpu
+  temperature=1.0  eval_dataset=unconditional
+
+Sweep axes:
+  GRAMMARS        = ['baN', 'bbaN', 'aNbN', 'aNbNcN']
+  LENGTHS         = [128]
+  T_VALUES        = [4, 8, 16, 32, 64, 128]    (AR fixed at L+2)
+  STRATEGIES      = ['uniform', 'gaussian', 'ar', 'ebsampler']
+  SAMPLERS        = ['greedy', 'categorical']
+  EB_GAMMAS       = [0.1, 0.5, 0.9, 2.0, 5.0, 10.0]
+  GAUSSIAN_SIGMAS = [1.0, 2.0, 5.0, 10.0, 20.0, 50.0]
+
+Grid: 632 cells after filtering.
+  by strategy: ar=8, ebsampler=288, gaussian=288, uniform=48
+Cells to run: 632
+
+[1/632  eta=187.1min]
+>> baN     L=128  T=4    strat=uniform    samp=greedy       —
+  built (baN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=4.0/4  n_corr=0  elapsed=11.6s
+[2/632  eta=96.1min]
+>> baN     L=128  T=4    strat=uniform    samp=categorical  —
+  built (baN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.4250 ± 0.0829 (4 reps)  steps=3.6/4  n_corr=15  elapsed=11.3s
+[3/632  eta=69.4min]
+>> baN     L=128  T=8    strat=uniform    samp=greedy       —
+  built (baN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=8.0/8  n_corr=0  elapsed=13.1s
+[4/632  eta=53.3min]
+>> baN     L=128  T=8    strat=uniform    samp=categorical  —
+  built (baN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=0.4250 ± 0.0829 (4 reps)  steps=7.3/8  n_corr=17  elapsed=13.3s
+[5/632  eta=52.0min]
+>> baN     L=128  T=16   strat=uniform    samp=greedy       —
+  built (baN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=16.0/16  n_corr=0  elapsed=18.1s
+[6/632  eta=44.1min]
+>> baN     L=128  T=16   strat=uniform    samp=categorical  —
+  built (baN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=0.5250 ± 0.0829 (4 reps)  steps=15.8/16  n_corr=21  elapsed=18.4s
+[7/632  eta=39.8min]
+>> baN     L=128  T=4    strat=gaussian   samp=greedy       σ=50.0
+  built (baN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.4000 ± 0.0707 (4 reps)  steps=4.5/5  n_corr=16  elapsed=19.7s
+[8/632  eta=42.9min]
+>> baN     L=128  T=4    strat=gaussian   samp=greedy       σ=20.0
+  built (baN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.2250 ± 0.0829 (4 reps)  steps=4.2/5  n_corr=9  elapsed=26.0s
+[9/632  eta=38.4min]
+>> baN     L=128  T=4    strat=gaussian   samp=greedy       σ=10.0
+  built (baN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.0500 ± 0.0500 (4 reps)  steps=4.1/5  n_corr=2  elapsed=26.1s
+[10/632  eta=34.6min]
+>> baN     L=128  T=32   strat=uniform    samp=greedy       —
+  built (baN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=0.0500 ± 0.0500 (4 reps)  steps=32.0/32  n_corr=2  elapsed=26.5s
+[11/632  eta=32.2min]
+>> baN     L=128  T=4    strat=gaussian   samp=greedy       σ=2.0
+  built (baN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=4.0/4  n_corr=0  elapsed=27.2s
+[12/632  eta=30.1min]
+>> baN     L=128  T=4    strat=gaussian   samp=greedy       σ=5.0
+  built (baN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.1000 ± 0.1225 (4 reps)  steps=4.0/5  n_corr=4  elapsed=28.0s
+[13/632  eta=28.1min]
+>> baN     L=128  T=32   strat=uniform    samp=categorical  —
+  built (baN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=0.5750 ± 0.1479 (4 reps)  steps=30.9/32  n_corr=21  elapsed=28.5s
+[14/632  eta=28.3min]
+>> baN     L=128  T=4    strat=gaussian   samp=greedy       σ=1.0
+  built (baN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=4.0/4  n_corr=0  elapsed=31.4s
+[15/632  eta=27.8min]
+>> baN     L=128  T=8    strat=gaussian   samp=greedy       σ=50.0
+  built (baN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=0.5000 ± 0.0707 (4 reps)  steps=8.4/9  n_corr=20  elapsed=33.4s
+
+############################################################
+# T-sweep started: 2026-06-20 11:57:07
+############################################################
+Config: configs/config_oracle.yaml
+Output: results/T-sweep-nonDyck-2
+Workers: 28  (device: cpu)
+
+Fixed config:
+  seed=42  n_samples=10  device_for_cells=cpu
+  temperature=1.0  eval_dataset=unconditional
+
+Sweep axes:
+  GRAMMARS        = ['baN', 'bbaN', 'aNbN', 'aNbNcN']
+  LENGTHS         = [128]
+  T_VALUES        = [4, 8, 16, 32, 64, 128]    (AR fixed at L+2)
+  STRATEGIES      = ['uniform', 'gaussian', 'ar', 'ebsampler']
+  SAMPLERS        = ['greedy', 'categorical']
+  EB_GAMMAS       = [0.1, 0.5, 0.9, 2.0, 5.0, 10.0]
+  GAUSSIAN_SIGMAS = [1.0, 2.0, 5.0, 10.0, 20.0, 50.0]
+
+Grid: 632 cells after filtering.
+  by strategy: ar=8, ebsampler=288, gaussian=288, uniform=48
+Cells to run: 632
+
+[1/632  eta=173.6min]
+>> baN     L=128  T=4    strat=uniform    samp=greedy       —
+  built (baN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=4.0/4  n_corr=0  elapsed=10.7s
+[2/632  eta=89.1min]
+>> baN     L=128  T=4    strat=uniform    samp=categorical  —
+  built (baN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.4250 ± 0.0829 (4 reps)  steps=3.6/4  n_corr=15  elapsed=10.7s
+[3/632  eta=65.7min]
+>> baN     L=128  T=8    strat=uniform    samp=categorical  —
+  built (baN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=0.4250 ± 0.0829 (4 reps)  steps=7.3/8  n_corr=17  elapsed=12.7s
+[4/632  eta=49.5min]
+>> baN     L=128  T=8    strat=uniform    samp=greedy       —
+  built (baN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=8.0/8  n_corr=0  elapsed=12.9s
+[5/632  eta=47.7min]
+>> baN     L=128  T=16   strat=uniform    samp=greedy       —
+  built (baN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=16.0/16  n_corr=0  elapsed=16.8s
+[6/632  eta=41.5min]
+>> baN     L=128  T=4    strat=gaussian   samp=greedy       σ=50.0
+  built (baN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.4000 ± 0.0707 (4 reps)  steps=4.5/5  n_corr=16  elapsed=17.3s
+[7/632  eta=35.9min]
+>> baN     L=128  T=16   strat=uniform    samp=categorical  —
+  built (baN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=0.5250 ± 0.0829 (4 reps)  steps=15.8/16  n_corr=21  elapsed=17.8s
+[8/632  eta=36.5min]
+>> baN     L=128  T=4    strat=gaussian   samp=greedy       σ=20.0
+  built (baN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.2250 ± 0.0829 (4 reps)  steps=4.2/5  n_corr=9  elapsed=21.5s
+[9/632  eta=38.0min]
+>> baN     L=128  T=32   strat=uniform    samp=greedy       —
+  built (baN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=0.0500 ± 0.0500 (4 reps)  steps=32.0/32  n_corr=2  elapsed=26.9s
+[10/632  eta=34.5min]
+>> baN     L=128  T=4    strat=gaussian   samp=greedy       σ=5.0
+  built (baN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.1000 ± 0.1225 (4 reps)  steps=4.0/5  n_corr=4  elapsed=26.8s
+[11/632  eta=32.0min]
+>> baN     L=128  T=8    strat=gaussian   samp=greedy       σ=50.0
+  built (baN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=0.5000 ± 0.0707 (4 reps)  steps=8.4/9  n_corr=20  elapsed=27.3s
+[12/632  eta=29.5min]
+>> baN     L=128  T=4    strat=gaussian   samp=greedy       σ=10.0
+  built (baN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.0500 ± 0.0500 (4 reps)  steps=4.1/5  n_corr=2  elapsed=27.6s
+[13/632  eta=27.3min]
+>> baN     L=128  T=32   strat=uniform    samp=categorical  —
+  built (baN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=0.5750 ± 0.1479 (4 reps)  steps=30.9/32  n_corr=21  elapsed=28.0s
+[14/632  eta=25.5min]
+>> baN     L=128  T=4    strat=gaussian   samp=greedy       σ=1.0
+  built (baN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=4.0/4  n_corr=0  elapsed=28.3s
+[15/632  eta=25.8min]
+>> baN     L=128  T=4    strat=gaussian   samp=greedy       σ=2.0
+  built (baN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=4.0/4  n_corr=0  elapsed=31.1s
+[16/632  eta=28.7min]
+>> baN     L=128  T=8    strat=gaussian   samp=greedy       σ=20.0
+  built (baN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=0.4000 ± 0.1581 (4 reps)  steps=8.2/9  n_corr=16  elapsed=38.1s
+[17/632  eta=32.5min]
+>> baN     L=128  T=64   strat=uniform    samp=categorical  —
+  built (baN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=0.5750 ± 0.0829 (4 reps)  steps=63.8/64  n_corr=23  elapsed=47.5s
+[18/632  eta=30.7min]
+>> baN     L=128  T=8    strat=gaussian   samp=greedy       σ=2.0
+  built (baN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=0.2000 ± 0.0707 (4 reps)  steps=8.0/8  n_corr=8  elapsed=47.5s
+[19/632  eta=29.2min]
+>> baN     L=128  T=8    strat=gaussian   samp=greedy       σ=10.0
+  built (baN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=0.1500 ± 0.1118 (4 reps)  steps=8.1/9  n_corr=6  elapsed=47.7s
+[20/632  eta=27.7min]
+>> baN     L=128  T=8    strat=gaussian   samp=greedy       σ=1.0
+  built (baN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=0.5750 ± 0.0433 (4 reps)  steps=8.0/8  n_corr=23  elapsed=47.8s
+[21/632  eta=27.1min]
+>> baN     L=128  T=8    strat=gaussian   samp=greedy       σ=5.0
+  built (baN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=0.0750 ± 0.0433 (4 reps)  steps=8.1/9  n_corr=3  elapsed=49.3s
+[22/632  eta=28.3min]
+>> baN     L=128  T=64   strat=uniform    samp=greedy       —
+  built (baN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=0.1750 ± 0.1479 (4 reps)  steps=63.9/64  n_corr=7  elapsed=55.3s
+[23/632  eta=30.1min]
+>> baN     L=128  T=16   strat=gaussian   samp=greedy       σ=50.0
+  built (baN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=0.7000 ± 0.2121 (4 reps)  steps=16.1/17  n_corr=28  elapsed=51.2s
+[24/632  eta=34.5min]
+>> baN     L=128  T=4    strat=gaussian   samp=categorical  σ=1.0
+  built (baN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.6000 ± 0.0707 (4 reps)  steps=4.0/4  n_corr=13  elapsed=25.7s
+[25/632  eta=33.9min]
+>> baN     L=128  T=128  strat=uniform    samp=categorical  —
+  built (baN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=0.7750 ± 0.1479 (4 reps)  steps=127.3/128  n_corr=30  elapsed=77.4s
+[26/632  eta=33.4min]
+>> baN     L=128  T=16   strat=gaussian   samp=greedy       σ=10.0
+  built (baN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=0.4250 ± 0.2165 (4 reps)  steps=15.6/17  n_corr=17  elapsed=79.5s
+[27/632  eta=32.3min]
+>> baN     L=128  T=16   strat=gaussian   samp=greedy       σ=20.0
+  built (baN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=0.7000 ± 0.2121 (4 reps)  steps=15.9/17  n_corr=28  elapsed=69.8s
+[28/632  eta=33.2min]
+>> baN     L=128  T=4    strat=gaussian   samp=categorical  σ=2.0
+  built (baN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.5750 ± 0.1479 (4 reps)  steps=4.0/4  n_corr=11  elapsed=30.8s
+[29/632  eta=32.0min]
+>> baN     L=128  T=4    strat=gaussian   samp=categorical  σ=5.0
+   → both_rules=0.4750 ± 0.1090 (4 reps)  steps=4.0/5  n_corr=10  elapsed=24.1s
+[30/632  eta=31.5min]
+>> baN     L=128  T=128  strat=uniform    samp=greedy       —
+  built (baN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=0.6000 ± 0.2345 (4 reps)  steps=127.3/128  n_corr=24  elapsed=87.8s
+[31/632  eta=30.6min]
+>> baN     L=128  T=16   strat=gaussian   samp=greedy       σ=5.0
+  built (baN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=0.4750 ± 0.0829 (4 reps)  steps=15.8/16  n_corr=19  elapsed=87.9s
+[32/632  eta=30.9min]
+>> baN     L=128  T=16   strat=gaussian   samp=greedy       σ=1.0
+  built (baN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=0.6250 ± 0.2046 (4 reps)  steps=16.0/16  n_corr=25  elapsed=92.3s
+[33/632  eta=30.9min]
+>> baN     L=128  T=4    strat=gaussian   samp=categorical  σ=50.0
+  built (baN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.4500 ± 0.0500 (4 reps)  steps=3.7/5  n_corr=11  elapsed=15.9s
+[34/632  eta=30.7min]
+>> baN     L=128  T=4    strat=gaussian   samp=categorical  σ=20.0
+  built (baN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.5250 ± 0.0829 (4 reps)  steps=4.0/5  n_corr=13  elapsed=20.8s
+[35/632  eta=30.1min]
+>> baN     L=128  T=4    strat=gaussian   samp=categorical  σ=10.0
+   → both_rules=0.6000 ± 0.0707 (4 reps)  steps=4.0/5  n_corr=14  elapsed=24.2s
+[36/632  eta=30.8min]
+>> baN     L=128  T=16   strat=gaussian   samp=greedy       σ=2.0
+  built (baN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=0.4750 ± 0.0829 (4 reps)  steps=16.0/16  n_corr=19  elapsed=105.1s
+[37/632  eta=32.2min]
+>> baN     L=128  T=32   strat=gaussian   samp=greedy       σ=50.0
+  built (baN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=0.6750 ± 0.0829 (4 reps)  steps=31.3/33  n_corr=27  elapsed=91.7s
+[38/632  eta=33.0min]
+>> baN     L=128  T=8    strat=gaussian   samp=categorical  σ=50.0
+  built (baN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=0.7000 ± 0.1414 (4 reps)  steps=8.0/9  n_corr=27  elapsed=27.6s
+[39/632  eta=33.6min]
+>> baN     L=128  T=8    strat=gaussian   samp=categorical  σ=20.0
+  built (baN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=0.8250 ± 0.1090 (4 reps)  steps=7.8/9  n_corr=26  elapsed=37.7s
+[40/632  eta=33.4min]
+>> baN     L=128  T=8    strat=gaussian   samp=categorical  σ=1.0
+  built (baN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=0.4000 ± 0.0707 (4 reps)  steps=8.0/9  n_corr=6  elapsed=48.7s
+[41/632  eta=33.6min]
+>> baN     L=128  T=8    strat=gaussian   samp=categorical  σ=5.0
+  built (baN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=0.5000 ± 0.1000 (4 reps)  steps=8.0/9  n_corr=15  elapsed=47.2s
+[42/632  eta=32.7min]
+>> baN     L=128  T=8    strat=gaussian   samp=categorical  σ=10.0
+  built (baN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=0.4250 ± 0.1479 (4 reps)  steps=7.7/9  n_corr=10  elapsed=45.6s
+[43/632  eta=35.0min]
+>> baN     L=128  T=8    strat=gaussian   samp=categorical  σ=2.0
+  built (baN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=0.4750 ± 0.1785 (4 reps)  steps=8.0/9  n_corr=9  elapsed=61.0s
+[44/632  eta=36.5min]
+>> baN     L=128  T=32   strat=gaussian   samp=greedy       σ=20.0
+  built (baN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=0.6500 ± 0.1118 (4 reps)  steps=30.9/33  n_corr=26  elapsed=139.5s
+[45/632  eta=38.8min]
+>> baN     L=128  T=16   strat=gaussian   samp=categorical  σ=50.0
+   → both_rules=0.8250 ± 0.0433 (4 reps)  steps=14.6/17  n_corr=26  elapsed=51.7s
+[46/632  eta=41.4min]
+>> baN     L=128  T=16   strat=gaussian   samp=categorical  σ=20.0
+  built (baN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=0.8500 ± 0.0500 (4 reps)  steps=15.2/17  n_corr=31  elapsed=74.8s
+[47/632  eta=41.1min]
+>> baN     L=128  T=16   strat=gaussian   samp=categorical  σ=1.0
+   → both_rules=0.5250 ± 0.0433 (4 reps)  steps=15.9/17  n_corr=7  elapsed=96.0s
+[48/632  eta=40.7min]
+>> baN     L=128  T=16   strat=gaussian   samp=categorical  σ=5.0
+  built (baN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=0.6000 ± 0.0707 (4 reps)  steps=15.4/16  n_corr=15  elapsed=94.5s
+[49/632  eta=39.8min]
+>> baN     L=128  T=16   strat=gaussian   samp=categorical  σ=2.0
+  built (baN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=0.5500 ± 0.1500 (4 reps)  steps=15.9/17  n_corr=14  elapsed=95.9s
+[50/632  eta=39.0min]
+>> baN     L=128  T=32   strat=gaussian   samp=greedy       σ=2.0
+  built (baN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=0.4500 ± 0.2693 (4 reps)  steps=31.4/32  n_corr=18  elapsed=182.0s
+[51/632  eta=38.2min]
+>> baN     L=128  T=32   strat=gaussian   samp=greedy       σ=10.0
+  built (baN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=0.6250 ± 0.0829 (4 reps)  steps=30.7/33  n_corr=25  elapsed=177.3s
+[52/632  eta=38.1min]
+>> baN     L=128  T=32   strat=gaussian   samp=greedy       σ=5.0
+  built (baN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=0.6750 ± 0.0829 (4 reps)  steps=30.9/32  n_corr=27  elapsed=182.1s
+[53/632  eta=38.0min]
+>> baN     L=128  T=16   strat=gaussian   samp=categorical  σ=10.0
+   → both_rules=0.6500 ± 0.1118 (4 reps)  steps=15.2/17  n_corr=22  elapsed=97.2s
+[54/632  eta=38.2min]
+>> baN     L=128  T=32   strat=gaussian   samp=greedy       σ=1.0
+  built (baN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=0.8000 ± 0.1000 (4 reps)  steps=31.9/32  n_corr=32  elapsed=195.0s
+[55/632  eta=38.4min]
+>> baN     L=128  T=64   strat=gaussian   samp=greedy       σ=50.0
+  built (baN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=0.8750 ± 0.0829 (4 reps)  steps=61.7/65  n_corr=35  elapsed=184.8s
+[56/632  eta=45.9min]
+>> baN     L=128  T=32   strat=gaussian   samp=categorical  σ=50.0
+   → both_rules=0.8500 ± 0.0866 (4 reps)  steps=30.9/33  n_corr=33  elapsed=103.7s
+[57/632  eta=52.9min]
+>> baN     L=128  T=64   strat=gaussian   samp=greedy       σ=20.0
+  built (baN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=0.7750 ± 0.1090 (4 reps)  steps=61.6/65  n_corr=31  elapsed=279.8s
+[58/632  eta=51.9min]
+>> baN     L=128  T=32   strat=gaussian   samp=categorical  σ=10.0
+  built (baN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=0.6750 ± 0.1299 (4 reps)  steps=30.1/33  n_corr=23  elapsed=175.0s
+[59/632  eta=52.0min]
+>> baN     L=128  T=32   strat=gaussian   samp=categorical  σ=5.0
+  built (baN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=0.7000 ± 0.1581 (4 reps)  steps=30.6/33  n_corr=21  elapsed=181.1s
+[60/632  eta=51.6min]
+>> baN     L=128  T=32   strat=gaussian   samp=categorical  σ=2.0
+  built (baN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=0.6000 ± 0.1871 (4 reps)  steps=31.2/32  n_corr=15  elapsed=189.1s
+[61/632  eta=50.8min]
+>> baN     L=128  T=32   strat=gaussian   samp=categorical  σ=20.0
+  built (baN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=0.8250 ± 0.1920 (4 reps)  steps=30.0/33  n_corr=32  elapsed=172.0s
+[62/632  eta=50.2min]
+>> baN     L=128  T=32   strat=gaussian   samp=categorical  σ=1.0
+  built (baN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=0.6000 ± 0.2449 (4 reps)  steps=31.5/32  n_corr=15  elapsed=194.9s
+[63/632  eta=49.5min]
+>> baN     L=128  T=4    strat=ebsampler  samp=greedy       γ=0.1
+   → both_rules=1.0000 (det)  steps=128.0/128  n_corr=10  elapsed=7.8s
+[64/632  eta=49.1min]
+>> baN     L=128  T=4    strat=ebsampler  samp=greedy       γ=0.9
+   → both_rules=0.0000 (det)  steps=64.0/64  n_corr=0  elapsed=6.1s
+[65/632  eta=48.2min]
+>> baN     L=128  T=4    strat=ebsampler  samp=greedy       γ=5.0
+   → both_rules=0.0000 (det)  steps=16.0/16  n_corr=0  elapsed=3.0s
+[66/632  eta=47.4min]
+>> baN     L=128  T=4    strat=ebsampler  samp=greedy       γ=2.0
+  built (baN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.0000 (det)  steps=43.0/43  n_corr=0  elapsed=4.2s
+[67/632  eta=46.7min]
+>> baN     L=128  T=4    strat=ebsampler  samp=greedy       γ=0.5
+   → both_rules=1.0000 (det)  steps=128.0/128  n_corr=10  elapsed=8.1s
+[68/632  eta=46.3min]
+>> baN     L=128  T=4    strat=ebsampler  samp=greedy       γ=10.0
+   → both_rules=0.0000 (det)  steps=9.0/9  n_corr=0  elapsed=3.3s
+[69/632  eta=45.9min]
+>> baN     L=128  T=8    strat=ebsampler  samp=greedy       γ=0.9
+   → both_rules=0.0000 (det)  steps=64.0/64  n_corr=0  elapsed=5.0s
+[70/632  eta=45.5min]
+>> baN     L=128  T=8    strat=ebsampler  samp=greedy       γ=0.1
+   → both_rules=1.0000 (det)  steps=128.0/128  n_corr=10  elapsed=7.9s
+[71/632  eta=44.8min]
+>> baN     L=128  T=8    strat=ebsampler  samp=greedy       γ=0.5
+   → both_rules=1.0000 (det)  steps=128.0/128  n_corr=10  elapsed=8.2s
+[72/632  eta=44.1min]
+>> baN     L=128  T=8    strat=ebsampler  samp=greedy       γ=2.0
+   → both_rules=0.0000 (det)  steps=43.0/43  n_corr=0  elapsed=5.3s
+[73/632  eta=43.5min]
+>> baN     L=128  T=8    strat=ebsampler  samp=greedy       γ=5.0
+   → both_rules=0.0000 (det)  steps=16.0/16  n_corr=0  elapsed=3.4s
+[74/632  eta=43.2min]
+>> baN     L=128  T=8    strat=ebsampler  samp=greedy       γ=10.0
+   → both_rules=0.0000 (det)  steps=9.0/9  n_corr=0  elapsed=3.7s
+[75/632  eta=43.2min]
+>> baN     L=128  T=16   strat=ebsampler  samp=greedy       γ=0.9
+   → both_rules=0.0000 (det)  steps=64.0/64  n_corr=0  elapsed=7.5s
+[76/632  eta=42.8min]
+>> baN     L=128  T=16   strat=ebsampler  samp=greedy       γ=2.0
+   → both_rules=0.0000 (det)  steps=43.0/43  n_corr=0  elapsed=7.5s
+[77/632  eta=42.3min]
+>> baN     L=128  T=16   strat=ebsampler  samp=greedy       γ=0.1
+   → both_rules=1.0000 (det)  steps=128.0/128  n_corr=10  elapsed=12.2s
+[78/632  eta=41.9min]
+>> baN     L=128  T=16   strat=ebsampler  samp=greedy       γ=5.0
+   → both_rules=0.0000 (det)  steps=16.0/16  n_corr=0  elapsed=5.3s
+[79/632  eta=41.4min]
+>> baN     L=128  T=16   strat=ebsampler  samp=greedy       γ=10.0
+   → both_rules=0.0000 (det)  steps=9.0/9  n_corr=0  elapsed=3.5s
+[80/632  eta=40.8min]
+>> baN     L=128  T=16   strat=ebsampler  samp=greedy       γ=0.5
+  built (baN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=1.0000 (det)  steps=128.0/128  n_corr=10  elapsed=14.4s
+[81/632  eta=41.3min]
+>> baN     L=128  T=32   strat=ebsampler  samp=greedy       γ=0.9
+   → both_rules=0.0000 (det)  steps=64.0/64  n_corr=0  elapsed=9.5s
+[82/632  eta=40.7min]
+>> baN     L=128  T=32   strat=ebsampler  samp=greedy       γ=2.0
+   → both_rules=0.0000 (det)  steps=43.0/43  n_corr=0  elapsed=9.1s
+[83/632  eta=40.2min]
+>> baN     L=128  T=32   strat=ebsampler  samp=greedy       γ=0.1
+   → both_rules=1.0000 (det)  steps=128.0/128  n_corr=10  elapsed=12.8s
+[84/632  eta=39.9min]
+>> baN     L=128  T=32   strat=ebsampler  samp=greedy       γ=0.5
+   → both_rules=1.0000 (det)  steps=128.0/128  n_corr=10  elapsed=12.7s
+[85/632  eta=39.4min]
+>> baN     L=128  T=32   strat=ebsampler  samp=greedy       γ=5.0
+   → both_rules=0.0000 (det)  steps=16.0/16  n_corr=0  elapsed=3.5s
+[86/632  eta=38.9min]
+>> baN     L=128  T=32   strat=ebsampler  samp=greedy       γ=10.0
+   → both_rules=0.0000 (det)  steps=9.0/9  n_corr=0  elapsed=3.8s
+[87/632  eta=39.0min]
+>> baN     L=128  T=64   strat=ebsampler  samp=greedy       γ=0.9
+  built (baN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=0.0000 (det)  steps=64.0/64  n_corr=0  elapsed=5.6s
+[88/632  eta=38.5min]
+>> baN     L=128  T=64   strat=ebsampler  samp=greedy       γ=2.0
+   → both_rules=0.0000 (det)  steps=43.0/43  n_corr=0  elapsed=5.5s
+[89/632  eta=38.0min]
+>> baN     L=128  T=64   strat=ebsampler  samp=greedy       γ=0.1
+  built (baN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=1.0000 (det)  steps=128.0/128  n_corr=10  elapsed=8.8s
+[90/632  eta=37.7min]
+>> baN     L=128  T=64   strat=ebsampler  samp=greedy       γ=0.5
+  built (baN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=1.0000 (det)  steps=128.0/128  n_corr=10  elapsed=8.6s
+[91/632  eta=37.3min]
+>> baN     L=128  T=64   strat=ebsampler  samp=greedy       γ=5.0
+   → both_rules=0.0000 (det)  steps=16.0/16  n_corr=0  elapsed=3.3s
+[92/632  eta=36.8min]
+>> baN     L=128  T=64   strat=ebsampler  samp=greedy       γ=10.0
+   → both_rules=0.0000 (det)  steps=9.0/9  n_corr=0  elapsed=3.4s
+[93/632  eta=36.9min]
+>> baN     L=128  T=128  strat=ebsampler  samp=greedy       γ=0.9
+  built (baN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=0.0000 (det)  steps=64.0/64  n_corr=0  elapsed=5.9s
+[94/632  eta=36.5min]
+>> baN     L=128  T=128  strat=ebsampler  samp=greedy       γ=2.0
+  built (baN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=0.0000 (det)  steps=43.0/43  n_corr=0  elapsed=5.6s
+[95/632  eta=36.1min]
+>> baN     L=128  T=128  strat=ebsampler  samp=greedy       γ=0.1
+  built (baN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=1.0000 (det)  steps=128.0/128  n_corr=10  elapsed=8.8s
+[96/632  eta=35.8min]
+>> baN     L=128  T=128  strat=ebsampler  samp=greedy       γ=0.5
+  built (baN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=1.0000 (det)  steps=128.0/128  n_corr=10  elapsed=9.0s
+[97/632  eta=35.5min]
+>> baN     L=128  T=128  strat=ebsampler  samp=greedy       γ=5.0
+   → both_rules=0.0000 (det)  steps=16.0/16  n_corr=0  elapsed=3.4s
+[98/632  eta=35.1min]
+>> baN     L=128  T=128  strat=ebsampler  samp=greedy       γ=10.0
+   → both_rules=0.0000 (det)  steps=9.0/9  n_corr=0  elapsed=3.7s
+[99/632  eta=34.7min]
+>> baN     L=128  T=64   strat=gaussian   samp=greedy       σ=5.0
+  built (baN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=0.6750 ± 0.0829 (4 reps)  steps=61.4/65  n_corr=27  elapsed=352.3s
+[100/632  eta=36.4min]
+>> baN     L=128  T=64   strat=gaussian   samp=greedy       σ=10.0
+  built (baN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=0.8000 ± 0.1225 (4 reps)  steps=61.4/65  n_corr=32  elapsed=376.3s
+[101/632  eta=36.1min]
+>> baN     L=128  T=4    strat=ebsampler  samp=categorical  γ=5.0
+  built (baN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.5750 ± 0.1785 (4 reps)  steps=16.0/16  n_corr=23  elapsed=25.5s
+[102/632  eta=36.1min]
+>> baN     L=128  T=64   strat=gaussian   samp=greedy       σ=2.0
+  built (baN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=0.6750 ± 0.1090 (4 reps)  steps=62.5/64  n_corr=27  elapsed=383.1s
+[103/632  eta=35.8min]
+>> baN     L=128  T=64   strat=gaussian   samp=categorical  σ=50.0
+  built (baN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=0.8500 ± 0.1500 (4 reps)  steps=60.9/65  n_corr=34  elapsed=216.8s
+[104/632  eta=35.6min]
+>> baN     L=128  T=4    strat=ebsampler  samp=categorical  γ=2.0
+   → both_rules=0.5500 ± 0.1500 (4 reps)  steps=43.0/43  n_corr=22  elapsed=34.5s
+[105/632  eta=35.2min]
+>> baN     L=128  T=64   strat=gaussian   samp=greedy       σ=1.0
+  built (baN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=0.7250 ± 0.1299 (4 reps)  steps=63.0/64  n_corr=29  elapsed=387.9s
+[106/632  eta=35.0min]
+>> baN     L=128  T=4    strat=ebsampler  samp=categorical  γ=0.9
+   → both_rules=0.5250 ± 0.1920 (4 reps)  steps=64.0/64  n_corr=21  elapsed=37.3s
+[107/632  eta=35.6min]
+>> baN     L=128  T=4    strat=ebsampler  samp=categorical  γ=10.0
+   → both_rules=0.4500 ± 0.2062 (4 reps)  steps=9.0/9  n_corr=18  elapsed=24.3s
+[108/632  eta=35.5min]
+>> baN     L=128  T=128  strat=gaussian   samp=greedy       σ=50.0
+  built (baN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=0.9000 ± 0.0707 (4 reps)  steps=122.3/129  n_corr=36  elapsed=384.6s
+[109/632  eta=35.4min]
+>> baN     L=128  T=8    strat=ebsampler  samp=categorical  γ=5.0
+  built (baN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=0.5750 ± 0.1785 (4 reps)  steps=16.0/16  n_corr=23  elapsed=21.2s
+[110/632  eta=35.2min]
+>> baN     L=128  T=8    strat=ebsampler  samp=categorical  γ=10.0
+   → both_rules=0.4500 ± 0.2062 (4 reps)  steps=9.0/9  n_corr=18  elapsed=21.6s
+[111/632  eta=35.2min]
+>> baN     L=128  T=8    strat=ebsampler  samp=categorical  γ=2.0
+   → both_rules=0.5500 ± 0.1500 (4 reps)  steps=43.0/43  n_corr=22  elapsed=29.6s
+[112/632  eta=34.9min]
+>> baN     L=128  T=8    strat=ebsampler  samp=categorical  γ=0.9
+   → both_rules=0.5250 ± 0.1920 (4 reps)  steps=64.0/64  n_corr=21  elapsed=32.4s
+[113/632  eta=36.1min]
+>> baN     L=128  T=16   strat=ebsampler  samp=categorical  γ=2.0
+   → both_rules=0.5500 ± 0.1500 (4 reps)  steps=43.0/43  n_corr=22  elapsed=26.4s
+[114/632  eta=35.9min]
+>> baN     L=128  T=16   strat=ebsampler  samp=categorical  γ=10.0
+  built (baN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=0.4500 ± 0.2062 (4 reps)  steps=9.0/9  n_corr=18  elapsed=23.0s
+[115/632  eta=35.7min]
+>> baN     L=128  T=16   strat=ebsampler  samp=categorical  γ=0.9
+  built (baN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=0.5250 ± 0.1920 (4 reps)  steps=64.0/64  n_corr=21  elapsed=33.5s
+[116/632  eta=35.4min]
+>> baN     L=128  T=16   strat=ebsampler  samp=categorical  γ=5.0
+   → both_rules=0.5750 ± 0.1785 (4 reps)  steps=16.0/16  n_corr=23  elapsed=27.0s
+[117/632  eta=36.3min]
+>> baN     L=128  T=4    strat=ebsampler  samp=categorical  γ=0.1
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=128.0/128  n_corr=40  elapsed=112.0s
+[118/632  eta=36.0min]
+>> baN     L=128  T=4    strat=ebsampler  samp=categorical  γ=0.5
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=128.0/128  n_corr=40  elapsed=110.8s
+[119/632  eta=36.0min]
+>> baN     L=128  T=64   strat=gaussian   samp=categorical  σ=20.0
+  built (baN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=0.8750 ± 0.0829 (4 reps)  steps=59.3/65  n_corr=31  elapsed=300.6s
+[120/632  eta=36.8min]
+>> baN     L=128  T=32   strat=ebsampler  samp=categorical  γ=2.0
+   → both_rules=0.5500 ± 0.1500 (4 reps)  steps=43.0/43  n_corr=22  elapsed=40.8s
+[121/632  eta=36.6min]
+>> baN     L=128  T=32   strat=ebsampler  samp=categorical  γ=0.9
+   → both_rules=0.5250 ± 0.1920 (4 reps)  steps=64.0/64  n_corr=21  elapsed=43.9s
+[122/632  eta=38.0min]
+>> baN     L=128  T=32   strat=ebsampler  samp=categorical  γ=5.0
+   → both_rules=0.5750 ± 0.1785 (4 reps)  steps=16.0/16  n_corr=23  elapsed=50.3s
+[123/632  eta=37.7min]
+>> baN     L=128  T=32   strat=ebsampler  samp=categorical  γ=10.0
+   → both_rules=0.4500 ± 0.2062 (4 reps)  steps=9.0/9  n_corr=18  elapsed=51.7s
+[124/632  eta=37.4min]
+>> baN     L=128  T=8    strat=ebsampler  samp=categorical  γ=0.1
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=128.0/128  n_corr=40  elapsed=136.2s
+[125/632  eta=38.5min]
+>> baN     L=128  T=8    strat=ebsampler  samp=categorical  γ=0.5
+  built (baN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=128.0/128  n_corr=40  elapsed=153.2s
+[126/632  eta=39.4min]
+>> baN     L=128  T=130  strat=ar         samp=greedy       —
+  built (baN, L=128, T=130)  vocab=6  |X|=10
+   → both_rules=1.0000 (det)  steps=129.0/129  n_corr=10  elapsed=274.7s
+[127/632  eta=41.5min]
+>> baN     L=128  T=64   strat=ebsampler  samp=categorical  γ=5.0
+   → both_rules=0.5750 ± 0.1785 (4 reps)  steps=16.0/16  n_corr=23  elapsed=79.5s
+[128/632  eta=41.2min]
+>> baN     L=128  T=64   strat=ebsampler  samp=categorical  γ=10.0
+   → both_rules=0.4500 ± 0.2062 (4 reps)  steps=9.0/9  n_corr=18  elapsed=78.8s
+[129/632  eta=41.5min]
+>> baN     L=128  T=64   strat=ebsampler  samp=categorical  γ=0.9
+   → both_rules=0.5250 ± 0.1920 (4 reps)  steps=64.0/64  n_corr=21  elapsed=117.5s
+[130/632  eta=41.2min]
+>> baN     L=128  T=64   strat=ebsampler  samp=categorical  γ=2.0
+   → both_rules=0.5500 ± 0.1500 (4 reps)  steps=43.0/43  n_corr=22  elapsed=94.2s
+[131/632  eta=41.0min]
+>> baN     L=128  T=16   strat=ebsampler  samp=categorical  γ=0.5
+  built (baN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=128.0/128  n_corr=40  elapsed=204.1s
+[132/632  eta=40.8min]
+>> bbaN    L=128  T=4    strat=uniform    samp=greedy       —
+  built (bbaN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.8500 ± 0.0866 (4 reps)  steps=3.6/4  n_corr=28  elapsed=3.0s
+[133/632  eta=40.7min]
+>> bbaN    L=128  T=8    strat=uniform    samp=greedy       —
+  built (bbaN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=0.8750 ± 0.0829 (4 reps)  steps=7.3/8  n_corr=32  elapsed=3.1s
+[134/632  eta=40.6min]
+>> bbaN    L=128  T=16   strat=uniform    samp=greedy       —
+  built (bbaN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=0.9250 ± 0.0433 (4 reps)  steps=15.3/16  n_corr=35  elapsed=4.6s
+[135/632  eta=40.7min]
+>> baN     L=128  T=16   strat=ebsampler  samp=categorical  γ=0.1
+  built (baN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=128.0/128  n_corr=40  elapsed=227.3s
+[136/632  eta=40.4min]
+>> bbaN    L=128  T=32   strat=uniform    samp=greedy       —
+  built (bbaN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=0.9500 ± 0.0866 (4 reps)  steps=31.1/32  n_corr=37  elapsed=8.6s
+[137/632  eta=41.0min]
+>> bbaN    L=128  T=64   strat=uniform    samp=greedy       —
+  built (bbaN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=0.9750 ± 0.0433 (4 reps)  steps=62.8/64  n_corr=39  elapsed=17.6s
+[138/632  eta=40.8min]
+>> bbaN    L=128  T=4    strat=uniform    samp=categorical  —
+  built (bbaN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.0250 ± 0.0433 (4 reps)  steps=1.0/1  n_corr=0  elapsed=2.8s
+[139/632  eta=40.5min]
+>> baN     L=128  T=64   strat=gaussian   samp=categorical  σ=10.0
+  built (baN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=0.9000 ± 0.0707 (4 reps)  steps=61.0/65  n_corr=33  elapsed=484.1s
+[140/632  eta=40.2min]
+>> bbaN    L=128  T=8    strat=uniform    samp=categorical  —
+  built (bbaN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=0.1250 ± 0.0433 (4 reps)  steps=1.0/1  n_corr=0  elapsed=2.3s
+[141/632  eta=39.9min]
+>> bbaN    L=128  T=16   strat=uniform    samp=categorical  —
+  built (bbaN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=0.3750 ± 0.0829 (4 reps)  steps=4.4/16  n_corr=7  elapsed=2.8s
+[142/632  eta=39.6min]
+>> baN     L=128  T=128  strat=ebsampler  samp=categorical  γ=5.0
+  built (baN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=0.5750 ± 0.1785 (4 reps)  steps=16.0/16  n_corr=23  elapsed=49.7s
+[143/632  eta=39.3min]
+>> baN     L=128  T=128  strat=ebsampler  samp=categorical  γ=10.0
+   → both_rules=0.4500 ± 0.2062 (4 reps)  steps=9.0/9  n_corr=18  elapsed=50.2s
+[144/632  eta=39.0min]
+>> baN     L=128  T=128  strat=ebsampler  samp=categorical  γ=2.0
+  built (baN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=0.5500 ± 0.1500 (4 reps)  steps=43.0/43  n_corr=22  elapsed=62.5s
+[145/632  eta=38.7min]
+>> bbaN    L=128  T=32   strat=uniform    samp=categorical  —
+  built (bbaN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=0.5250 ± 0.0433 (4 reps)  steps=15.9/32  n_corr=19  elapsed=4.6s
+[146/632  eta=38.5min]
+>> bbaN    L=128  T=4    strat=gaussian   samp=greedy       σ=1.0
+  built (bbaN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.6250 ± 0.0829 (4 reps)  steps=3.8/4  n_corr=2  elapsed=3.0s
+[147/632  eta=38.1min]
+>> bbaN    L=128  T=4    strat=gaussian   samp=greedy       σ=2.0
+  built (bbaN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.5500 ± 0.2291 (4 reps)  steps=3.6/4  n_corr=5  elapsed=3.1s
+[148/632  eta=37.9min]
+>> bbaN    L=128  T=128  strat=uniform    samp=greedy       —
+  built (bbaN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=125.5/128  n_corr=39  elapsed=29.5s
+[149/632  eta=37.6min]
+>> bbaN    L=128  T=4    strat=gaussian   samp=greedy       σ=5.0
+   → both_rules=0.6000 ± 0.1581 (4 reps)  steps=3.5/4  n_corr=10  elapsed=3.3s
+[150/632  eta=37.3min]
+>> bbaN    L=128  T=4    strat=gaussian   samp=greedy       σ=10.0
+   → both_rules=0.6750 ± 0.0433 (4 reps)  steps=3.5/5  n_corr=17  elapsed=3.3s
+[151/632  eta=37.0min]
+>> bbaN    L=128  T=64   strat=uniform    samp=categorical  —
+  built (bbaN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=0.6000 ± 0.0707 (4 reps)  steps=36.1/64  n_corr=21  elapsed=8.7s
+[152/632  eta=36.7min]
+>> bbaN    L=128  T=4    strat=gaussian   samp=greedy       σ=20.0
+   → both_rules=0.6000 ± 0.0707 (4 reps)  steps=3.5/5  n_corr=14  elapsed=3.4s
+[153/632  eta=36.4min]
+>> bbaN    L=128  T=4    strat=gaussian   samp=greedy       σ=50.0
+   → both_rules=0.6750 ± 0.1090 (4 reps)  steps=3.6/5  n_corr=18  elapsed=3.0s
+[154/632  eta=36.2min]
+>> bbaN    L=128  T=8    strat=gaussian   samp=greedy       σ=1.0
+   → both_rules=0.4750 ± 0.1920 (4 reps)  steps=7.7/8  n_corr=3  elapsed=5.4s
+[155/632  eta=36.0min]
+>> bbaN    L=128  T=8    strat=gaussian   samp=greedy       σ=20.0
+   → both_rules=0.8000 ± 0.1000 (4 reps)  steps=7.2/9  n_corr=24  elapsed=4.8s
+[156/632  eta=35.7min]
+>> bbaN    L=128  T=8    strat=gaussian   samp=greedy       σ=10.0
+  built (bbaN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=0.7500 ± 0.0866 (4 reps)  steps=7.3/8  n_corr=17  elapsed=5.3s
+[157/632  eta=35.4min]
+>> bbaN    L=128  T=8    strat=gaussian   samp=greedy       σ=2.0
+  built (bbaN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=0.5000 ± 0.1581 (4 reps)  steps=7.5/9  n_corr=9  elapsed=5.8s
+[158/632  eta=35.2min]
+>> bbaN    L=128  T=8    strat=gaussian   samp=greedy       σ=5.0
+  built (bbaN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=0.5750 ± 0.0829 (4 reps)  steps=7.5/8  n_corr=16  elapsed=5.6s
+[159/632  eta=34.9min]
+>> baN     L=128  T=128  strat=ebsampler  samp=categorical  γ=0.9
+   → both_rules=0.5250 ± 0.1920 (4 reps)  steps=64.0/64  n_corr=21  elapsed=77.9s
+[160/632  eta=34.6min]
+>> bbaN    L=128  T=8    strat=gaussian   samp=greedy       σ=50.0
+   → both_rules=0.8500 ± 0.0866 (4 reps)  steps=7.6/9  n_corr=30  elapsed=4.1s
+[161/632  eta=34.5min]
+>> baN     L=128  T=64   strat=gaussian   samp=categorical  σ=5.0
+  built (baN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=0.8250 ± 0.0829 (4 reps)  steps=60.8/64  n_corr=32  elapsed=509.5s
+[162/632  eta=34.4min]
+>> bbaN    L=128  T=128  strat=uniform    samp=categorical  —
+  built (bbaN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=0.8250 ± 0.0829 (4 reps)  steps=95.9/128  n_corr=29  elapsed=21.2s
+[163/632  eta=34.1min]
+>> bbaN    L=128  T=16   strat=gaussian   samp=greedy       σ=50.0
+  built (bbaN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=0.9500 ± 0.0500 (4 reps)  steps=15.1/17  n_corr=34  elapsed=6.5s
+[164/632  eta=33.9min]
+>> bbaN    L=128  T=16   strat=gaussian   samp=greedy       σ=10.0
+   → both_rules=0.8750 ± 0.1639 (4 reps)  steps=14.9/17  n_corr=23  elapsed=9.1s
+[165/632  eta=33.6min]
+>> bbaN    L=128  T=16   strat=gaussian   samp=greedy       σ=1.0
+   → both_rules=0.3000 ± 0.1000 (4 reps)  steps=15.7/16  n_corr=3  elapsed=9.9s
+[166/632  eta=33.3min]
+>> bbaN    L=128  T=16   strat=gaussian   samp=greedy       σ=20.0
+  built (bbaN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=0.8000 ± 0.0000 (4 reps)  steps=14.3/17  n_corr=27  elapsed=8.0s
+[167/632  eta=33.1min]
+>> bbaN    L=128  T=16   strat=gaussian   samp=greedy       σ=5.0
+  built (bbaN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=0.7250 ± 0.2487 (4 reps)  steps=15.3/16  n_corr=21  elapsed=9.6s
+[168/632  eta=32.8min]
+>> baN     L=128  T=32   strat=ebsampler  samp=categorical  γ=0.1
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=128.0/128  n_corr=40  elapsed=241.9s
+[169/632  eta=32.6min]
+>> bbaN    L=128  T=16   strat=gaussian   samp=greedy       σ=2.0
+  built (bbaN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=0.5750 ± 0.1090 (4 reps)  steps=15.3/16  n_corr=7  elapsed=10.0s
+[170/632  eta=32.6min]
+>> baN     L=128  T=64   strat=gaussian   samp=categorical  σ=1.0
+  built (baN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=0.6500 ± 0.1118 (4 reps)  steps=62.6/64  n_corr=23  elapsed=541.4s
+[171/632  eta=32.4min]
+>> baN     L=128  T=32   strat=ebsampler  samp=categorical  γ=0.5
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=128.0/128  n_corr=40  elapsed=247.0s
+[172/632  eta=32.4min]
+>> bbaN    L=128  T=32   strat=gaussian   samp=greedy       σ=50.0
+  built (bbaN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=0.9750 ± 0.0433 (4 reps)  steps=30.7/33  n_corr=38  elapsed=13.3s
+[173/632  eta=32.2min]
+>> bbaN    L=128  T=32   strat=gaussian   samp=greedy       σ=1.0
+  built (bbaN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=0.8750 ± 0.0829 (4 reps)  steps=31.8/32  n_corr=31  elapsed=19.4s
+[174/632  eta=31.9min]
+>> bbaN    L=128  T=32   strat=gaussian   samp=greedy       σ=20.0
+   → both_rules=0.9750 ± 0.0433 (4 reps)  steps=29.4/33  n_corr=35  elapsed=15.6s
+[175/632  eta=31.8min]
+>> bbaN    L=128  T=32   strat=gaussian   samp=greedy       σ=10.0
+  built (bbaN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=0.8750 ± 0.0829 (4 reps)  steps=29.9/33  n_corr=32  elapsed=17.7s
+[176/632  eta=31.5min]
+>> bbaN    L=128  T=32   strat=gaussian   samp=greedy       σ=2.0
+  built (bbaN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=0.9750 ± 0.0433 (4 reps)  steps=31.4/32  n_corr=33  elapsed=19.4s
+[177/632  eta=31.3min]
+>> bbaN    L=128  T=32   strat=gaussian   samp=greedy       σ=5.0
+   → both_rules=0.9000 ± 0.1225 (4 reps)  steps=30.9/33  n_corr=34  elapsed=18.8s
+[178/632  eta=32.0min]
+>> baN     L=128  T=64   strat=gaussian   samp=categorical  σ=2.0
+  built (baN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=0.6500 ± 0.0500 (4 reps)  steps=61.9/64  n_corr=21  elapsed=558.2s
+[179/632  eta=32.4min]
+>> bbaN    L=128  T=64   strat=gaussian   samp=greedy       σ=5.0
+  built (bbaN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=0.9250 ± 0.0433 (4 reps)  steps=60.7/63  n_corr=33  elapsed=55.5s
+[180/632  eta=32.2min]
+>> bbaN    L=128  T=64   strat=gaussian   samp=greedy       σ=1.0
+  built (bbaN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=0.8500 ± 0.1118 (4 reps)  steps=63.0/64  n_corr=34  elapsed=55.9s
+[181/632  eta=32.0min]
+>> bbaN    L=128  T=64   strat=gaussian   samp=greedy       σ=2.0
+  built (bbaN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=0.9250 ± 0.0433 (4 reps)  steps=62.4/65  n_corr=35  elapsed=56.4s
+[182/632  eta=32.1min]
+>> bbaN    L=128  T=64   strat=gaussian   samp=greedy       σ=50.0
+  built (bbaN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=0.9500 ± 0.0500 (4 reps)  steps=60.5/65  n_corr=37  elapsed=51.7s
+[183/632  eta=31.9min]
+>> bbaN    L=128  T=64   strat=gaussian   samp=greedy       σ=20.0
+  built (bbaN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=0.9500 ± 0.0866 (4 reps)  steps=59.4/65  n_corr=37  elapsed=58.9s
+[184/632  eta=31.8min]
+>> bbaN    L=128  T=4    strat=gaussian   samp=categorical  σ=2.0
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=1.0/1  n_corr=0  elapsed=13.7s
+[185/632  eta=31.5min]
+>> bbaN    L=128  T=4    strat=gaussian   samp=categorical  σ=1.0
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=1.0/1  n_corr=0  elapsed=14.0s
+[186/632  eta=31.4min]
+>> bbaN    L=128  T=4    strat=gaussian   samp=categorical  σ=5.0
+  built (bbaN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=1.0/1  n_corr=0  elapsed=8.1s
+[187/632  eta=31.2min]
+>> bbaN    L=128  T=4    strat=gaussian   samp=categorical  σ=10.0
+  built (bbaN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.0500 ± 0.0500 (4 reps)  steps=1.1/4  n_corr=1  elapsed=7.6s
+[188/632  eta=31.0min]
+>> bbaN    L=128  T=64   strat=gaussian   samp=greedy       σ=10.0
+  built (bbaN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=0.9500 ± 0.0866 (4 reps)  steps=60.0/64  n_corr=35  elapsed=66.7s
+[189/632  eta=30.8min]
+>> bbaN    L=128  T=4    strat=gaussian   samp=categorical  σ=20.0
+  built (bbaN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.0250 ± 0.0433 (4 reps)  steps=1.1/2  n_corr=0  elapsed=6.8s
+[190/632  eta=30.6min]
+>> bbaN    L=128  T=4    strat=gaussian   samp=categorical  σ=50.0
+   → both_rules=0.1000 ± 0.1000 (4 reps)  steps=1.2/4  n_corr=1  elapsed=5.5s
+[191/632  eta=30.4min]
+>> bbaN    L=128  T=8    strat=gaussian   samp=categorical  σ=1.0
+   → both_rules=0.0500 ± 0.0866 (4 reps)  steps=1.4/4  n_corr=0  elapsed=5.7s
+[192/632  eta=30.2min]
+>> bbaN    L=128  T=8    strat=gaussian   samp=categorical  σ=2.0
+  built (bbaN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=0.1750 ± 0.1479 (4 reps)  steps=1.7/4  n_corr=0  elapsed=3.5s
+[193/632  eta=30.0min]
+>> bbaN    L=128  T=8    strat=gaussian   samp=categorical  σ=5.0
+  built (bbaN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=0.1250 ± 0.0829 (4 reps)  steps=1.9/3  n_corr=0  elapsed=3.4s
+[194/632  eta=29.8min]
+>> bbaN    L=128  T=8    strat=gaussian   samp=categorical  σ=10.0
+  built (bbaN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=0.0750 ± 0.0829 (4 reps)  steps=2.4/8  n_corr=1  elapsed=4.5s
+[195/632  eta=29.6min]
+>> bbaN    L=128  T=8    strat=gaussian   samp=categorical  σ=20.0
+  built (bbaN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=0.1500 ± 0.1118 (4 reps)  steps=2.8/8  n_corr=1  elapsed=4.7s
+[196/632  eta=29.4min]
+>> bbaN    L=128  T=8    strat=gaussian   samp=categorical  σ=50.0
+   → both_rules=0.3250 ± 0.1299 (4 reps)  steps=3.5/9  n_corr=6  elapsed=4.2s
+[197/632  eta=29.2min]
+>> bbaN    L=128  T=16   strat=gaussian   samp=categorical  σ=1.0
+   → both_rules=0.1750 ± 0.1479 (4 reps)  steps=4.0/16  n_corr=1  elapsed=5.4s
+[198/632  eta=29.1min]
+>> bbaN    L=128  T=16   strat=gaussian   samp=categorical  σ=2.0
+  built (bbaN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=0.2250 ± 0.0829 (4 reps)  steps=4.0/16  n_corr=1  elapsed=6.3s
+[199/632  eta=28.9min]
+>> bbaN    L=128  T=16   strat=gaussian   samp=categorical  σ=5.0
+   → both_rules=0.2000 ± 0.1000 (4 reps)  steps=4.8/16  n_corr=3  elapsed=6.8s
+[200/632  eta=28.8min]
+>> bbaN    L=128  T=16   strat=gaussian   samp=categorical  σ=10.0
+  built (bbaN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=0.2500 ± 0.0500 (4 reps)  steps=6.0/16  n_corr=2  elapsed=7.9s
+[201/632  eta=28.6min]
+>> bbaN    L=128  T=16   strat=gaussian   samp=categorical  σ=50.0
+   → both_rules=0.6250 ± 0.1090 (4 reps)  steps=9.7/17  n_corr=16  elapsed=8.0s
+[202/632  eta=28.4min]
+>> bbaN    L=128  T=16   strat=gaussian   samp=categorical  σ=20.0
+  built (bbaN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=0.2750 ± 0.0829 (4 reps)  steps=6.5/16  n_corr=6  elapsed=8.3s
+[203/632  eta=28.4min]
+>> baN     L=128  T=64   strat=ebsampler  samp=categorical  γ=0.1
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=128.0/128  n_corr=40  elapsed=305.6s
+[204/632  eta=28.2min]
+>> bbaN    L=128  T=32   strat=gaussian   samp=categorical  σ=1.0
+  built (bbaN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=0.2000 ± 0.1414 (4 reps)  steps=11.8/32  n_corr=3  elapsed=12.7s
+[205/632  eta=28.0min]
+>> bbaN    L=128  T=32   strat=gaussian   samp=categorical  σ=2.0
+  built (bbaN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=0.3000 ± 0.1225 (4 reps)  steps=10.6/32  n_corr=4  elapsed=11.2s
+[206/632  eta=28.0min]
+>> bbaN    L=128  T=32   strat=gaussian   samp=categorical  σ=5.0
+   → both_rules=0.5000 ± 0.2345 (4 reps)  steps=15.9/31  n_corr=8  elapsed=15.0s
+[207/632  eta=27.9min]
+>> bbaN    L=128  T=32   strat=gaussian   samp=categorical  σ=50.0
+  built (bbaN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=0.6750 ± 0.1479 (4 reps)  steps=20.9/33  n_corr=21  elapsed=13.2s
+[208/632  eta=27.7min]
+>> bbaN    L=128  T=32   strat=gaussian   samp=categorical  σ=10.0
+  built (bbaN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=0.4750 ± 0.0829 (4 reps)  steps=19.4/33  n_corr=15  elapsed=15.1s
+[209/632  eta=27.6min]
+>> bbaN    L=128  T=32   strat=gaussian   samp=categorical  σ=20.0
+  built (bbaN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=0.6500 ± 0.1118 (4 reps)  steps=22.1/33  n_corr=20  elapsed=16.0s
+[210/632  eta=28.0min]
+>> bbaN    L=128  T=64   strat=gaussian   samp=categorical  σ=1.0
+  built (bbaN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=0.4000 ± 0.1225 (4 reps)  steps=29.7/64  n_corr=9  elapsed=28.8s
+[211/632  eta=27.9min]
+>> bbaN    L=128  T=128  strat=gaussian   samp=greedy       σ=20.0
+  built (bbaN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=120.7/129  n_corr=39  elapsed=109.4s
+[212/632  eta=27.8min]
+>> bbaN    L=128  T=64   strat=gaussian   samp=categorical  σ=2.0
+   → both_rules=0.5500 ± 0.1658 (4 reps)  steps=40.1/64  n_corr=14  elapsed=34.2s
+[213/632  eta=27.7min]
+>> bbaN    L=128  T=64   strat=gaussian   samp=categorical  σ=5.0
+   → both_rules=0.6500 ± 0.1118 (4 reps)  steps=45.1/65  n_corr=20  elapsed=37.2s
+[214/632  eta=27.5min]
+>> bbaN    L=128  T=64   strat=gaussian   samp=categorical  σ=50.0
+   → both_rules=0.7000 ± 0.1581 (4 reps)  steps=46.5/65  n_corr=25  elapsed=29.5s
+[215/632  eta=27.3min]
+>> bbaN    L=128  T=128  strat=gaussian   samp=greedy       σ=50.0
+  built (bbaN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=121.9/129  n_corr=39  elapsed=91.3s
+[216/632  eta=27.2min]
+>> bbaN    L=128  T=128  strat=gaussian   samp=greedy       σ=10.0
+   → both_rules=0.9750 ± 0.0433 (4 reps)  steps=121.2/129  n_corr=39  elapsed=117.9s
+[217/632  eta=27.1min]
+>> bbaN    L=128  T=64   strat=gaussian   samp=categorical  σ=10.0
+   → both_rules=0.6500 ± 0.1118 (4 reps)  steps=47.7/65  n_corr=24  elapsed=36.7s
+[218/632  eta=26.9min]
+>> bbaN    L=128  T=64   strat=gaussian   samp=categorical  σ=20.0
+   → both_rules=0.8750 ± 0.0829 (4 reps)  steps=53.9/65  n_corr=33  elapsed=35.3s
+[219/632  eta=26.8min]
+>> bbaN    L=128  T=128  strat=gaussian   samp=greedy       σ=2.0
+   → both_rules=0.9500 ± 0.0500 (4 reps)  steps=124.7/127  n_corr=38  elapsed=123.5s
+[220/632  eta=26.6min]
+>> bbaN    L=128  T=128  strat=gaussian   samp=greedy       σ=1.0
+  built (bbaN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=0.7500 ± 0.0866 (4 reps)  steps=125.5/128  n_corr=30  elapsed=124.3s
+[221/632  eta=26.4min]
+>> bbaN    L=128  T=128  strat=gaussian   samp=greedy       σ=5.0
+  built (bbaN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=0.9250 ± 0.0433 (4 reps)  steps=122.0/129  n_corr=37  elapsed=121.7s
+[222/632  eta=26.3min]
+>> bbaN    L=128  T=4    strat=ebsampler  samp=greedy       γ=5.0
+  built (bbaN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.0000 (det)  steps=11.0/11  n_corr=0  elapsed=1.5s
+[223/632  eta=26.1min]
+>> bbaN    L=128  T=4    strat=ebsampler  samp=greedy       γ=2.0
+  built (bbaN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.0000 (det)  steps=19.0/19  n_corr=0  elapsed=2.4s
+[224/632  eta=26.0min]
+>> bbaN    L=128  T=4    strat=ebsampler  samp=greedy       γ=10.0
+   → both_rules=1.0000 (det)  steps=7.0/7  n_corr=10  elapsed=0.9s
+[225/632  eta=25.8min]
+>> bbaN    L=128  T=4    strat=ebsampler  samp=greedy       γ=0.9
+   → both_rules=1.0000 (det)  steps=31.0/31  n_corr=10  elapsed=3.8s
+[226/632  eta=25.6min]
+>> bbaN    L=128  T=4    strat=ebsampler  samp=greedy       γ=0.5
+   → both_rules=1.0000 (det)  steps=46.0/46  n_corr=10  elapsed=5.6s
+[227/632  eta=25.5min]
+>> bbaN    L=128  T=8    strat=ebsampler  samp=greedy       γ=2.0
+   → both_rules=0.0000 (det)  steps=19.0/19  n_corr=0  elapsed=2.4s
+[228/632  eta=25.4min]
+>> bbaN    L=128  T=8    strat=ebsampler  samp=greedy       γ=0.9
+   → both_rules=1.0000 (det)  steps=31.0/31  n_corr=10  elapsed=3.8s
+[229/632  eta=25.2min]
+>> bbaN    L=128  T=8    strat=ebsampler  samp=greedy       γ=5.0
+   → both_rules=0.0000 (det)  steps=11.0/11  n_corr=0  elapsed=1.4s
+[230/632  eta=25.1min]
+>> baN     L=128  T=128  strat=ebsampler  samp=categorical  γ=0.1
+  built (baN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=128.0/128  n_corr=40  elapsed=289.2s
+[231/632  eta=24.9min]
+>> bbaN    L=128  T=8    strat=ebsampler  samp=greedy       γ=10.0
+   → both_rules=1.0000 (det)  steps=7.0/7  n_corr=10  elapsed=1.2s
+[232/632  eta=24.7min]
+>> bbaN    L=128  T=8    strat=ebsampler  samp=greedy       γ=0.5
+   → both_rules=1.0000 (det)  steps=46.0/46  n_corr=10  elapsed=5.6s
+[233/632  eta=24.6min]
+>> bbaN    L=128  T=16   strat=ebsampler  samp=greedy       γ=2.0
+   → both_rules=0.0000 (det)  steps=19.0/19  n_corr=0  elapsed=2.3s
+[234/632  eta=24.5min]
+>> bbaN    L=128  T=4    strat=ebsampler  samp=greedy       γ=0.1
+   → both_rules=1.0000 (det)  steps=111.0/111  n_corr=10  elapsed=14.1s
+[235/632  eta=24.3min]
+>> bbaN    L=128  T=16   strat=ebsampler  samp=greedy       γ=10.0
+   → both_rules=1.0000 (det)  steps=7.0/7  n_corr=10  elapsed=1.0s
+[236/632  eta=24.2min]
+>> bbaN    L=128  T=16   strat=ebsampler  samp=greedy       γ=0.9
+   → both_rules=1.0000 (det)  steps=31.0/31  n_corr=10  elapsed=3.6s
+[237/632  eta=24.0min]
+>> bbaN    L=128  T=16   strat=ebsampler  samp=greedy       γ=5.0
+   → both_rules=0.0000 (det)  steps=11.0/11  n_corr=0  elapsed=1.5s
+[238/632  eta=23.9min]
+>> bbaN    L=128  T=130  strat=ar         samp=greedy       —
+  built (bbaN, L=128, T=130)  vocab=6  |X|=10
+   → both_rules=1.0000 (det)  steps=129.0/129  n_corr=10  elapsed=18.6s
+[239/632  eta=23.7min]
+>> baN     L=128  T=64   strat=ebsampler  samp=categorical  γ=0.5
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=128.0/128  n_corr=40  elapsed=347.5s
+[240/632  eta=23.6min]
+>> bbaN    L=128  T=16   strat=ebsampler  samp=greedy       γ=0.5
+  built (bbaN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=1.0000 (det)  steps=46.0/46  n_corr=10  elapsed=5.5s
+[241/632  eta=23.5min]
+>> bbaN    L=128  T=32   strat=ebsampler  samp=greedy       γ=10.0
+  built (bbaN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=1.0000 (det)  steps=7.0/7  n_corr=10  elapsed=0.9s
+[242/632  eta=23.3min]
+>> bbaN    L=128  T=32   strat=ebsampler  samp=greedy       γ=5.0
+  built (bbaN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=0.0000 (det)  steps=11.0/11  n_corr=0  elapsed=1.5s
+[243/632  eta=23.1min]
+>> bbaN    L=128  T=32   strat=ebsampler  samp=greedy       γ=2.0
+  built (bbaN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=0.0000 (det)  steps=19.0/19  n_corr=0  elapsed=2.4s
+[244/632  eta=23.0min]
+>> bbaN    L=128  T=32   strat=ebsampler  samp=greedy       γ=0.9
+   → both_rules=1.0000 (det)  steps=31.0/31  n_corr=10  elapsed=4.0s
+[245/632  eta=22.9min]
+>> bbaN    L=128  T=8    strat=ebsampler  samp=greedy       γ=0.1
+  built (bbaN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=1.0000 (det)  steps=111.0/111  n_corr=10  elapsed=14.0s
+[246/632  eta=22.8min]
+>> bbaN    L=128  T=32   strat=ebsampler  samp=greedy       γ=0.5
+   → both_rules=1.0000 (det)  steps=46.0/46  n_corr=10  elapsed=5.7s
+[247/632  eta=22.6min]
+>> bbaN    L=128  T=64   strat=ebsampler  samp=greedy       γ=5.0
+  built (bbaN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=0.0000 (det)  steps=11.0/11  n_corr=0  elapsed=1.5s
+[248/632  eta=22.5min]
+>> bbaN    L=128  T=64   strat=ebsampler  samp=greedy       γ=2.0
+   → both_rules=0.0000 (det)  steps=19.0/19  n_corr=0  elapsed=2.5s
+[249/632  eta=22.3min]
+>> bbaN    L=128  T=64   strat=ebsampler  samp=greedy       γ=10.0
+  built (bbaN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=1.0000 (det)  steps=7.0/7  n_corr=10  elapsed=1.1s
+[250/632  eta=22.2min]
+>> bbaN    L=128  T=64   strat=ebsampler  samp=greedy       γ=0.9
+  built (bbaN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=1.0000 (det)  steps=31.0/31  n_corr=10  elapsed=4.0s
+[251/632  eta=22.1min]
+>> bbaN    L=128  T=64   strat=ebsampler  samp=greedy       γ=0.5
+  built (bbaN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=1.0000 (det)  steps=46.0/46  n_corr=10  elapsed=5.5s
+[252/632  eta=22.0min]
+>> bbaN    L=128  T=16   strat=ebsampler  samp=greedy       γ=0.1
+   → both_rules=1.0000 (det)  steps=111.0/111  n_corr=10  elapsed=14.5s
+[253/632  eta=21.8min]
+>> bbaN    L=128  T=128  strat=ebsampler  samp=greedy       γ=2.0
+   → both_rules=0.0000 (det)  steps=19.0/19  n_corr=0  elapsed=2.5s
+[254/632  eta=21.7min]
+>> bbaN    L=128  T=128  strat=ebsampler  samp=greedy       γ=0.9
+   → both_rules=1.0000 (det)  steps=31.0/31  n_corr=10  elapsed=3.9s
+[255/632  eta=21.6min]
+>> bbaN    L=128  T=128  strat=ebsampler  samp=greedy       γ=5.0
+  built (bbaN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=0.0000 (det)  steps=11.0/11  n_corr=0  elapsed=1.6s
+[256/632  eta=21.4min]
+>> bbaN    L=128  T=128  strat=ebsampler  samp=greedy       γ=10.0
+  built (bbaN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=1.0000 (det)  steps=7.0/7  n_corr=10  elapsed=1.2s
+[257/632  eta=21.3min]
+>> bbaN    L=128  T=128  strat=gaussian   samp=categorical  σ=1.0
+  built (bbaN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=0.4750 ± 0.0829 (4 reps)  steps=87.2/127  n_corr=17  elapsed=58.8s
+[258/632  eta=21.2min]
+>> bbaN    L=128  T=128  strat=ebsampler  samp=greedy       γ=0.5
+   → both_rules=1.0000 (det)  steps=46.0/46  n_corr=10  elapsed=5.6s
+[259/632  eta=21.1min]
+>> bbaN    L=128  T=32   strat=ebsampler  samp=greedy       γ=0.1
+   → both_rules=1.0000 (det)  steps=111.0/111  n_corr=10  elapsed=14.5s
+[260/632  eta=21.0min]
+>> bbaN    L=128  T=4    strat=ebsampler  samp=categorical  γ=5.0
+   → both_rules=0.2000 ± 0.0707 (4 reps)  steps=1.4/5  n_corr=0  elapsed=3.0s
+[261/632  eta=20.8min]
+>> bbaN    L=128  T=4    strat=ebsampler  samp=categorical  γ=10.0
+   → both_rules=0.1000 ± 0.0707 (4 reps)  steps=1.0/2  n_corr=0  elapsed=3.0s
+[262/632  eta=20.7min]
+>> baN     L=128  T=128  strat=ebsampler  samp=categorical  γ=0.5
+  built (baN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=128.0/128  n_corr=40  elapsed=289.7s
+[263/632  eta=20.6min]
+>> bbaN    L=128  T=4    strat=ebsampler  samp=categorical  γ=2.0
+   → both_rules=0.4000 ± 0.1225 (4 reps)  steps=3.7/13  n_corr=2  elapsed=4.5s
+[264/632  eta=20.5min]
+>> bbaN    L=128  T=4    strat=ebsampler  samp=categorical  γ=0.9
+  built (bbaN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.4500 ± 0.2179 (4 reps)  steps=6.0/23  n_corr=4  elapsed=6.2s
+[265/632  eta=20.4min]
+>> bbaN    L=128  T=64   strat=ebsampler  samp=greedy       γ=0.1
+  built (bbaN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=1.0000 (det)  steps=111.0/111  n_corr=10  elapsed=14.6s
+[266/632  eta=20.3min]
+>> bbaN    L=128  T=8    strat=ebsampler  samp=categorical  γ=5.0
+   → both_rules=0.2000 ± 0.0707 (4 reps)  steps=1.4/5  n_corr=0  elapsed=3.1s
+[267/632  eta=20.2min]
+>> bbaN    L=128  T=4    strat=ebsampler  samp=categorical  γ=0.5
+   → both_rules=0.4000 ± 0.1225 (4 reps)  steps=11.8/39  n_corr=6  elapsed=9.3s
+[268/632  eta=20.0min]
+>> bbaN    L=128  T=8    strat=ebsampler  samp=categorical  γ=2.0
+  built (bbaN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=0.4000 ± 0.1225 (4 reps)  steps=3.7/13  n_corr=2  elapsed=4.5s
+[269/632  eta=19.9min]
+>> bbaN    L=128  T=8    strat=ebsampler  samp=categorical  γ=10.0
+  built (bbaN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=0.1000 ± 0.0707 (4 reps)  steps=1.0/2  n_corr=0  elapsed=3.1s
+[270/632  eta=19.8min]
+>> bbaN    L=128  T=128  strat=ebsampler  samp=greedy       γ=0.1
+   → both_rules=1.0000 (det)  steps=111.0/111  n_corr=10  elapsed=14.6s
+[271/632  eta=19.7min]
+>> bbaN    L=128  T=8    strat=ebsampler  samp=categorical  γ=0.9
+   → both_rules=0.4500 ± 0.2179 (4 reps)  steps=6.0/23  n_corr=4  elapsed=6.3s
+[272/632  eta=19.6min]
+>> bbaN    L=128  T=16   strat=ebsampler  samp=categorical  γ=5.0
+  built (bbaN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=0.2000 ± 0.0707 (4 reps)  steps=1.4/5  n_corr=0  elapsed=3.2s
+[273/632  eta=19.5min]
+>> bbaN    L=128  T=16   strat=ebsampler  samp=categorical  γ=10.0
+  built (bbaN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=0.1000 ± 0.0707 (4 reps)  steps=1.0/2  n_corr=0  elapsed=3.2s
+[274/632  eta=19.4min]
+>> bbaN    L=128  T=8    strat=ebsampler  samp=categorical  γ=0.5
+   → both_rules=0.4000 ± 0.1225 (4 reps)  steps=11.8/39  n_corr=6  elapsed=9.7s
+[275/632  eta=19.3min]
+>> bbaN    L=128  T=16   strat=ebsampler  samp=categorical  γ=2.0
+  built (bbaN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=0.4000 ± 0.1225 (4 reps)  steps=3.7/13  n_corr=2  elapsed=4.8s
+[276/632  eta=19.2min]
+>> bbaN    L=128  T=16   strat=ebsampler  samp=categorical  γ=0.9
+   → both_rules=0.4500 ± 0.2179 (4 reps)  steps=6.0/23  n_corr=4  elapsed=6.5s
+[277/632  eta=19.1min]
+>> bbaN    L=128  T=16   strat=ebsampler  samp=categorical  γ=0.5
+   → both_rules=0.4000 ± 0.1225 (4 reps)  steps=11.8/39  n_corr=6  elapsed=9.6s
+[278/632  eta=19.0min]
+>> bbaN    L=128  T=32   strat=ebsampler  samp=categorical  γ=5.0
+  built (bbaN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=0.2000 ± 0.0707 (4 reps)  steps=1.4/5  n_corr=0  elapsed=3.0s
+[279/632  eta=18.8min]
+>> bbaN    L=128  T=32   strat=ebsampler  samp=categorical  γ=2.0
+   → both_rules=0.4000 ± 0.1225 (4 reps)  steps=3.7/13  n_corr=2  elapsed=4.4s
+[280/632  eta=18.7min]
+>> bbaN    L=128  T=32   strat=ebsampler  samp=categorical  γ=10.0
+   → both_rules=0.1000 ± 0.0707 (4 reps)  steps=1.0/2  n_corr=0  elapsed=3.0s
+[281/632  eta=18.6min]
+>> bbaN    L=128  T=32   strat=ebsampler  samp=categorical  γ=0.9
+   → both_rules=0.4500 ± 0.2179 (4 reps)  steps=6.0/23  n_corr=4  elapsed=6.2s
+[282/632  eta=18.6min]
+>> bbaN    L=128  T=128  strat=gaussian   samp=categorical  σ=5.0
+   → both_rules=0.8000 ± 0.1225 (4 reps)  steps=96.2/128  n_corr=25  elapsed=57.7s
+[283/632  eta=18.5min]
+>> bbaN    L=128  T=128  strat=gaussian   samp=categorical  σ=50.0
+  built (bbaN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=0.8750 ± 0.1299 (4 reps)  steps=111.1/129  n_corr=34  elapsed=52.2s
+[284/632  eta=18.3min]
+>> bbaN    L=128  T=64   strat=ebsampler  samp=categorical  γ=5.0
+   → both_rules=0.2000 ± 0.0707 (4 reps)  steps=1.4/5  n_corr=0  elapsed=2.9s
+[285/632  eta=18.2min]
+>> bbaN    L=128  T=64   strat=ebsampler  samp=categorical  γ=2.0
+   → both_rules=0.4000 ± 0.1225 (4 reps)  steps=3.7/13  n_corr=2  elapsed=4.3s
+[286/632  eta=18.1min]
+>> bbaN    L=128  T=32   strat=ebsampler  samp=categorical  γ=0.5
+   → both_rules=0.4000 ± 0.1225 (4 reps)  steps=11.8/39  n_corr=6  elapsed=9.4s
+[287/632  eta=18.0min]
+>> bbaN    L=128  T=64   strat=ebsampler  samp=categorical  γ=0.9
+   → both_rules=0.4500 ± 0.2179 (4 reps)  steps=6.0/23  n_corr=4  elapsed=5.9s
+[288/632  eta=17.9min]
+>> bbaN    L=128  T=128  strat=gaussian   samp=categorical  σ=2.0
+  built (bbaN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=0.6000 ± 0.1225 (4 reps)  steps=96.2/128  n_corr=19  elapsed=63.4s
+[289/632  eta=17.8min]
+>> bbaN    L=128  T=64   strat=ebsampler  samp=categorical  γ=10.0
+   → both_rules=0.1000 ± 0.0707 (4 reps)  steps=1.0/2  n_corr=0  elapsed=3.0s
+[290/632  eta=17.7min]
+>> bbaN    L=128  T=128  strat=ebsampler  samp=categorical  γ=5.0
+   → both_rules=0.2000 ± 0.0707 (4 reps)  steps=1.4/5  n_corr=0  elapsed=3.0s
+[291/632  eta=17.6min]
+>> bbaN    L=128  T=64   strat=ebsampler  samp=categorical  γ=0.5
+  built (bbaN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=0.4000 ± 0.1225 (4 reps)  steps=11.8/39  n_corr=6  elapsed=9.2s
+[292/632  eta=17.5min]
+>> bbaN    L=128  T=128  strat=ebsampler  samp=categorical  γ=10.0
+   → both_rules=0.1000 ± 0.0707 (4 reps)  steps=1.0/2  n_corr=0  elapsed=2.9s
+[293/632  eta=17.4min]
+>> bbaN    L=128  T=128  strat=ebsampler  samp=categorical  γ=2.0
+   → both_rules=0.4000 ± 0.1225 (4 reps)  steps=3.7/13  n_corr=2  elapsed=4.6s
+[294/632  eta=17.3min]
+>> aNbN    L=128  T=4    strat=uniform    samp=greedy       —
+  built (aNbN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.1750 ± 0.0829 (4 reps)  steps=1.4/4  n_corr=5  elapsed=2.6s
+[295/632  eta=17.2min]
+>> bbaN    L=128  T=128  strat=gaussian   samp=categorical  σ=10.0
+  built (bbaN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=0.8000 ± 0.1225 (4 reps)  steps=102.1/129  n_corr=29  elapsed=62.7s
+[296/632  eta=17.1min]
+>> bbaN    L=128  T=128  strat=ebsampler  samp=categorical  γ=0.9
+   → both_rules=0.4500 ± 0.2179 (4 reps)  steps=6.0/23  n_corr=4  elapsed=6.4s
+[297/632  eta=17.0min]
+>> aNbN    L=128  T=8    strat=uniform    samp=greedy       —
+  built (aNbN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=0.3500 ± 0.1118 (4 reps)  steps=3.5/8  n_corr=14  elapsed=2.3s
+[298/632  eta=16.9min]
+>> bbaN    L=128  T=128  strat=gaussian   samp=categorical  σ=20.0
+  built (bbaN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=0.9000 ± 0.0707 (4 reps)  steps=111.0/129  n_corr=35  elapsed=61.1s
+[299/632  eta=16.8min]
+>> aNbN    L=128  T=16   strat=uniform    samp=greedy       —
+  built (aNbN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=0.7500 ± 0.0500 (4 reps)  steps=12.4/16  n_corr=30  elapsed=3.5s
+[300/632  eta=16.7min]
+>> aNbN    L=128  T=8    strat=uniform    samp=categorical  —
+  built (aNbN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=0.0500 ± 0.0866 (4 reps)  steps=1.0/1  n_corr=0  elapsed=2.2s
+[301/632  eta=16.6min]
+>> aNbN    L=128  T=16   strat=uniform    samp=categorical  —
+  built (aNbN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=0.2750 ± 0.0433 (4 reps)  steps=3.3/16  n_corr=6  elapsed=2.4s
+[302/632  eta=16.5min]
+>> aNbN    L=128  T=4    strat=uniform    samp=categorical  —
+  built (aNbN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.0250 ± 0.0433 (4 reps)  steps=1.0/1  n_corr=0  elapsed=2.9s
+[303/632  eta=16.4min]
+>> bbaN    L=128  T=128  strat=ebsampler  samp=categorical  γ=0.5
+   → both_rules=0.4000 ± 0.1225 (4 reps)  steps=11.8/39  n_corr=6  elapsed=9.8s
+[304/632  eta=16.4min]
+>> aNbN    L=128  T=4    strat=gaussian   samp=greedy       σ=1.0
+  built (aNbN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=4.0/4  n_corr=40  elapsed=2.3s
+[305/632  eta=16.3min]
+>> aNbN    L=128  T=4    strat=gaussian   samp=greedy       σ=2.0
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=4.0/5  n_corr=40  elapsed=2.3s
+[306/632  eta=16.2min]
+>> aNbN    L=128  T=32   strat=uniform    samp=greedy       —
+  built (aNbN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=0.9000 ± 0.0707 (4 reps)  steps=28.1/32  n_corr=35  elapsed=6.9s
+[307/632  eta=16.1min]
+>> bbaN    L=128  T=4    strat=ebsampler  samp=categorical  γ=0.1
+  built (bbaN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.9250 ± 0.0829 (4 reps)  steps=52.2/92  n_corr=37  elapsed=35.1s
+[308/632  eta=16.0min]
+>> aNbN    L=128  T=4    strat=gaussian   samp=greedy       σ=5.0
+  built (aNbN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=4.1/5  n_corr=40  elapsed=2.1s
+[309/632  eta=15.9min]
+>> bbaN    L=128  T=130  strat=ar         samp=categorical  —
+  built (bbaN, L=128, T=130)  vocab=6  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=129.0/129  n_corr=40  elapsed=61.9s
+[310/632  eta=15.8min]
+>> aNbN    L=128  T=32   strat=uniform    samp=categorical  —
+  built (aNbN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=0.5750 ± 0.1299 (4 reps)  steps=16.8/32  n_corr=20  elapsed=5.2s
+[311/632  eta=15.7min]
+>> aNbN    L=128  T=4    strat=gaussian   samp=greedy       σ=10.0
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=4.2/5  n_corr=40  elapsed=2.2s
+[312/632  eta=15.6min]
+>> aNbN    L=128  T=4    strat=gaussian   samp=greedy       σ=20.0
+   → both_rules=0.8000 ± 0.1000 (4 reps)  steps=3.9/5  n_corr=32  elapsed=2.6s
+[313/632  eta=15.5min]
+>> aNbN    L=128  T=4    strat=gaussian   samp=greedy       σ=50.0
+  built (aNbN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.5250 ± 0.1090 (4 reps)  steps=3.0/5  n_corr=21  elapsed=2.7s
+[314/632  eta=15.4min]
+>> bbaN    L=128  T=8    strat=ebsampler  samp=categorical  γ=0.1
+   → both_rules=0.9250 ± 0.0829 (4 reps)  steps=52.2/92  n_corr=37  elapsed=34.5s
+[315/632  eta=15.3min]
+>> aNbN    L=128  T=8    strat=gaussian   samp=greedy       σ=1.0
+  built (aNbN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=8.0/8  n_corr=40  elapsed=4.0s
+[316/632  eta=15.2min]
+>> aNbN    L=128  T=8    strat=gaussian   samp=greedy       σ=2.0
+  built (aNbN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=8.1/9  n_corr=40  elapsed=4.0s
+[317/632  eta=15.2min]
+>> aNbN    L=128  T=8    strat=gaussian   samp=greedy       σ=5.0
+  built (aNbN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=8.1/9  n_corr=40  elapsed=3.9s
+[318/632  eta=15.1min]
+>> aNbN    L=128  T=8    strat=gaussian   samp=greedy       σ=10.0
+  built (aNbN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=8.1/9  n_corr=40  elapsed=3.9s
+[319/632  eta=15.0min]
+>> aNbN    L=128  T=8    strat=gaussian   samp=greedy       σ=20.0
+   → both_rules=0.9000 ± 0.1225 (4 reps)  steps=7.9/9  n_corr=36  elapsed=3.9s
+[320/632  eta=14.9min]
+>> aNbN    L=128  T=8    strat=gaussian   samp=greedy       σ=50.0
+  built (aNbN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=0.7250 ± 0.0829 (4 reps)  steps=6.9/9  n_corr=29  elapsed=3.6s
+[321/632  eta=14.8min]
+>> bbaN    L=128  T=16   strat=ebsampler  samp=categorical  γ=0.1
+   → both_rules=0.9250 ± 0.0829 (4 reps)  steps=52.2/92  n_corr=37  elapsed=35.4s
+[322/632  eta=14.7min]
+>> aNbN    L=128  T=64   strat=uniform    samp=categorical  —
+  built (aNbN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=0.7250 ± 0.1299 (4 reps)  steps=46.0/64  n_corr=28  elapsed=11.4s
+[323/632  eta=14.6min]
+>> aNbN    L=128  T=64   strat=uniform    samp=greedy       —
+  built (aNbN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=63.8/64  n_corr=40  elapsed=14.9s
+[324/632  eta=14.6min]
+>> aNbN    L=128  T=16   strat=gaussian   samp=greedy       σ=1.0
+  built (aNbN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=16.0/17  n_corr=40  elapsed=7.1s
+[325/632  eta=14.5min]
+>> aNbN    L=128  T=16   strat=gaussian   samp=greedy       σ=2.0
+  built (aNbN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=16.1/17  n_corr=40  elapsed=7.2s
+[326/632  eta=14.4min]
+>> aNbN    L=128  T=16   strat=gaussian   samp=greedy       σ=5.0
+  built (aNbN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=15.9/17  n_corr=40  elapsed=6.9s
+[327/632  eta=14.3min]
+>> aNbN    L=128  T=16   strat=gaussian   samp=greedy       σ=10.0
+  built (aNbN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=15.7/17  n_corr=40  elapsed=6.8s
+[328/632  eta=14.2min]
+>> aNbN    L=128  T=16   strat=gaussian   samp=greedy       σ=20.0
+  built (aNbN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=15.6/17  n_corr=40  elapsed=6.4s
+[329/632  eta=14.1min]
+>> bbaN    L=128  T=32   strat=ebsampler  samp=categorical  γ=0.1
+   → both_rules=0.9250 ± 0.0829 (4 reps)  steps=52.2/92  n_corr=37  elapsed=35.1s
+[330/632  eta=14.1min]
+>> aNbN    L=128  T=16   strat=gaussian   samp=greedy       σ=50.0
+  built (aNbN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=0.9000 ± 0.0707 (4 reps)  steps=15.1/17  n_corr=36  elapsed=6.1s
+[331/632  eta=14.0min]
+>> bbaN    L=128  T=64   strat=ebsampler  samp=categorical  γ=0.1
+   → both_rules=0.9250 ± 0.0829 (4 reps)  steps=52.2/92  n_corr=37  elapsed=33.7s
+[332/632  eta=14.0min]
+>> aNbN    L=128  T=32   strat=gaussian   samp=greedy       σ=1.0
+  built (aNbN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=32.0/33  n_corr=40  elapsed=12.6s
+[333/632  eta=13.9min]
+>> aNbN    L=128  T=128  strat=uniform    samp=categorical  —
+  built (aNbN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=0.8500 ± 0.0866 (4 reps)  steps=103.3/128  n_corr=32  elapsed=22.0s
+[334/632  eta=13.8min]
+>> aNbN    L=128  T=32   strat=gaussian   samp=greedy       σ=2.0
+  built (aNbN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=31.6/32  n_corr=40  elapsed=12.9s
+[335/632  eta=13.7min]
+>> aNbN    L=128  T=32   strat=gaussian   samp=greedy       σ=10.0
+  built (aNbN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=30.9/33  n_corr=40  elapsed=12.0s
+[336/632  eta=13.7min]
+>> aNbN    L=128  T=32   strat=gaussian   samp=greedy       σ=50.0
+   → both_rules=0.8750 ± 0.1299 (4 reps)  steps=28.9/33  n_corr=35  elapsed=10.1s
+[337/632  eta=13.6min]
+>> aNbN    L=128  T=32   strat=gaussian   samp=greedy       σ=5.0
+  built (aNbN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=31.2/33  n_corr=40  elapsed=12.5s
+[338/632  eta=13.5min]
+>> aNbN    L=128  T=32   strat=gaussian   samp=greedy       σ=20.0
+  built (aNbN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=30.9/33  n_corr=40  elapsed=12.5s
+[339/632  eta=13.4min]
+>> aNbN    L=128  T=128  strat=uniform    samp=greedy       —
+  built (aNbN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=127.2/128  n_corr=40  elapsed=27.1s
+[340/632  eta=13.3min]
+>> bbaN    L=128  T=128  strat=ebsampler  samp=categorical  γ=0.1
+   → both_rules=0.9250 ± 0.0829 (4 reps)  steps=52.2/92  n_corr=37  elapsed=33.7s
+[341/632  eta=13.3min]
+>> aNbN    L=128  T=4    strat=gaussian   samp=categorical  σ=1.0
+  built (aNbN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=1.0/1  n_corr=0  elapsed=2.5s
+[342/632  eta=13.2min]
+>> aNbN    L=128  T=4    strat=gaussian   samp=categorical  σ=5.0
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=1.0/1  n_corr=0  elapsed=2.5s
+[343/632  eta=13.1min]
+>> aNbN    L=128  T=4    strat=gaussian   samp=categorical  σ=2.0
+  built (aNbN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=1.0/1  n_corr=0  elapsed=2.6s
+[344/632  eta=13.0min]
+>> aNbN    L=128  T=4    strat=gaussian   samp=categorical  σ=10.0
+  built (aNbN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=1.0/2  n_corr=0  elapsed=2.3s
+[345/632  eta=13.0min]
+>> aNbN    L=128  T=4    strat=gaussian   samp=categorical  σ=20.0
+   → both_rules=0.0250 ± 0.0433 (4 reps)  steps=1.1/4  n_corr=1  elapsed=2.1s
+[346/632  eta=12.9min]
+>> aNbN    L=128  T=4    strat=gaussian   samp=categorical  σ=50.0
+   → both_rules=0.0250 ± 0.0433 (4 reps)  steps=1.1/4  n_corr=1  elapsed=2.0s
+[347/632  eta=12.8min]
+>> aNbN    L=128  T=8    strat=gaussian   samp=categorical  σ=1.0
+  built (aNbN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=0.0250 ± 0.0433 (4 reps)  steps=1.4/8  n_corr=1  elapsed=2.3s
+[348/632  eta=12.7min]
+>> aNbN    L=128  T=8    strat=gaussian   samp=categorical  σ=2.0
+  built (aNbN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=0.0500 ± 0.0500 (4 reps)  steps=1.6/8  n_corr=2  elapsed=2.1s
+[349/632  eta=12.7min]
+>> aNbN    L=128  T=8    strat=gaussian   samp=categorical  σ=5.0
+  built (aNbN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=0.0500 ± 0.0500 (4 reps)  steps=1.9/8  n_corr=2  elapsed=2.4s
+[350/632  eta=12.6min]
+>> aNbN    L=128  T=8    strat=gaussian   samp=categorical  σ=10.0
+  built (aNbN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=0.0750 ± 0.0433 (4 reps)  steps=2.5/9  n_corr=3  elapsed=2.9s
+[351/632  eta=12.5min]
+>> aNbN    L=128  T=8    strat=gaussian   samp=categorical  σ=20.0
+   → both_rules=0.1250 ± 0.0829 (4 reps)  steps=2.9/8  n_corr=5  elapsed=3.1s
+[352/632  eta=12.5min]
+>> aNbN    L=128  T=8    strat=gaussian   samp=categorical  σ=50.0
+   → both_rules=0.2250 ± 0.1639 (4 reps)  steps=3.3/9  n_corr=7  elapsed=2.7s
+[353/632  eta=12.4min]
+>> aNbN    L=128  T=16   strat=gaussian   samp=categorical  σ=1.0
+  built (aNbN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=0.2250 ± 0.0433 (4 reps)  steps=5.6/16  n_corr=9  elapsed=3.4s
+[354/632  eta=12.3min]
+>> aNbN    L=128  T=16   strat=gaussian   samp=categorical  σ=2.0
+  built (aNbN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=0.2250 ± 0.1639 (4 reps)  steps=5.6/16  n_corr=9  elapsed=3.8s
+[355/632  eta=12.3min]
+>> aNbN    L=128  T=16   strat=gaussian   samp=categorical  σ=5.0
+  built (aNbN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=0.3500 ± 0.0500 (4 reps)  steps=7.2/16  n_corr=13  elapsed=4.4s
+[356/632  eta=12.2min]
+>> aNbN    L=128  T=16   strat=gaussian   samp=categorical  σ=10.0
+  built (aNbN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=0.3500 ± 0.1803 (4 reps)  steps=8.1/16  n_corr=14  elapsed=4.5s
+[357/632  eta=12.1min]
+>> aNbN    L=128  T=64   strat=gaussian   samp=greedy       σ=50.0
+  built (aNbN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=0.9500 ± 0.0500 (4 reps)  steps=61.3/65  n_corr=38  elapsed=21.7s
+[358/632  eta=12.1min]
+>> aNbN    L=128  T=64   strat=gaussian   samp=greedy       σ=20.0
+  built (aNbN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=0.9750 ± 0.0433 (4 reps)  steps=60.6/65  n_corr=39  elapsed=23.4s
+[359/632  eta=12.0min]
+>> aNbN    L=128  T=64   strat=gaussian   samp=greedy       σ=1.0
+  built (aNbN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=63.1/64  n_corr=40  elapsed=24.6s
+[360/632  eta=11.9min]
+>> aNbN    L=128  T=64   strat=gaussian   samp=greedy       σ=10.0
+  built (aNbN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=60.9/65  n_corr=40  elapsed=23.8s
+[361/632  eta=11.8min]
+>> aNbN    L=128  T=16   strat=gaussian   samp=categorical  σ=20.0
+   → both_rules=0.2750 ± 0.1639 (4 reps)  steps=7.0/17  n_corr=10  elapsed=4.5s
+[362/632  eta=11.8min]
+>> aNbN    L=128  T=64   strat=gaussian   samp=greedy       σ=5.0
+  built (aNbN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=61.5/64  n_corr=40  elapsed=24.2s
+[363/632  eta=11.7min]
+>> aNbN    L=128  T=16   strat=gaussian   samp=categorical  σ=50.0
+   → both_rules=0.3000 ± 0.1225 (4 reps)  steps=7.0/17  n_corr=10  elapsed=4.3s
+[364/632  eta=11.6min]
+>> aNbN    L=128  T=64   strat=gaussian   samp=greedy       σ=2.0
+  built (aNbN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=62.8/64  n_corr=40  elapsed=25.0s
+[365/632  eta=11.6min]
+>> aNbN    L=128  T=32   strat=gaussian   samp=categorical  σ=1.0
+   → both_rules=0.3000 ± 0.0707 (4 reps)  steps=13.4/32  n_corr=12  elapsed=7.5s
+[366/632  eta=11.5min]
+>> aNbN    L=128  T=32   strat=gaussian   samp=categorical  σ=2.0
+  built (aNbN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=0.4500 ± 0.2062 (4 reps)  steps=17.3/32  n_corr=18  elapsed=8.0s
+[367/632  eta=11.5min]
+>> aNbN    L=128  T=32   strat=gaussian   samp=categorical  σ=5.0
+   → both_rules=0.4750 ± 0.1090 (4 reps)  steps=18.6/32  n_corr=19  elapsed=8.7s
+[368/632  eta=11.4min]
+>> aNbN    L=128  T=32   strat=gaussian   samp=categorical  σ=50.0
+  built (aNbN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=0.5000 ± 0.1871 (4 reps)  steps=20.1/33  n_corr=20  elapsed=8.3s
+[369/632  eta=11.3min]
+>> aNbN    L=128  T=32   strat=gaussian   samp=categorical  σ=10.0
+  built (aNbN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=0.5000 ± 0.0707 (4 reps)  steps=19.8/33  n_corr=20  elapsed=9.3s
+[370/632  eta=11.3min]
+>> aNbN    L=128  T=32   strat=gaussian   samp=categorical  σ=20.0
+  built (aNbN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=0.6500 ± 0.0866 (4 reps)  steps=22.8/33  n_corr=26  elapsed=9.4s
+[371/632  eta=11.3min]
+>> baN     L=128  T=128  strat=gaussian   samp=greedy       σ=20.0
+  built (baN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=0.9000 ± 0.0707 (4 reps)  steps=120.6/129  n_corr=36  elapsed=905.4s
+[372/632  eta=11.2min]
+>> aNbN    L=128  T=64   strat=gaussian   samp=categorical  σ=1.0
+  built (aNbN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=0.7000 ± 0.0707 (4 reps)  steps=48.1/64  n_corr=28  elapsed=18.1s
+[373/632  eta=11.2min]
+>> aNbN    L=128  T=64   strat=gaussian   samp=categorical  σ=2.0
+   → both_rules=0.6500 ± 0.1118 (4 reps)  steps=44.9/64  n_corr=26  elapsed=17.8s
+[374/632  eta=11.1min]
+>> aNbN    L=128  T=64   strat=gaussian   samp=categorical  σ=10.0
+   → both_rules=0.6750 ± 0.0829 (4 reps)  steps=45.8/65  n_corr=27  elapsed=17.8s
+[375/632  eta=11.0min]
+>> aNbN    L=128  T=64   strat=gaussian   samp=categorical  σ=5.0
+  built (aNbN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=0.6750 ± 0.0829 (4 reps)  steps=46.4/65  n_corr=27  elapsed=19.4s
+[376/632  eta=11.0min]
+>> aNbN    L=128  T=128  strat=gaussian   samp=greedy       σ=50.0
+  built (aNbN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=0.9750 ± 0.0433 (4 reps)  steps=122.1/129  n_corr=39  elapsed=40.6s
+[377/632  eta=10.9min]
+>> aNbN    L=128  T=64   strat=gaussian   samp=categorical  σ=50.0
+  built (aNbN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=0.8500 ± 0.1118 (4 reps)  steps=55.4/65  n_corr=34  elapsed=19.2s
+[378/632  eta=10.9min]
+>> aNbN    L=128  T=64   strat=gaussian   samp=categorical  σ=20.0
+   → both_rules=0.7750 ± 0.1920 (4 reps)  steps=51.1/65  n_corr=31  elapsed=20.7s
+[379/632  eta=10.8min]
+>> aNbN    L=128  T=4    strat=ebsampler  samp=greedy       γ=0.9
+   → both_rules=1.0000 (det)  steps=21.0/21  n_corr=10  elapsed=2.3s
+[380/632  eta=10.8min]
+>> aNbN    L=128  T=130  strat=ar         samp=greedy       —
+  built (aNbN, L=128, T=130)  vocab=6  |X|=10
+   → both_rules=1.0000 (det)  steps=129.0/129  n_corr=10  elapsed=9.4s
+[381/632  eta=10.7min]
+>> aNbN    L=128  T=4    strat=ebsampler  samp=greedy       γ=2.0
+   → both_rules=1.0000 (det)  steps=14.0/14  n_corr=10  elapsed=1.7s
+[382/632  eta=10.6min]
+>> aNbN    L=128  T=4    strat=ebsampler  samp=greedy       γ=0.1
+   → both_rules=1.0000 (det)  steps=60.0/60  n_corr=10  elapsed=7.8s
+[383/632  eta=10.6min]
+>> aNbN    L=128  T=4    strat=ebsampler  samp=greedy       γ=10.0
+   → both_rules=0.0000 (det)  steps=5.0/5  n_corr=0  elapsed=0.7s
+[384/632  eta=10.5min]
+>> aNbN    L=128  T=4    strat=ebsampler  samp=greedy       γ=0.5
+   → both_rules=1.0000 (det)  steps=28.0/28  n_corr=10  elapsed=3.3s
+[385/632  eta=10.4min]
+>> aNbN    L=128  T=4    strat=ebsampler  samp=greedy       γ=5.0
+   → both_rules=1.0000 (det)  steps=8.0/8  n_corr=10  elapsed=1.0s
+[386/632  eta=10.4min]
+>> aNbN    L=128  T=8    strat=ebsampler  samp=greedy       γ=5.0
+   → both_rules=1.0000 (det)  steps=8.0/8  n_corr=10  elapsed=0.9s
+[387/632  eta=10.3min]
+>> aNbN    L=128  T=128  strat=gaussian   samp=greedy       σ=20.0
+  built (aNbN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=121.3/129  n_corr=40  elapsed=45.3s
+[388/632  eta=10.2min]
+>> aNbN    L=128  T=8    strat=ebsampler  samp=greedy       γ=10.0
+   → both_rules=0.0000 (det)  steps=5.0/5  n_corr=0  elapsed=0.6s
+[389/632  eta=10.2min]
+>> aNbN    L=128  T=8    strat=ebsampler  samp=greedy       γ=2.0
+  built (aNbN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=1.0000 (det)  steps=14.0/14  n_corr=10  elapsed=1.7s
+[390/632  eta=10.1min]
+>> aNbN    L=128  T=8    strat=ebsampler  samp=greedy       γ=0.9
+   → both_rules=1.0000 (det)  steps=21.0/21  n_corr=10  elapsed=2.5s
+[391/632  eta=10.0min]
+>> aNbN    L=128  T=128  strat=gaussian   samp=greedy       σ=1.0
+  built (aNbN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=125.8/128  n_corr=40  elapsed=49.3s
+[392/632  eta=10.0min]
+>> aNbN    L=128  T=8    strat=ebsampler  samp=greedy       γ=0.5
+   → both_rules=1.0000 (det)  steps=28.0/28  n_corr=10  elapsed=3.5s
+[393/632  eta=9.9min]
+>> aNbN    L=128  T=16   strat=ebsampler  samp=greedy       γ=5.0
+  built (aNbN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=1.0000 (det)  steps=8.0/8  n_corr=10  elapsed=0.9s
+[394/632  eta=9.8min]
+>> aNbN    L=128  T=128  strat=gaussian   samp=greedy       σ=5.0
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=122.5/129  n_corr=40  elapsed=48.3s
+[395/632  eta=9.8min]
+>> aNbN    L=128  T=128  strat=gaussian   samp=greedy       σ=10.0
+  built (aNbN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=121.8/129  n_corr=40  elapsed=48.1s
+[396/632  eta=9.7min]
+>> aNbN    L=128  T=16   strat=ebsampler  samp=greedy       γ=10.0
+   → both_rules=0.0000 (det)  steps=5.0/5  n_corr=0  elapsed=0.7s
+[397/632  eta=9.7min]
+>> aNbN    L=128  T=16   strat=ebsampler  samp=greedy       γ=2.0
+   → both_rules=1.0000 (det)  steps=14.0/14  n_corr=10  elapsed=1.7s
+[398/632  eta=9.6min]
+>> aNbN    L=128  T=128  strat=gaussian   samp=greedy       σ=2.0
+  built (aNbN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=124.7/129  n_corr=40  elapsed=49.2s
+[399/632  eta=9.5min]
+>> aNbN    L=128  T=16   strat=ebsampler  samp=greedy       γ=0.9
+   → both_rules=1.0000 (det)  steps=21.0/21  n_corr=10  elapsed=2.6s
+[400/632  eta=9.5min]
+>> aNbN    L=128  T=32   strat=ebsampler  samp=greedy       γ=10.0
+   → both_rules=0.0000 (det)  steps=5.0/5  n_corr=0  elapsed=0.7s
+[401/632  eta=9.4min]
+>> aNbN    L=128  T=32   strat=ebsampler  samp=greedy       γ=5.0
+  built (aNbN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=1.0000 (det)  steps=8.0/8  n_corr=10  elapsed=0.9s
+[402/632  eta=9.3min]
+>> aNbN    L=128  T=16   strat=ebsampler  samp=greedy       γ=0.5
+   → both_rules=1.0000 (det)  steps=28.0/28  n_corr=10  elapsed=3.4s
+[403/632  eta=9.3min]
+>> aNbN    L=128  T=32   strat=ebsampler  samp=greedy       γ=2.0
+  built (aNbN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=1.0000 (det)  steps=14.0/14  n_corr=10  elapsed=1.7s
+[404/632  eta=9.2min]
+>> aNbN    L=128  T=32   strat=ebsampler  samp=greedy       γ=0.9
+   → both_rules=1.0000 (det)  steps=21.0/21  n_corr=10  elapsed=2.4s
+[405/632  eta=9.2min]
+>> aNbN    L=128  T=64   strat=ebsampler  samp=greedy       γ=10.0
+  built (aNbN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=0.0000 (det)  steps=5.0/5  n_corr=0  elapsed=0.7s
+[406/632  eta=9.1min]
+>> aNbN    L=128  T=64   strat=ebsampler  samp=greedy       γ=5.0
+   → both_rules=1.0000 (det)  steps=8.0/8  n_corr=10  elapsed=1.0s
+[407/632  eta=9.0min]
+>> aNbN    L=128  T=64   strat=ebsampler  samp=greedy       γ=2.0
+   → both_rules=1.0000 (det)  steps=14.0/14  n_corr=10  elapsed=1.6s
+[408/632  eta=9.0min]
+>> aNbN    L=128  T=32   strat=ebsampler  samp=greedy       γ=0.5
+  built (aNbN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=1.0000 (det)  steps=28.0/28  n_corr=10  elapsed=3.3s
+[409/632  eta=8.9min]
+>> aNbN    L=128  T=64   strat=ebsampler  samp=greedy       γ=0.9
+   → both_rules=1.0000 (det)  steps=21.0/21  n_corr=10  elapsed=2.4s
+[410/632  eta=8.9min]
+>> aNbN    L=128  T=8    strat=ebsampler  samp=greedy       γ=0.1
+   → both_rules=1.0000 (det)  steps=60.0/60  n_corr=10  elapsed=8.7s
+[411/632  eta=8.8min]
+>> aNbN    L=128  T=64   strat=ebsampler  samp=greedy       γ=0.5
+  built (aNbN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=1.0000 (det)  steps=28.0/28  n_corr=10  elapsed=3.2s
+[412/632  eta=8.7min]
+>> aNbN    L=128  T=128  strat=ebsampler  samp=greedy       γ=2.0
+   → both_rules=1.0000 (det)  steps=14.0/14  n_corr=10  elapsed=1.5s
+[413/632  eta=8.7min]
+>> aNbN    L=128  T=128  strat=ebsampler  samp=greedy       γ=5.0
+  built (aNbN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=1.0000 (det)  steps=8.0/8  n_corr=10  elapsed=1.0s
+[414/632  eta=8.6min]
+>> aNbN    L=128  T=128  strat=ebsampler  samp=greedy       γ=10.0
+  built (aNbN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=0.0000 (det)  steps=5.0/5  n_corr=0  elapsed=0.7s
+[415/632  eta=8.6min]
+>> aNbN    L=128  T=128  strat=ebsampler  samp=greedy       γ=0.9
+  built (aNbN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=1.0000 (det)  steps=21.0/21  n_corr=10  elapsed=2.4s
+[416/632  eta=8.5min]
+>> aNbN    L=128  T=16   strat=ebsampler  samp=greedy       γ=0.1
+   → both_rules=1.0000 (det)  steps=60.0/60  n_corr=10  elapsed=8.1s
+[417/632  eta=8.5min]
+>> aNbN    L=128  T=128  strat=ebsampler  samp=greedy       γ=0.5
+   → both_rules=1.0000 (det)  steps=28.0/28  n_corr=10  elapsed=3.4s
+[418/632  eta=8.4min]
+>> aNbN    L=128  T=4    strat=ebsampler  samp=categorical  γ=2.0
+   → both_rules=0.2000 ± 0.1732 (4 reps)  steps=2.3/6  n_corr=8  elapsed=2.7s
+[419/632  eta=8.3min]
+>> aNbN    L=128  T=32   strat=ebsampler  samp=greedy       γ=0.1
+  built (aNbN, L=128, T=32)  vocab=6  |X|=10
+   → both_rules=1.0000 (det)  steps=60.0/60  n_corr=10  elapsed=7.9s
+[420/632  eta=8.3min]
+>> aNbN    L=128  T=4    strat=ebsampler  samp=categorical  γ=5.0
+   → both_rules=0.1500 ± 0.1118 (4 reps)  steps=1.4/3  n_corr=6  elapsed=2.3s
+[421/632  eta=8.2min]
+>> aNbN    L=128  T=4    strat=ebsampler  samp=categorical  γ=10.0
+  built (aNbN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=1.0/2  n_corr=0  elapsed=2.7s
+[422/632  eta=8.2min]
+>> aNbN    L=128  T=64   strat=ebsampler  samp=greedy       γ=0.1
+  built (aNbN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=1.0000 (det)  steps=60.0/60  n_corr=10  elapsed=7.9s
+[423/632  eta=8.1min]
+>> aNbN    L=128  T=4    strat=ebsampler  samp=categorical  γ=0.9
+   → both_rules=0.3750 ± 0.0829 (4 reps)  steps=5.8/16  n_corr=15  elapsed=4.8s
+[424/632  eta=8.1min]
+>> aNbN    L=128  T=8    strat=ebsampler  samp=categorical  γ=2.0
+   → both_rules=0.2000 ± 0.1732 (4 reps)  steps=2.3/6  n_corr=8  elapsed=2.6s
+[425/632  eta=8.0min]
+>> aNbN    L=128  T=128  strat=ebsampler  samp=greedy       γ=0.1
+   → both_rules=1.0000 (det)  steps=60.0/60  n_corr=10  elapsed=7.9s
+[426/632  eta=8.0min]
+>> aNbN    L=128  T=4    strat=ebsampler  samp=categorical  γ=0.5
+  built (aNbN, L=128, T=4)  vocab=6  |X|=10
+   → both_rules=0.5500 ± 0.1658 (4 reps)  steps=8.4/27  n_corr=22  elapsed=6.2s
+[427/632  eta=7.9min]
+>> aNbN    L=128  T=8    strat=ebsampler  samp=categorical  γ=5.0
+  built (aNbN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=0.1500 ± 0.1118 (4 reps)  steps=1.4/3  n_corr=6  elapsed=2.3s
+[428/632  eta=7.9min]
+>> aNbN    L=128  T=8    strat=ebsampler  samp=categorical  γ=10.0
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=1.0/2  n_corr=0  elapsed=2.4s
+[429/632  eta=7.8min]
+>> aNbN    L=128  T=8    strat=ebsampler  samp=categorical  γ=0.9
+  built (aNbN, L=128, T=8)  vocab=6  |X|=10
+   → both_rules=0.3750 ± 0.0829 (4 reps)  steps=5.8/16  n_corr=15  elapsed=4.7s
+[430/632  eta=7.8min]
+>> aNbN    L=128  T=16   strat=ebsampler  samp=categorical  γ=5.0
+   → both_rules=0.1500 ± 0.1118 (4 reps)  steps=1.4/3  n_corr=6  elapsed=2.1s
+[431/632  eta=7.7min]
+>> aNbN    L=128  T=16   strat=ebsampler  samp=categorical  γ=2.0
+  built (aNbN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=0.2000 ± 0.1732 (4 reps)  steps=2.3/6  n_corr=8  elapsed=2.6s
+[432/632  eta=7.7min]
+>> aNbN    L=128  T=16   strat=ebsampler  samp=categorical  γ=10.0
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=1.0/2  n_corr=0  elapsed=2.8s
+[433/632  eta=7.6min]
+>> aNbN    L=128  T=128  strat=gaussian   samp=categorical  σ=1.0
+  built (aNbN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=0.7250 ± 0.1479 (4 reps)  steps=98.7/128  n_corr=29  elapsed=39.5s
+[434/632  eta=7.5min]
+>> aNbN    L=128  T=8    strat=ebsampler  samp=categorical  γ=0.5
+   → both_rules=0.5500 ± 0.1658 (4 reps)  steps=8.4/27  n_corr=22  elapsed=6.8s
+[435/632  eta=7.5min]
+>> aNbN    L=128  T=16   strat=ebsampler  samp=categorical  γ=0.9
+  built (aNbN, L=128, T=16)  vocab=6  |X|=10
+   → both_rules=0.3750 ± 0.0829 (4 reps)  steps=5.8/16  n_corr=15  elapsed=4.7s
+[436/632  eta=7.5min]
+>> aNbN    L=128  T=32   strat=ebsampler  samp=categorical  γ=2.0
+   → both_rules=0.2000 ± 0.1732 (4 reps)  steps=2.3/6  n_corr=8  elapsed=2.8s
+[437/632  eta=7.4min]
+>> aNbN    L=128  T=32   strat=ebsampler  samp=categorical  γ=5.0
+   → both_rules=0.1500 ± 0.1118 (4 reps)  steps=1.4/3  n_corr=6  elapsed=2.5s
+[438/632  eta=7.3min]
+>> aNbN    L=128  T=16   strat=ebsampler  samp=categorical  γ=0.5
+   → both_rules=0.5500 ± 0.1658 (4 reps)  steps=8.4/27  n_corr=22  elapsed=6.5s
+[439/632  eta=7.3min]
+>> aNbN    L=128  T=32   strat=ebsampler  samp=categorical  γ=10.0
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=1.0/2  n_corr=0  elapsed=2.8s
+[440/632  eta=7.2min]
+>> aNbN    L=128  T=32   strat=ebsampler  samp=categorical  γ=0.9
+   → both_rules=0.3750 ± 0.0829 (4 reps)  steps=5.8/16  n_corr=15  elapsed=5.1s
+[441/632  eta=7.2min]
+>> aNbN    L=128  T=128  strat=gaussian   samp=categorical  σ=10.0
+  built (aNbN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=0.8000 ± 0.1000 (4 reps)  steps=103.4/129  n_corr=32  elapsed=42.7s
+[442/632  eta=7.1min]
+>> aNbN    L=128  T=64   strat=ebsampler  samp=categorical  γ=5.0
+   → both_rules=0.1500 ± 0.1118 (4 reps)  steps=1.4/3  n_corr=6  elapsed=2.7s
+[443/632  eta=7.1min]
+>> aNbN    L=128  T=64   strat=ebsampler  samp=categorical  γ=2.0
+   → both_rules=0.2000 ± 0.1732 (4 reps)  steps=2.3/6  n_corr=8  elapsed=2.9s
+[444/632  eta=7.0min]
+>> aNbN    L=128  T=32   strat=ebsampler  samp=categorical  γ=0.5
+   → both_rules=0.5500 ± 0.1658 (4 reps)  steps=8.4/27  n_corr=22  elapsed=6.9s
+[445/632  eta=7.0min]
+>> aNbN    L=128  T=128  strat=gaussian   samp=categorical  σ=5.0
+  built (aNbN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=0.8500 ± 0.0500 (4 reps)  steps=108.2/129  n_corr=34  elapsed=43.5s
+[446/632  eta=6.9min]
+>> aNbN    L=128  T=128  strat=gaussian   samp=categorical  σ=2.0
+  built (aNbN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=0.8750 ± 0.1090 (4 reps)  steps=112.9/127  n_corr=35  elapsed=44.3s
+[447/632  eta=6.9min]
+>> aNbN    L=128  T=64   strat=ebsampler  samp=categorical  γ=10.0
+  built (aNbN, L=128, T=64)  vocab=6  |X|=10
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=1.0/2  n_corr=0  elapsed=2.9s
+[448/632  eta=6.8min]
+>> aNbN    L=128  T=64   strat=ebsampler  samp=categorical  γ=0.9
+   → both_rules=0.3750 ± 0.0829 (4 reps)  steps=5.8/16  n_corr=15  elapsed=5.1s
+[449/632  eta=6.8min]
+>> aNbN    L=128  T=128  strat=ebsampler  samp=categorical  γ=5.0
+   → both_rules=0.1500 ± 0.1118 (4 reps)  steps=1.4/3  n_corr=6  elapsed=2.7s
+[450/632  eta=6.7min]
+>> aNbN    L=128  T=128  strat=ebsampler  samp=categorical  γ=2.0
+   → both_rules=0.2000 ± 0.1732 (4 reps)  steps=2.3/6  n_corr=8  elapsed=3.2s
+[451/632  eta=6.7min]
+>> aNbN    L=128  T=128  strat=ebsampler  samp=categorical  γ=10.0
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=1.0/2  n_corr=0  elapsed=3.0s
+[452/632  eta=6.6min]
+>> aNbN    L=128  T=64   strat=ebsampler  samp=categorical  γ=0.5
+   → both_rules=0.5500 ± 0.1658 (4 reps)  steps=8.4/27  n_corr=22  elapsed=7.0s
+[453/632  eta=6.6min]
+>> aNbN    L=128  T=4    strat=ebsampler  samp=categorical  γ=0.1
+   → both_rules=0.7750 ± 0.1090 (4 reps)  steps=28.4/60  n_corr=31  elapsed=20.2s
+[454/632  eta=6.6min]
+>> aNbN    L=128  T=130  strat=ar         samp=categorical  —
+  built (aNbN, L=128, T=130)  vocab=6  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=129.0/129  n_corr=40  elapsed=38.0s
+[455/632  eta=6.5min]
+>> aNbN    L=128  T=128  strat=ebsampler  samp=categorical  γ=0.9
+   → both_rules=0.3750 ± 0.0829 (4 reps)  steps=5.8/16  n_corr=15  elapsed=5.3s
+[456/632  eta=6.5min]
+>> aNbN    L=128  T=8    strat=ebsampler  samp=categorical  γ=0.1
+   → both_rules=0.7750 ± 0.1090 (4 reps)  steps=28.4/60  n_corr=31  elapsed=20.7s
+[457/632  eta=6.4min]
+>> aNbN    L=128  T=128  strat=ebsampler  samp=categorical  γ=0.5
+   → both_rules=0.5500 ± 0.1658 (4 reps)  steps=8.4/27  n_corr=22  elapsed=7.4s
+[458/632  eta=6.4min]
+>> aNbN    L=128  T=128  strat=gaussian   samp=categorical  σ=20.0
+  built (aNbN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=0.8500 ± 0.0866 (4 reps)  steps=106.1/129  n_corr=34  elapsed=46.0s
+[459/632  eta=6.3min]
+>> aNbNcN  L=128  T=4    strat=uniform    samp=greedy       —
+  built (aNbNcN, L=128, T=4)  vocab=7  |X|=10
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=1.0/1  n_corr=0  elapsed=7.2s
+[460/632  eta=6.3min]
+>> aNbNcN  L=128  T=8    strat=uniform    samp=greedy       —
+  built (aNbNcN, L=128, T=8)  vocab=7  |X|=10
+   → both_rules=0.0250 ± 0.0433 (4 reps)  steps=1.2/8  n_corr=1  elapsed=7.2s
+[461/632  eta=6.2min]
+>> aNbNcN  L=128  T=8    strat=uniform    samp=categorical  —
+  built (aNbNcN, L=128, T=8)  vocab=7  |X|=10
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=1.0/1  n_corr=0  elapsed=5.3s
+[462/632  eta=6.2min]
+>> aNbN    L=128  T=16   strat=ebsampler  samp=categorical  γ=0.1
+   → both_rules=0.7750 ± 0.1090 (4 reps)  steps=28.4/60  n_corr=31  elapsed=20.7s
+[463/632  eta=6.1min]
+>> aNbNcN  L=128  T=4    strat=uniform    samp=categorical  —
+  built (aNbNcN, L=128, T=4)  vocab=7  |X|=10
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=1.0/1  n_corr=0  elapsed=5.7s
+[464/632  eta=6.1min]
+>> aNbN    L=128  T=128  strat=gaussian   samp=categorical  σ=50.0
+  built (aNbN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=0.9750 ± 0.0433 (4 reps)  steps=121.0/129  n_corr=39  elapsed=44.9s
+[465/632  eta=6.0min]
+>> aNbNcN  L=128  T=16   strat=uniform    samp=categorical  —
+  built (aNbNcN, L=128, T=16)  vocab=7  |X|=10
+   → both_rules=0.0750 ± 0.0829 (4 reps)  steps=1.8/16  n_corr=2  elapsed=6.1s
+[466/632  eta=6.0min]
+>> aNbNcN  L=128  T=16   strat=uniform    samp=greedy       —
+  built (aNbNcN, L=128, T=16)  vocab=7  |X|=10
+   → both_rules=0.2000 ± 0.0707 (4 reps)  steps=4.3/16  n_corr=8  elapsed=8.5s
+[467/632  eta=6.0min]
+>> aNbN    L=128  T=32   strat=ebsampler  samp=categorical  γ=0.1
+   → both_rules=0.7750 ± 0.1090 (4 reps)  steps=28.4/60  n_corr=31  elapsed=20.6s
+[468/632  eta=5.9min]
+>> aNbNcN  L=128  T=4    strat=gaussian   samp=greedy       σ=1.0
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=4.0/4  n_corr=40  elapsed=5.9s
+[469/632  eta=5.9min]
+>> aNbNcN  L=128  T=4    strat=gaussian   samp=greedy       σ=2.0
+  built (aNbNcN, L=128, T=4)  vocab=7  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=4.0/4  n_corr=40  elapsed=6.0s
+[470/632  eta=5.8min]
+>> aNbN    L=128  T=64   strat=ebsampler  samp=categorical  γ=0.1
+   → both_rules=0.7750 ± 0.1090 (4 reps)  steps=28.4/60  n_corr=31  elapsed=20.0s
+[471/632  eta=5.8min]
+>> aNbNcN  L=128  T=4    strat=gaussian   samp=greedy       σ=5.0
+  built (aNbNcN, L=128, T=4)  vocab=7  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=4.0/5  n_corr=40  elapsed=5.8s
+[472/632  eta=5.7min]
+>> aNbNcN  L=128  T=4    strat=gaussian   samp=greedy       σ=10.0
+  built (aNbNcN, L=128, T=4)  vocab=7  |X|=10
+   → both_rules=0.9500 ± 0.0866 (4 reps)  steps=4.0/5  n_corr=38  elapsed=5.9s
+[473/632  eta=5.7min]
+>> aNbNcN  L=128  T=4    strat=gaussian   samp=greedy       σ=20.0
+   → both_rules=0.6000 ± 0.0707 (4 reps)  steps=3.1/5  n_corr=24  elapsed=6.5s
+[474/632  eta=5.6min]
+>> aNbNcN  L=128  T=4    strat=gaussian   samp=greedy       σ=50.0
+  built (aNbNcN, L=128, T=4)  vocab=7  |X|=10
+   → both_rules=0.1250 ± 0.0829 (4 reps)  steps=1.5/5  n_corr=5  elapsed=6.2s
+[475/632  eta=5.6min]
+>> aNbNcN  L=128  T=32   strat=uniform    samp=categorical  —
+  built (aNbNcN, L=128, T=32)  vocab=7  |X|=10
+   → both_rules=0.2750 ± 0.1479 (4 reps)  steps=9.0/32  n_corr=10  elapsed=10.9s
+[476/632  eta=5.6min]
+>> aNbNcN  L=128  T=32   strat=uniform    samp=greedy       —
+  built (aNbNcN, L=128, T=32)  vocab=7  |X|=10
+   → both_rules=0.5750 ± 0.1920 (4 reps)  steps=19.1/32  n_corr=23  elapsed=16.0s
+[477/632  eta=5.5min]
+>> aNbN    L=128  T=128  strat=ebsampler  samp=categorical  γ=0.1
+   → both_rules=0.7750 ± 0.1090 (4 reps)  steps=28.4/60  n_corr=31  elapsed=19.5s
+[478/632  eta=5.5min]
+>> aNbNcN  L=128  T=8    strat=gaussian   samp=greedy       σ=1.0
+  built (aNbNcN, L=128, T=8)  vocab=7  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=8.0/8  n_corr=40  elapsed=10.9s
+[479/632  eta=5.4min]
+>> aNbNcN  L=128  T=8    strat=gaussian   samp=greedy       σ=2.0
+  built (aNbNcN, L=128, T=8)  vocab=7  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=8.0/8  n_corr=40  elapsed=11.0s
+[480/632  eta=5.4min]
+>> aNbNcN  L=128  T=8    strat=gaussian   samp=greedy       σ=5.0
+  built (aNbNcN, L=128, T=8)  vocab=7  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=8.0/8  n_corr=40  elapsed=11.1s
+[481/632  eta=5.4min]
+>> aNbNcN  L=128  T=8    strat=gaussian   samp=greedy       σ=50.0
+  built (aNbNcN, L=128, T=8)  vocab=7  |X|=10
+   → both_rules=0.5000 ± 0.1225 (4 reps)  steps=5.5/9  n_corr=20  elapsed=9.4s
+[482/632  eta=5.3min]
+>> aNbNcN  L=128  T=8    strat=gaussian   samp=greedy       σ=20.0
+   → both_rules=0.9000 ± 0.1000 (4 reps)  steps=7.6/9  n_corr=36  elapsed=10.5s
+[483/632  eta=5.3min]
+>> aNbNcN  L=128  T=8    strat=gaussian   samp=greedy       σ=10.0
+  built (aNbNcN, L=128, T=8)  vocab=7  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=8.2/9  n_corr=40  elapsed=11.1s
+[484/632  eta=5.3min]
+>> aNbNcN  L=128  T=16   strat=gaussian   samp=greedy       σ=50.0
+  built (aNbNcN, L=128, T=16)  vocab=7  |X|=10
+   → both_rules=0.7000 ± 0.1225 (4 reps)  steps=12.5/17  n_corr=28  elapsed=14.9s
+[485/632  eta=5.2min]
+>> aNbNcN  L=128  T=64   strat=uniform    samp=categorical  —
+  built (aNbNcN, L=128, T=64)  vocab=7  |X|=10
+   → both_rules=0.5750 ± 0.1920 (4 reps)  steps=37.8/64  n_corr=23  elapsed=28.9s
+[486/632  eta=5.2min]
+>> baN     L=128  T=128  strat=gaussian   samp=categorical  σ=50.0
+  built (baN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=0.9500 ± 0.0500 (4 reps)  steps=122.7/129  n_corr=37  elapsed=766.6s
+[487/632  eta=5.1min]
+>> aNbNcN  L=128  T=16   strat=gaussian   samp=greedy       σ=10.0
+  built (aNbNcN, L=128, T=16)  vocab=7  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=15.8/17  n_corr=40  elapsed=19.5s
+[488/632  eta=5.1min]
+>> aNbNcN  L=128  T=16   strat=gaussian   samp=greedy       σ=2.0
+  built (aNbNcN, L=128, T=16)  vocab=7  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=16.0/16  n_corr=40  elapsed=20.7s
+[489/632  eta=5.0min]
+>> aNbNcN  L=128  T=16   strat=gaussian   samp=greedy       σ=1.0
+  built (aNbNcN, L=128, T=16)  vocab=7  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=16.0/16  n_corr=40  elapsed=21.1s
+[490/632  eta=5.0min]
+>> aNbNcN  L=128  T=16   strat=gaussian   samp=greedy       σ=20.0
+  built (aNbNcN, L=128, T=16)  vocab=7  |X|=10
+   → both_rules=0.9500 ± 0.0500 (4 reps)  steps=15.1/17  n_corr=38  elapsed=19.3s
+[491/632  eta=5.0min]
+>> aNbNcN  L=128  T=16   strat=gaussian   samp=greedy       σ=5.0
+  built (aNbNcN, L=128, T=16)  vocab=7  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=15.8/17  n_corr=40  elapsed=20.7s
+[492/632  eta=4.9min]
+>> aNbNcN  L=128  T=64   strat=uniform    samp=greedy       —
+  built (aNbNcN, L=128, T=64)  vocab=7  |X|=10
+   → both_rules=0.8750 ± 0.1639 (4 reps)  steps=56.0/64  n_corr=35  elapsed=35.0s
+[493/632  eta=4.9min]
+>> baN     L=128  T=128  strat=gaussian   samp=greedy       σ=10.0
+  built (baN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=0.8750 ± 0.1090 (4 reps)  steps=121.4/129  n_corr=35  elapsed=988.8s
+[494/632  eta=4.9min]
+>> aNbNcN  L=128  T=32   strat=gaussian   samp=greedy       σ=50.0
+  built (aNbNcN, L=128, T=32)  vocab=7  |X|=10
+   → both_rules=0.8500 ± 0.1118 (4 reps)  steps=28.3/33  n_corr=34  elapsed=27.3s
+[495/632  eta=4.9min]
+>> aNbNcN  L=128  T=32   strat=gaussian   samp=greedy       σ=20.0
+  built (aNbNcN, L=128, T=32)  vocab=7  |X|=10
+   → both_rules=0.9750 ± 0.0433 (4 reps)  steps=30.6/33  n_corr=39  elapsed=32.6s
+[496/632  eta=4.8min]
+>> aNbNcN  L=128  T=32   strat=gaussian   samp=greedy       σ=1.0
+  built (aNbNcN, L=128, T=32)  vocab=7  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=32.0/32  n_corr=40  elapsed=40.4s
+[497/632  eta=4.8min]
+>> aNbNcN  L=128  T=32   strat=gaussian   samp=greedy       σ=10.0
+  built (aNbNcN, L=128, T=32)  vocab=7  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=30.4/33  n_corr=40  elapsed=36.5s
+[498/632  eta=4.8min]
+>> aNbNcN  L=128  T=32   strat=gaussian   samp=greedy       σ=5.0
+  built (aNbNcN, L=128, T=32)  vocab=7  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=31.1/33  n_corr=40  elapsed=39.8s
+[499/632  eta=4.7min]
+>> aNbNcN  L=128  T=32   strat=gaussian   samp=greedy       σ=2.0
+  built (aNbNcN, L=128, T=32)  vocab=7  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=31.5/32  n_corr=40  elapsed=40.7s
+[500/632  eta=4.7min]
+>> aNbNcN  L=128  T=4    strat=gaussian   samp=categorical  σ=1.0
+  built (aNbNcN, L=128, T=4)  vocab=7  |X|=10
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=1.0/1  n_corr=0  elapsed=6.4s
+[501/632  eta=4.6min]
+>> aNbNcN  L=128  T=4    strat=gaussian   samp=categorical  σ=2.0
+  built (aNbNcN, L=128, T=4)  vocab=7  |X|=10
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=1.0/1  n_corr=0  elapsed=6.4s
+[502/632  eta=4.6min]
+>> aNbNcN  L=128  T=4    strat=gaussian   samp=categorical  σ=5.0
+  built (aNbNcN, L=128, T=4)  vocab=7  |X|=10
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=1.0/1  n_corr=0  elapsed=6.2s
+[503/632  eta=4.6min]
+>> aNbNcN  L=128  T=4    strat=gaussian   samp=categorical  σ=10.0
+  built (aNbNcN, L=128, T=4)  vocab=7  |X|=10
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=1.0/1  n_corr=0  elapsed=6.1s
+[504/632  eta=4.5min]
+>> aNbNcN  L=128  T=4    strat=gaussian   samp=categorical  σ=20.0
+  built (aNbNcN, L=128, T=4)  vocab=7  |X|=10
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=1.0/1  n_corr=0  elapsed=5.7s
+[505/632  eta=4.5min]
+>> aNbNcN  L=128  T=4    strat=gaussian   samp=categorical  σ=50.0
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=1.0/1  n_corr=0  elapsed=5.4s
+[506/632  eta=4.4min]
+>> aNbNcN  L=128  T=8    strat=gaussian   samp=categorical  σ=1.0
+  built (aNbNcN, L=128, T=8)  vocab=7  |X|=10
+   → both_rules=0.0500 ± 0.0500 (4 reps)  steps=1.4/8  n_corr=2  elapsed=6.2s
+[507/632  eta=4.4min]
+>> aNbNcN  L=128  T=8    strat=gaussian   samp=categorical  σ=2.0
+   → both_rules=0.0500 ± 0.0500 (4 reps)  steps=1.4/8  n_corr=2  elapsed=6.1s
+[508/632  eta=4.4min]
+>> aNbNcN  L=128  T=128  strat=uniform    samp=categorical  —
+  built (aNbNcN, L=128, T=128)  vocab=7  |X|=10
+   → both_rules=0.8750 ± 0.0829 (4 reps)  steps=108.8/128  n_corr=34  elapsed=65.6s
+[509/632  eta=4.3min]
+>> aNbNcN  L=128  T=8    strat=gaussian   samp=categorical  σ=5.0
+   → both_rules=0.0250 ± 0.0433 (4 reps)  steps=1.6/8  n_corr=1  elapsed=6.9s
+[510/632  eta=4.3min]
+>> aNbNcN  L=128  T=8    strat=gaussian   samp=categorical  σ=10.0
+   → both_rules=0.0750 ± 0.0829 (4 reps)  steps=1.9/8  n_corr=2  elapsed=7.5s
+[511/632  eta=4.2min]
+>> aNbNcN  L=128  T=8    strat=gaussian   samp=categorical  σ=20.0
+   → both_rules=0.1750 ± 0.1479 (4 reps)  steps=3.0/8  n_corr=7  elapsed=7.9s
+[512/632  eta=4.2min]
+>> aNbNcN  L=128  T=8    strat=gaussian   samp=categorical  σ=50.0
+   → both_rules=0.2250 ± 0.1090 (4 reps)  steps=3.0/9  n_corr=7  elapsed=7.3s
+[513/632  eta=4.2min]
+>> aNbNcN  L=128  T=128  strat=uniform    samp=greedy       —
+  built (aNbNcN, L=128, T=128)  vocab=7  |X|=10
+   → both_rules=0.9750 ± 0.0433 (4 reps)  steps=124.1/128  n_corr=39  elapsed=78.7s
+[514/632  eta=4.1min]
+>> aNbNcN  L=128  T=16   strat=gaussian   samp=categorical  σ=1.0
+  built (aNbNcN, L=128, T=16)  vocab=7  |X|=10
+   → both_rules=0.2000 ± 0.1225 (4 reps)  steps=4.8/16  n_corr=8  elapsed=9.5s
+[515/632  eta=4.1min]
+>> aNbNcN  L=128  T=16   strat=gaussian   samp=categorical  σ=2.0
+  built (aNbNcN, L=128, T=16)  vocab=7  |X|=10
+   → both_rules=0.1750 ± 0.0829 (4 reps)  steps=4.6/16  n_corr=7  elapsed=10.6s
+[516/632  eta=4.1min]
+>> aNbNcN  L=128  T=16   strat=gaussian   samp=categorical  σ=5.0
+   → both_rules=0.2250 ± 0.0829 (4 reps)  steps=5.8/16  n_corr=9  elapsed=14.1s
+[517/632  eta=4.0min]
+>> aNbNcN  L=128  T=16   strat=gaussian   samp=categorical  σ=10.0
+   → both_rules=0.3000 ± 0.1581 (4 reps)  steps=6.7/16  n_corr=12  elapsed=16.0s
+[518/632  eta=4.0min]
+>> aNbNcN  L=128  T=16   strat=gaussian   samp=categorical  σ=20.0
+  built (aNbNcN, L=128, T=16)  vocab=7  |X|=10
+   → both_rules=0.3250 ± 0.1299 (4 reps)  steps=7.0/16  n_corr=12  elapsed=15.0s
+[519/632  eta=4.0min]
+>> aNbNcN  L=128  T=16   strat=gaussian   samp=categorical  σ=50.0
+  built (aNbNcN, L=128, T=16)  vocab=7  |X|=10
+   → both_rules=0.3500 ± 0.1500 (4 reps)  steps=7.8/17  n_corr=14  elapsed=15.0s
+[520/632  eta=3.9min]
+>> aNbNcN  L=128  T=64   strat=gaussian   samp=greedy       σ=50.0
+  built (aNbNcN, L=128, T=64)  vocab=7  |X|=10
+   → both_rules=0.9500 ± 0.0500 (4 reps)  steps=60.8/65  n_corr=38  elapsed=61.4s
+[521/632  eta=3.9min]
+>> aNbNcN  L=128  T=32   strat=gaussian   samp=categorical  σ=1.0
+  built (aNbNcN, L=128, T=32)  vocab=7  |X|=10
+   → both_rules=0.3750 ± 0.0829 (4 reps)  steps=14.7/32  n_corr=15  elapsed=23.3s
+[522/632  eta=3.9min]
+>> aNbNcN  L=128  T=64   strat=gaussian   samp=greedy       σ=20.0
+  built (aNbNcN, L=128, T=64)  vocab=7  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=60.0/65  n_corr=40  elapsed=70.8s
+[523/632  eta=3.8min]
+>> aNbNcN  L=128  T=64   strat=gaussian   samp=greedy       σ=1.0
+  built (aNbNcN, L=128, T=64)  vocab=7  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=63.1/64  n_corr=40  elapsed=84.1s
+[524/632  eta=3.8min]
+>> aNbNcN  L=128  T=32   strat=gaussian   samp=categorical  σ=2.0
+   → both_rules=0.4500 ± 0.1118 (4 reps)  steps=17.2/32  n_corr=18  elapsed=28.1s
+[525/632  eta=3.8min]
+>> aNbNcN  L=128  T=64   strat=gaussian   samp=greedy       σ=10.0
+  built (aNbNcN, L=128, T=64)  vocab=7  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=61.1/65  n_corr=40  elapsed=79.0s
+[526/632  eta=3.7min]
+>> aNbNcN  L=128  T=32   strat=gaussian   samp=categorical  σ=10.0
+   → both_rules=0.5000 ± 0.1581 (4 reps)  steps=18.1/32  n_corr=20  elapsed=28.0s
+[527/632  eta=3.7min]
+>> aNbNcN  L=128  T=32   strat=gaussian   samp=categorical  σ=5.0
+  built (aNbNcN, L=128, T=32)  vocab=7  |X|=10
+   → both_rules=0.5750 ± 0.1090 (4 reps)  steps=20.7/32  n_corr=23  elapsed=33.7s
+[528/632  eta=3.7min]
+>> aNbNcN  L=128  T=64   strat=gaussian   samp=greedy       σ=2.0
+  built (aNbNcN, L=128, T=64)  vocab=7  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=62.6/64  n_corr=40  elapsed=84.9s
+[529/632  eta=3.6min]
+>> aNbNcN  L=128  T=32   strat=gaussian   samp=categorical  σ=20.0
+   → both_rules=0.5250 ± 0.0433 (4 reps)  steps=19.5/33  n_corr=21  elapsed=28.4s
+[530/632  eta=3.6min]
+>> aNbNcN  L=128  T=32   strat=gaussian   samp=categorical  σ=50.0
+   → both_rules=0.6500 ± 0.1118 (4 reps)  steps=23.5/33  n_corr=26  elapsed=28.2s
+[531/632  eta=3.6min]
+>> aNbNcN  L=128  T=64   strat=gaussian   samp=greedy       σ=5.0
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=61.6/64  n_corr=40  elapsed=95.0s
+[532/632  eta=3.6min]
+>> aNbNcN  L=128  T=64   strat=gaussian   samp=categorical  σ=1.0
+  built (aNbNcN, L=128, T=64)  vocab=7  |X|=10
+   → both_rules=0.5250 ± 0.0829 (4 reps)  steps=37.3/64  n_corr=21  elapsed=45.9s
+[533/632  eta=3.6min]
+>> aNbNcN  L=128  T=64   strat=gaussian   samp=categorical  σ=2.0
+   → both_rules=0.6500 ± 0.1118 (4 reps)  steps=45.2/64  n_corr=26  elapsed=58.2s
+[534/632  eta=3.6min]
+>> aNbNcN  L=128  T=64   strat=gaussian   samp=categorical  σ=50.0
+  built (aNbNcN, L=128, T=64)  vocab=7  |X|=10
+   → both_rules=0.7250 ± 0.0829 (4 reps)  steps=48.6/65  n_corr=29  elapsed=53.5s
+[535/632  eta=3.5min]
+>> aNbNcN  L=128  T=64   strat=gaussian   samp=categorical  σ=5.0
+  built (aNbNcN, L=128, T=64)  vocab=7  |X|=10
+   → both_rules=0.7250 ± 0.0829 (4 reps)  steps=47.3/63  n_corr=29  elapsed=60.4s
+[536/632  eta=3.5min]
+>> aNbNcN  L=128  T=64   strat=gaussian   samp=categorical  σ=20.0
+   → both_rules=0.8000 ± 0.1225 (4 reps)  steps=51.0/65  n_corr=32  elapsed=59.9s
+[537/632  eta=3.5min]
+>> aNbNcN  L=128  T=64   strat=gaussian   samp=categorical  σ=10.0
+   → both_rules=0.8250 ± 0.0433 (4 reps)  steps=53.0/64  n_corr=33  elapsed=64.6s
+[538/632  eta=3.4min]
+>> aNbNcN  L=128  T=4    strat=ebsampler  samp=greedy       γ=0.9
+  built (aNbNcN, L=128, T=4)  vocab=7  |X|=10
+   → both_rules=1.0000 (det)  steps=17.0/17  n_corr=10  elapsed=7.3s
+[539/632  eta=3.4min]
+>> aNbNcN  L=128  T=128  strat=gaussian   samp=greedy       σ=50.0
+  built (aNbNcN, L=128, T=128)  vocab=7  |X|=10
+   → both_rules=0.9500 ± 0.0500 (4 reps)  steps=119.6/129  n_corr=38  elapsed=122.3s
+[540/632  eta=3.3min]
+>> aNbNcN  L=128  T=4    strat=ebsampler  samp=greedy       γ=5.0
+   → both_rules=0.0000 (det)  steps=8.0/8  n_corr=0  elapsed=3.4s
+[541/632  eta=3.3min]
+>> aNbNcN  L=128  T=4    strat=ebsampler  samp=greedy       γ=10.0
+   → both_rules=0.0000 (det)  steps=5.0/5  n_corr=0  elapsed=2.4s
+[542/632  eta=3.2min]
+>> aNbNcN  L=128  T=4    strat=ebsampler  samp=greedy       γ=2.0
+   → both_rules=0.0000 (det)  steps=12.0/12  n_corr=0  elapsed=5.7s
+[543/632  eta=3.2min]
+>> aNbNcN  L=128  T=4    strat=ebsampler  samp=greedy       γ=0.5
+   → both_rules=1.0000 (det)  steps=27.0/27  n_corr=10  elapsed=11.6s
+[544/632  eta=3.2min]
+>> aNbNcN  L=128  T=4    strat=ebsampler  samp=greedy       γ=0.1
+   → both_rules=1.0000 (det)  steps=42.0/42  n_corr=10  elapsed=19.4s
+[545/632  eta=3.1min]
+>> aNbNcN  L=128  T=8    strat=ebsampler  samp=greedy       γ=10.0
+  built (aNbNcN, L=128, T=8)  vocab=7  |X|=10
+   → both_rules=0.0000 (det)  steps=5.0/5  n_corr=0  elapsed=2.3s
+[546/632  eta=3.1min]
+>> aNbNcN  L=128  T=130  strat=ar         samp=greedy       —
+  built (aNbNcN, L=128, T=130)  vocab=7  |X|=10
+   → both_rules=1.0000 (det)  steps=129.0/129  n_corr=10  elapsed=47.6s
+[547/632  eta=3.0min]
+>> aNbNcN  L=128  T=8    strat=ebsampler  samp=greedy       γ=5.0
+   → both_rules=0.0000 (det)  steps=8.0/8  n_corr=0  elapsed=3.1s
+[548/632  eta=3.0min]
+>> aNbNcN  L=128  T=8    strat=ebsampler  samp=greedy       γ=2.0
+   → both_rules=0.0000 (det)  steps=12.0/12  n_corr=0  elapsed=5.3s
+[549/632  eta=3.0min]
+>> aNbNcN  L=128  T=128  strat=gaussian   samp=greedy       σ=20.0
+  built (aNbNcN, L=128, T=128)  vocab=7  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=121.1/129  n_corr=40  elapsed=136.9s
+[550/632  eta=2.9min]
+>> aNbNcN  L=128  T=8    strat=ebsampler  samp=greedy       γ=0.9
+  built (aNbNcN, L=128, T=8)  vocab=7  |X|=10
+   → both_rules=1.0000 (det)  steps=17.0/17  n_corr=10  elapsed=7.1s
+[551/632  eta=2.9min]
+>> aNbNcN  L=128  T=16   strat=ebsampler  samp=greedy       γ=5.0
+  built (aNbNcN, L=128, T=16)  vocab=7  |X|=10
+   → both_rules=0.0000 (det)  steps=8.0/8  n_corr=0  elapsed=3.0s
+[552/632  eta=2.9min]
+>> aNbNcN  L=128  T=16   strat=ebsampler  samp=greedy       γ=10.0
+  built (aNbNcN, L=128, T=16)  vocab=7  |X|=10
+   → both_rules=0.0000 (det)  steps=5.0/5  n_corr=0  elapsed=2.2s
+[553/632  eta=2.8min]
+>> aNbNcN  L=128  T=16   strat=ebsampler  samp=greedy       γ=0.9
+   → both_rules=1.0000 (det)  steps=17.0/17  n_corr=10  elapsed=7.2s
+[554/632  eta=2.8min]
+>> aNbNcN  L=128  T=16   strat=ebsampler  samp=greedy       γ=2.0
+  built (aNbNcN, L=128, T=16)  vocab=7  |X|=10
+   → both_rules=0.0000 (det)  steps=12.0/12  n_corr=0  elapsed=5.2s
+[555/632  eta=2.7min]
+>> aNbNcN  L=128  T=8    strat=ebsampler  samp=greedy       γ=0.5
+  built (aNbNcN, L=128, T=8)  vocab=7  |X|=10
+   → both_rules=1.0000 (det)  steps=27.0/27  n_corr=10  elapsed=11.5s
+[556/632  eta=2.7min]
+>> aNbNcN  L=128  T=32   strat=ebsampler  samp=greedy       γ=5.0
+  built (aNbNcN, L=128, T=32)  vocab=7  |X|=10
+   → both_rules=0.0000 (det)  steps=8.0/8  n_corr=0  elapsed=2.9s
+[557/632  eta=2.7min]
+>> aNbNcN  L=128  T=32   strat=ebsampler  samp=greedy       γ=2.0
+  built (aNbNcN, L=128, T=32)  vocab=7  |X|=10
+   → both_rules=0.0000 (det)  steps=12.0/12  n_corr=0  elapsed=5.0s
+[558/632  eta=2.6min]
+>> aNbNcN  L=128  T=16   strat=ebsampler  samp=greedy       γ=0.5
+  built (aNbNcN, L=128, T=16)  vocab=7  |X|=10
+   → both_rules=1.0000 (det)  steps=27.0/27  n_corr=10  elapsed=13.0s
+[559/632  eta=2.6min]
+>> aNbNcN  L=128  T=32   strat=ebsampler  samp=greedy       γ=10.0
+   → both_rules=0.0000 (det)  steps=5.0/5  n_corr=0  elapsed=2.1s
+[560/632  eta=2.6min]
+>> aNbNcN  L=128  T=32   strat=ebsampler  samp=greedy       γ=0.9
+   → both_rules=1.0000 (det)  steps=17.0/17  n_corr=10  elapsed=6.7s
+[561/632  eta=2.5min]
+>> aNbNcN  L=128  T=8    strat=ebsampler  samp=greedy       γ=0.1
+   → both_rules=1.0000 (det)  steps=42.0/42  n_corr=10  elapsed=18.4s
+[562/632  eta=2.5min]
+>> aNbNcN  L=128  T=128  strat=gaussian   samp=greedy       σ=10.0
+  built (aNbNcN, L=128, T=128)  vocab=7  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=121.0/129  n_corr=40  elapsed=155.6s
+[563/632  eta=2.4min]
+>> aNbNcN  L=128  T=32   strat=ebsampler  samp=greedy       γ=0.5
+   → both_rules=1.0000 (det)  steps=27.0/27  n_corr=10  elapsed=10.9s
+[564/632  eta=2.4min]
+>> aNbNcN  L=128  T=64   strat=ebsampler  samp=greedy       γ=10.0
+   → both_rules=0.0000 (det)  steps=5.0/5  n_corr=0  elapsed=2.3s
+[565/632  eta=2.4min]
+>> aNbNcN  L=128  T=16   strat=ebsampler  samp=greedy       γ=0.1
+   → both_rules=1.0000 (det)  steps=42.0/42  n_corr=10  elapsed=18.3s
+[566/632  eta=2.3min]
+>> aNbNcN  L=128  T=64   strat=ebsampler  samp=greedy       γ=5.0
+  built (aNbNcN, L=128, T=64)  vocab=7  |X|=10
+   → both_rules=0.0000 (det)  steps=8.0/8  n_corr=0  elapsed=3.1s
+[567/632  eta=2.3min]
+>> aNbNcN  L=128  T=64   strat=ebsampler  samp=greedy       γ=2.0
+   → both_rules=0.0000 (det)  steps=12.0/12  n_corr=0  elapsed=5.4s
+[568/632  eta=2.2min]
+>> aNbNcN  L=128  T=64   strat=ebsampler  samp=greedy       γ=0.9
+   → both_rules=1.0000 (det)  steps=17.0/17  n_corr=10  elapsed=7.0s
+[569/632  eta=2.2min]
+>> aNbNcN  L=128  T=128  strat=ebsampler  samp=greedy       γ=10.0
+  built (aNbNcN, L=128, T=128)  vocab=7  |X|=10
+   → both_rules=0.0000 (det)  steps=5.0/5  n_corr=0  elapsed=2.3s
+[570/632  eta=2.2min]
+>> aNbNcN  L=128  T=128  strat=ebsampler  samp=greedy       γ=5.0
+  built (aNbNcN, L=128, T=128)  vocab=7  |X|=10
+   → both_rules=0.0000 (det)  steps=8.0/8  n_corr=0  elapsed=3.2s
+[571/632  eta=2.1min]
+>> aNbNcN  L=128  T=128  strat=ebsampler  samp=greedy       γ=2.0
+   → both_rules=0.0000 (det)  steps=12.0/12  n_corr=0  elapsed=5.2s
+[572/632  eta=2.1min]
+>> aNbNcN  L=128  T=32   strat=ebsampler  samp=greedy       γ=0.1
+  built (aNbNcN, L=128, T=32)  vocab=7  |X|=10
+   → both_rules=1.0000 (det)  steps=42.0/42  n_corr=10  elapsed=17.2s
+[573/632  eta=2.1min]
+>> aNbNcN  L=128  T=128  strat=ebsampler  samp=greedy       γ=0.9
+  built (aNbNcN, L=128, T=128)  vocab=7  |X|=10
+   → both_rules=1.0000 (det)  steps=17.0/17  n_corr=10  elapsed=7.3s
+[574/632  eta=2.0min]
+>> aNbNcN  L=128  T=128  strat=gaussian   samp=greedy       σ=5.0
+  built (aNbNcN, L=128, T=128)  vocab=7  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=122.5/127  n_corr=40  elapsed=167.0s
+[575/632  eta=2.0min]
+>> aNbNcN  L=128  T=64   strat=ebsampler  samp=greedy       γ=0.5
+   → both_rules=1.0000 (det)  steps=27.0/27  n_corr=10  elapsed=13.3s
+[576/632  eta=2.0min]
+>> aNbNcN  L=128  T=128  strat=ebsampler  samp=greedy       γ=0.5
+   → both_rules=1.0000 (det)  steps=27.0/27  n_corr=10  elapsed=11.9s
+[577/632  eta=1.9min]
+>> aNbNcN  L=128  T=128  strat=gaussian   samp=greedy       σ=1.0
+  built (aNbNcN, L=128, T=128)  vocab=7  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=125.9/127  n_corr=40  elapsed=171.2s
+[578/632  eta=1.9min]
+>> aNbNcN  L=128  T=64   strat=ebsampler  samp=greedy       γ=0.1
+   → both_rules=1.0000 (det)  steps=42.0/42  n_corr=10  elapsed=19.4s
+[579/632  eta=1.8min]
+>> aNbNcN  L=128  T=4    strat=ebsampler  samp=categorical  γ=5.0
+   → both_rules=0.0250 ± 0.0433 (4 reps)  steps=1.3/4  n_corr=1  elapsed=7.9s
+[580/632  eta=1.8min]
+>> aNbNcN  L=128  T=4    strat=ebsampler  samp=categorical  γ=2.0
+  built (aNbNcN, L=128, T=4)  vocab=7  |X|=10
+   → both_rules=0.0750 ± 0.0433 (4 reps)  steps=2.4/9  n_corr=3  elapsed=9.6s
+[581/632  eta=1.8min]
+>> aNbNcN  L=128  T=4    strat=ebsampler  samp=categorical  γ=10.0
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=1.1/2  n_corr=0  elapsed=7.6s
+[582/632  eta=1.7min]
+>> aNbNcN  L=128  T=128  strat=ebsampler  samp=greedy       γ=0.1
+   → both_rules=1.0000 (det)  steps=42.0/42  n_corr=10  elapsed=19.9s
+[583/632  eta=1.7min]
+>> aNbNcN  L=128  T=4    strat=ebsampler  samp=categorical  γ=0.9
+   → both_rules=0.3750 ± 0.0433 (4 reps)  steps=5.1/14  n_corr=15  elapsed=15.8s
+[584/632  eta=1.7min]
+>> aNbNcN  L=128  T=8    strat=ebsampler  samp=categorical  γ=10.0
+  built (aNbNcN, L=128, T=8)  vocab=7  |X|=10
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=1.1/2  n_corr=0  elapsed=6.6s
+[585/632  eta=1.6min]
+>> aNbNcN  L=128  T=8    strat=ebsampler  samp=categorical  γ=5.0
+   → both_rules=0.0250 ± 0.0433 (4 reps)  steps=1.3/4  n_corr=1  elapsed=7.4s
+[586/632  eta=1.6min]
+>> aNbNcN  L=128  T=8    strat=ebsampler  samp=categorical  γ=2.0
+   → both_rules=0.0750 ± 0.0433 (4 reps)  steps=2.4/9  n_corr=3  elapsed=9.9s
+[587/632  eta=1.6min]
+>> baN     L=128  T=128  strat=gaussian   samp=greedy       σ=5.0
+  built (baN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=0.8750 ± 0.0829 (4 reps)  steps=123.0/129  n_corr=35  elapsed=1166.8s
+[588/632  eta=1.5min]
+>> aNbNcN  L=128  T=128  strat=gaussian   samp=greedy       σ=2.0
+  built (aNbNcN, L=128, T=128)  vocab=7  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=124.3/128  n_corr=40  elapsed=185.5s
+[589/632  eta=1.5min]
+>> aNbNcN  L=128  T=8    strat=ebsampler  samp=categorical  γ=0.9
+   → both_rules=0.3750 ± 0.0433 (4 reps)  steps=5.1/14  n_corr=15  elapsed=15.5s
+[590/632  eta=1.5min]
+>> aNbNcN  L=128  T=4    strat=ebsampler  samp=categorical  γ=0.5
+   → both_rules=0.3000 ± 0.1414 (4 reps)  steps=8.0/24  n_corr=12  elapsed=23.7s
+[591/632  eta=1.4min]
+>> aNbNcN  L=128  T=16   strat=ebsampler  samp=categorical  γ=5.0
+   → both_rules=0.0250 ± 0.0433 (4 reps)  steps=1.3/4  n_corr=1  elapsed=7.4s
+[592/632  eta=1.4min]
+>> aNbNcN  L=128  T=16   strat=ebsampler  samp=categorical  γ=10.0
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=1.1/2  n_corr=0  elapsed=6.5s
+[593/632  eta=1.3min]
+>> aNbNcN  L=128  T=16   strat=ebsampler  samp=categorical  γ=2.0
+   → both_rules=0.0750 ± 0.0433 (4 reps)  steps=2.4/9  n_corr=3  elapsed=9.2s
+[594/632  eta=1.3min]
+>> aNbNcN  L=128  T=8    strat=ebsampler  samp=categorical  γ=0.5
+  built (aNbNcN, L=128, T=8)  vocab=7  |X|=10
+   → both_rules=0.3000 ± 0.1414 (4 reps)  steps=8.0/24  n_corr=12  elapsed=23.4s
+[595/632  eta=1.3min]
+>> aNbNcN  L=128  T=16   strat=ebsampler  samp=categorical  γ=0.9
+  built (aNbNcN, L=128, T=16)  vocab=7  |X|=10
+   → both_rules=0.3750 ± 0.0433 (4 reps)  steps=5.1/14  n_corr=15  elapsed=14.7s
+[596/632  eta=1.2min]
+>> aNbNcN  L=128  T=128  strat=gaussian   samp=categorical  σ=1.0
+  built (aNbNcN, L=128, T=128)  vocab=7  |X|=10
+   → both_rules=0.8500 ± 0.1118 (4 reps)  steps=109.6/127  n_corr=34  elapsed=117.5s
+[597/632  eta=1.2min]
+>> aNbNcN  L=128  T=32   strat=ebsampler  samp=categorical  γ=10.0
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=1.1/2  n_corr=0  elapsed=6.3s
+[598/632  eta=1.2min]
+>> aNbNcN  L=128  T=32   strat=ebsampler  samp=categorical  γ=5.0
+  built (aNbNcN, L=128, T=32)  vocab=7  |X|=10
+   → both_rules=0.0250 ± 0.0433 (4 reps)  steps=1.3/4  n_corr=1  elapsed=6.7s
+[599/632  eta=1.1min]
+>> aNbNcN  L=128  T=32   strat=ebsampler  samp=categorical  γ=2.0
+   → both_rules=0.0750 ± 0.0433 (4 reps)  steps=2.4/9  n_corr=3  elapsed=9.2s
+[600/632  eta=1.1min]
+>> aNbNcN  L=128  T=32   strat=ebsampler  samp=categorical  γ=0.9
+  built (aNbNcN, L=128, T=32)  vocab=7  |X|=10
+   → both_rules=0.3750 ± 0.0433 (4 reps)  steps=5.1/14  n_corr=15  elapsed=14.3s
+[601/632  eta=1.1min]
+>> aNbNcN  L=128  T=128  strat=gaussian   samp=categorical  σ=50.0
+  built (aNbNcN, L=128, T=128)  vocab=7  |X|=10
+   → both_rules=0.9250 ± 0.0433 (4 reps)  steps=114.0/129  n_corr=37  elapsed=118.0s
+[602/632  eta=1.0min]
+>> aNbNcN  L=128  T=16   strat=ebsampler  samp=categorical  γ=0.5
+   → both_rules=0.3000 ± 0.1414 (4 reps)  steps=8.0/24  n_corr=12  elapsed=23.0s
+[603/632  eta=1.0min]
+>> aNbNcN  L=128  T=64   strat=ebsampler  samp=categorical  γ=10.0
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=1.1/2  n_corr=0  elapsed=6.5s
+[604/632  eta=1.0min]
+>> aNbNcN  L=128  T=64   strat=ebsampler  samp=categorical  γ=5.0
+   → both_rules=0.0250 ± 0.0433 (4 reps)  steps=1.3/4  n_corr=1  elapsed=7.0s
+[605/632  eta=0.9min]
+>> aNbNcN  L=128  T=64   strat=ebsampler  samp=categorical  γ=2.0
+   → both_rules=0.0750 ± 0.0433 (4 reps)  steps=2.4/9  n_corr=3  elapsed=9.6s
+[606/632  eta=0.9min]
+>> aNbNcN  L=128  T=128  strat=ebsampler  samp=categorical  γ=10.0
+  built (aNbNcN, L=128, T=128)  vocab=7  |X|=10
+   → both_rules=0.0000 ± 0.0000 (4 reps)  steps=1.1/2  n_corr=0  elapsed=5.9s
+[607/632  eta=0.9min]
+>> aNbNcN  L=128  T=128  strat=ebsampler  samp=categorical  γ=5.0
+   → both_rules=0.0250 ± 0.0433 (4 reps)  steps=1.3/4  n_corr=1  elapsed=6.5s
+[608/632  eta=0.8min]
+>> aNbNcN  L=128  T=128  strat=gaussian   samp=categorical  σ=10.0
+  built (aNbNcN, L=128, T=128)  vocab=7  |X|=10
+   → both_rules=0.8500 ± 0.1118 (4 reps)  steps=107.7/129  n_corr=34  elapsed=127.8s
+[609/632  eta=0.8min]
+>> aNbNcN  L=128  T=32   strat=ebsampler  samp=categorical  γ=0.5
+   → both_rules=0.3000 ± 0.1414 (4 reps)  steps=8.0/24  n_corr=12  elapsed=23.7s
+[610/632  eta=0.7min]
+>> aNbNcN  L=128  T=64   strat=ebsampler  samp=categorical  γ=0.9
+   → both_rules=0.3750 ± 0.0433 (4 reps)  steps=5.1/14  n_corr=15  elapsed=14.2s
+[611/632  eta=0.7min]
+>> aNbNcN  L=128  T=128  strat=ebsampler  samp=categorical  γ=2.0
+   → both_rules=0.0750 ± 0.0433 (4 reps)  steps=2.4/9  n_corr=3  elapsed=8.8s
+[612/632  eta=0.7min]
+>> aNbNcN  L=128  T=128  strat=gaussian   samp=categorical  σ=2.0
+  built (aNbNcN, L=128, T=128)  vocab=7  |X|=10
+   → both_rules=0.8500 ± 0.1118 (4 reps)  steps=110.1/128  n_corr=34  elapsed=131.9s
+[613/632  eta=0.6min]
+>> aNbNcN  L=128  T=128  strat=gaussian   samp=categorical  σ=20.0
+  built (aNbNcN, L=128, T=128)  vocab=7  |X|=10
+   → both_rules=0.9000 ± 0.0707 (4 reps)  steps=112.7/129  n_corr=36  elapsed=130.0s
+[614/632  eta=0.6min]
+>> aNbNcN  L=128  T=128  strat=ebsampler  samp=categorical  γ=0.9
+   → both_rules=0.3750 ± 0.0433 (4 reps)  steps=5.1/14  n_corr=15  elapsed=12.2s
+[615/632  eta=0.6min]
+>> aNbNcN  L=128  T=64   strat=ebsampler  samp=categorical  γ=0.5
+   → both_rules=0.3000 ± 0.1414 (4 reps)  steps=8.0/24  n_corr=12  elapsed=19.6s
+[616/632  eta=0.5min]
+>> aNbNcN  L=128  T=4    strat=ebsampler  samp=categorical  γ=0.1
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=24.1/42  n_corr=40  elapsed=50.6s
+[617/632  eta=0.5min]
+>> aNbNcN  L=128  T=128  strat=gaussian   samp=categorical  σ=5.0
+   → both_rules=0.8000 ± 0.1225 (4 reps)  steps=102.9/127  n_corr=32  elapsed=135.9s
+[618/632  eta=0.5min]
+>> baN     L=128  T=128  strat=gaussian   samp=greedy       σ=2.0
+  built (baN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=0.9000 ± 0.0707 (4 reps)  steps=125.0/128  n_corr=36  elapsed=1208.2s
+[619/632  eta=0.4min]
+>> aNbNcN  L=128  T=128  strat=ebsampler  samp=categorical  γ=0.5
+   → both_rules=0.3000 ± 0.1414 (4 reps)  steps=8.0/24  n_corr=12  elapsed=17.0s
+[620/632  eta=0.4min]
+>> aNbNcN  L=128  T=130  strat=ar         samp=categorical  —
+  built (aNbNcN, L=128, T=130)  vocab=7  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=129.0/129  n_corr=40  elapsed=114.6s
+[621/632  eta=0.4min]
+>> aNbNcN  L=128  T=16   strat=ebsampler  samp=categorical  γ=0.1
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=24.1/42  n_corr=40  elapsed=44.7s
+[622/632  eta=0.3min]
+>> aNbNcN  L=128  T=8    strat=ebsampler  samp=categorical  γ=0.1
+  built (aNbNcN, L=128, T=8)  vocab=7  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=24.1/42  n_corr=40  elapsed=52.4s
+[623/632  eta=0.3min]
+>> aNbNcN  L=128  T=32   strat=ebsampler  samp=categorical  γ=0.1
+  built (aNbNcN, L=128, T=32)  vocab=7  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=24.1/42  n_corr=40  elapsed=37.3s
+[624/632  eta=0.3min]
+>> aNbNcN  L=128  T=64   strat=ebsampler  samp=categorical  γ=0.1
+  built (aNbNcN, L=128, T=64)  vocab=7  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=24.1/42  n_corr=40  elapsed=33.3s
+[625/632  eta=0.2min]
+>> baN     L=128  T=128  strat=gaussian   samp=categorical  σ=20.0
+  built (baN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=0.9250 ± 0.0433 (4 reps)  steps=120.7/129  n_corr=37  elapsed=1039.4s
+[626/632  eta=0.2min]
+>> aNbNcN  L=128  T=128  strat=ebsampler  samp=categorical  γ=0.1
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=24.1/42  n_corr=40  elapsed=28.6s
+[627/632  eta=0.2min]
+>> baN     L=128  T=128  strat=gaussian   samp=greedy       σ=1.0
+  built (baN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=0.8500 ± 0.0500 (4 reps)  steps=125.6/129  n_corr=34  elapsed=1263.5s
+[628/632  eta=0.1min]
+>> baN     L=128  T=128  strat=gaussian   samp=categorical  σ=10.0
+  built (baN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=0.8750 ± 0.0433 (4 reps)  steps=121.2/129  n_corr=34  elapsed=1100.3s
+[629/632  eta=0.1min]
+>> baN     L=128  T=128  strat=gaussian   samp=categorical  σ=2.0
+  built (baN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=0.7750 ± 0.0433 (4 reps)  steps=124.1/128  n_corr=30  elapsed=1146.6s
+[630/632  eta=0.1min]
+>> baN     L=128  T=128  strat=gaussian   samp=categorical  σ=5.0
+  built (baN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=0.8500 ± 0.0866 (4 reps)  steps=122.3/128  n_corr=33  elapsed=1157.6s
+[631/632  eta=0.0min]
+>> baN     L=128  T=128  strat=gaussian   samp=categorical  σ=1.0
+  built (baN, L=128, T=128)  vocab=6  |X|=10
+   → both_rules=0.8000 ± 0.1225 (4 reps)  steps=125.4/127  n_corr=30  elapsed=1167.9s
+[632/632  eta=0.0min]
+>> baN     L=128  T=130  strat=ar         samp=categorical  —
+  built (baN, L=128, T=130)  vocab=6  |X|=10
+   → both_rules=1.0000 ± 0.0000 (4 reps)  steps=129.0/129  n_corr=40  elapsed=1071.9s
+
+============================================================
+T-SWEEP COMPLETE
+============================================================
+CSV: results/T-sweep-nonDyck-2/oracle_T_sweep_results.csv
+Distributions: results/T-sweep-nonDyck-2/distributions
+
+Log: results/T-sweep-nonDyck-2/run.log

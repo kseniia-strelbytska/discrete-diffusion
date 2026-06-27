@@ -1,6 +1,6 @@
 import torch 
 import torch.nn as nn
-from constants import EOS_token, SOS_token, PAD_token, MASK_token
+from datasets.constants import EOS_token, SOS_token, PAD_token, MASK_token
 
 
 def _trim_prompt(seq):

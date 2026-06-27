@@ -3,7 +3,7 @@ import math
 import torch
 from torch import Tensor
 
-from constants import MASK_token
+from datasets.constants import MASK_token
 from schedules.noise_schedule import NoiseSchedule
 
 

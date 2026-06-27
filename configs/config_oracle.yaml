@@ -1,0 +1,62 @@
+seed: 42
+device: auto
+decoding_strategy: eb
+sampling_strategy: categorical
+eb_gamma: 0.1
+# "baN"
+# "bbaN"
+# "aNbN"
+# "parentheses_and_brackets"
+# "aNbNcN"
+# "not_nested_parentheses_and_brackets"
+# not_nested_parentheses_and_brackets L=32   strat=ebsampler  samp=categorical  γ=0.9
+temperature: 1.0  # logit scaling (scale-invariant for greedy; kept for consistency)
+data:
+  l: 20 
+  train_split: 0.9
+  batch_size: 64
+  grammar: aNbNcN
+model:
+  architecture: oracle # classic (torch-native) or v2 (QKV low-level) or RPE or FIRE
+  max_len: 22    
+  vocab_size: 8
+  n_head: 4
+  n_layers: 4
+  embed_dim: 22
+  dim_feedforward: 1024
+  dropout: 0.1
+  layer_norm_eps: 0.0002
+  T: 1
+  sampling_eps: 0.00001
+  eos_weight: 2.0
+  inverse_t: False
+training:
+  epochs: 50000
+  learning_rate: 0.001
+  num_warmup_steps: 1000
+  weight_decay: 0.01
+  loss_type: eq8 # eq8 or eq9
+  gaussian_noise: True
+  denoise: "0" # "0" or eps
+schedule:
+  type: categorical  # categorical or gaussian
+  sigma: 1.0         # Gaussian width parameter; ignored when type=categorical
+validation:
+  val_every: 1000
+evaluation:
+  eval_every: 4000
+  n_samples: 1
+  eval_dataset: unconditional # limited or randomised or complete
+  eval_type: random # full or random
+  cutoff: 258
+investigation:
+  n_first_tokens: 258 # how many first tokens to investigate the distribution of
+  store_numeric: True # whether to store numeric logs of the investigation
+wandb:
+  project: ""
+  group: ""
+paths:
+  models_dir: models
+  figures_dir: figures
+  experiment_name: anomaly-23-oracle-uniform-baN
+notes: "Investigate oracle model with varying number of denoising steps (T) to see how it affects a perfect predictor"

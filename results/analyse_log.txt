@@ -1,0 +1,48 @@
+aNbN                                     ar                            categorical: {'uniqueness': 0.128, 'mean_both_rules': 1.0, 'n_steps_mean': 129.0, 'sampling_strategy': 'categorical'}
+aNbN                                     ar                                 greedy: {'uniqueness': 0.01, 'mean_both_rules': 1.0, 'n_steps_mean': 129.0, 'sampling_strategy': 'greedy'}
+aNbNcN                                   ar                            categorical: {'uniqueness': 0.084, 'mean_both_rules': 1.0, 'n_steps_mean': 129.0, 'sampling_strategy': 'categorical'}
+aNbNcN                                   ar                                 greedy: {'uniqueness': 0.01, 'mean_both_rules': 1.0, 'n_steps_mean': 129.0, 'sampling_strategy': 'greedy'}
+baN                                      ar                            categorical: {'uniqueness': 1.0, 'mean_both_rules': 1.0, 'n_steps_mean': 129.0, 'sampling_strategy': 'categorical'}
+baN                                      ar                                 greedy: {'uniqueness': 0.01, 'mean_both_rules': 1.0, 'n_steps_mean': 129.0, 'sampling_strategy': 'greedy'}
+bbaN                                     ar                            categorical: {'uniqueness': 0.928, 'mean_both_rules': 1.0, 'n_steps_mean': 129.0, 'sampling_strategy': 'categorical'}
+bbaN                                     ar                                 greedy: {'uniqueness': 0.01, 'mean_both_rules': 1.0, 'n_steps_mean': 129.0, 'sampling_strategy': 'greedy'}
+parentheses_and_brackets                 ar                            categorical: {'uniqueness': 1.0, 'mean_both_rules': 1.0, 'n_steps_mean': 33.0, 'sampling_strategy': 'categorical'}
+parentheses_and_brackets                 ar                                 greedy: {'uniqueness': 0.1, 'mean_both_rules': 1.0, 'n_steps_mean': 33.0, 'sampling_strategy': 'greedy'}
+not_nested_parentheses_and_brackets      ar                            categorical: {'uniqueness': 1.0, 'mean_both_rules': 1.0, 'n_steps_mean': 33.0, 'sampling_strategy': 'categorical'}
+not_nested_parentheses_and_brackets      ar                                 greedy: {'uniqueness': 0.1, 'mean_both_rules': 1.0, 'n_steps_mean': 33.0, 'sampling_strategy': 'greedy'}
+aNbN                                     ebsampler                     categorical: —
+aNbN                                     ebsampler                          greedy: {'uniqueness': 0.01, 'mean_both_rules': 1.0, 'n_steps_mean': 8.0, 'sampling_strategy': 'greedy'}
+aNbNcN                                   ebsampler                     categorical: {'uniqueness': 0.084, 'mean_both_rules': 1.0, 'n_steps_mean': 23.09, 'sampling_strategy': 'categorical'}
+aNbNcN                                   ebsampler                          greedy: {'uniqueness': 0.01, 'mean_both_rules': 1.0, 'n_steps_mean': 13.0, 'sampling_strategy': 'greedy'}
+baN                                      ebsampler                     categorical: {'uniqueness': 1.0, 'mean_both_rules': 1.0, 'n_steps_mean': 128.0, 'sampling_strategy': 'categorical'}
+baN                                      ebsampler                          greedy: {'uniqueness': 0.01, 'mean_both_rules': 1.0, 'n_steps_mean': 128.0, 'sampling_strategy': 'greedy'}
+bbaN                                     ebsampler                     categorical: {'uniqueness': 0.9148936170212766, 'mean_both_rules': 0.95, 'n_steps_mean': 52.924, 'sampling_strategy': 'categorical'}
+bbaN                                     ebsampler                          greedy: {'uniqueness': 0.01, 'mean_both_rules': 1.0, 'n_steps_mean': 7.0, 'sampling_strategy': 'greedy'}
+parentheses_and_brackets                 ebsampler                     categorical: {'uniqueness': 1.0, 'mean_both_rules': 0.96, 'n_steps_mean': 25.16, 'sampling_strategy': 'categorical'}
+parentheses_and_brackets                 ebsampler                          greedy: {'uniqueness': 0.1, 'mean_both_rules': 1.0, 'n_steps_mean': 4.0, 'sampling_strategy': 'greedy'}
+not_nested_parentheses_and_brackets      ebsampler                     categorical: {'uniqueness': 1.0, 'mean_both_rules': 1.0, 'n_steps_mean': 31.14, 'sampling_strategy': 'categorical'}
+not_nested_parentheses_and_brackets      ebsampler                          greedy: {'uniqueness': 0.1, 'mean_both_rules': 1.0, 'n_steps_mean': 8.0, 'sampling_strategy': 'greedy'}
+aNbN                                     gaussian                      categorical: {'uniqueness': 0.1333333333333333, 'mean_both_rules': 0.962, 'n_steps_mean': 237.438, 'sampling_strategy': 'categorical'}
+aNbN                                     gaussian                           greedy: {'uniqueness': 0.0020491803278688, 'mean_both_rules': 0.976, 'n_steps_mean': 1.978, 'sampling_strategy': 'greedy'}
+aNbNcN                                   gaussian                      categorical: {'uniqueness': 0.088235294117647, 'mean_both_rules': 0.952, 'n_steps_mean': 236.36, 'sampling_strategy': 'categorical'}
+aNbNcN                                   gaussian                           greedy: {'uniqueness': 0.0248962655601659, 'mean_both_rules': 0.964, 'n_steps_mean': 3.99, 'sampling_strategy': 'greedy'}
+baN                                      gaussian                      categorical: {'uniqueness': 1.0, 'mean_both_rules': 0.972, 'n_steps_mean': 240.474, 'sampling_strategy': 'categorical'}
+baN                                      gaussian                           greedy: —
+bbaN                                     gaussian                      categorical: {'uniqueness': 0.945945945945946, 'mean_both_rules': 0.97, 'n_steps_mean': 239.636, 'sampling_strategy': 'categorical'}
+bbaN                                     gaussian                           greedy: {'uniqueness': nan, 'mean_both_rules': 1.0, 'n_steps_mean': 1.0, 'sampling_strategy': 'greedy'}
+parentheses_and_brackets                 gaussian                      categorical: —
+parentheses_and_brackets                 gaussian                           greedy: {'uniqueness': 1.0, 'mean_both_rules': 0.96, 'n_steps_mean': 57.62, 'sampling_strategy': 'greedy'}
+not_nested_parentheses_and_brackets      gaussian                      categorical: —
+not_nested_parentheses_and_brackets      gaussian                           greedy: {'uniqueness': 0.02, 'mean_both_rules': 1.0, 'n_steps_mean': 1.0, 'sampling_strategy': 'greedy'}
+aNbN                                     uniform                       categorical: —
+aNbN                                     uniform                            greedy: {'uniqueness': 0.1221995926680244, 'mean_both_rules': 0.982, 'n_steps_mean': 125.198, 'sampling_strategy': 'greedy'}
+aNbNcN                                   uniform                       categorical: —
+aNbNcN                                   uniform                            greedy: {'uniqueness': 0.0841889117043121, 'mean_both_rules': 0.974, 'n_steps_mean': 247.24, 'sampling_strategy': 'greedy'}
+baN                                      uniform                       categorical: —
+baN                                      uniform                            greedy: —
+bbaN                                     uniform                       categorical: —
+bbaN                                     uniform                            greedy: {'uniqueness': nan, 'mean_both_rules': 1.0, 'n_steps_mean': 1.0, 'sampling_strategy': 'greedy'}
+parentheses_and_brackets                 uniform                       categorical: —
+parentheses_and_brackets                 uniform                            greedy: —
+not_nested_parentheses_and_brackets      uniform                       categorical: —
+not_nested_parentheses_and_brackets      uniform                            greedy: {'uniqueness': 0.02, 'mean_both_rules': 1.0, 'n_steps_mean': 1.0, 'sampling_strategy': 'greedy'}

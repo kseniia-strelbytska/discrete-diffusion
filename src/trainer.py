@@ -6,7 +6,7 @@ from datetime import datetime
 
 from loss import rblb
 from schedules.noise_schedule_loss import NoiseScheduleLoss
-from evaluation_tools import evaluation_from_generation
+from evaluation_tools import evaluation_from_generation  # noqa: F401 (re-exported from evaluation_tools)
 from transformers.optimization import get_inverse_sqrt_schedule
 import wandb
 
@@ -30,8 +30,10 @@ def train(
     evaluation_dataset=None,
     verbose=False,
     save_mode: bool = False,
-    strategy='categorical',
+    decoding_strategy='schedule_driven',
+    sampling_strategy='categorical',
     temperature=1.0,
+    eb_gamma=0.1,
     wandb=None,
     loss_type="eq8",
     gaussian_noise=False,
@@ -70,13 +72,15 @@ def train(
     for epoch in epochs_iter:
         #Calculate the eval metrics at initialisation
         if epoch == 0: # set to True to run evaluation at initialisation (expensive: ~4 min)
-            new_stats, new_stats_eos, total_eos, sequences, sequences_eos = evaluation_from_generation(
+            new_stats, new_stats_eos, total_eos, sequences, sequences_eos, _, _ = evaluation_from_generation(
                 model,
                 grammar,
                 evaluation_dataset=evaluation_dataset,
                 T=T,
-                strategy = strategy,
+                decoding_strategy=decoding_strategy,
+                sampling_strategy=sampling_strategy,
                 temperature=temperature,
+                eb_gamma=eb_gamma,
                 write_steps=False,
                 device=device,
                 figures_path=dirs.figure_path,
@@ -191,13 +195,15 @@ def train(
                     f.write(log_line + "\n")
 
         if (epoch + 1) % evaluation_config.eval_every == 0:
-            new_stats, new_stats_eos, total_eos, sequences, sequences_eos = evaluation_from_generation(
+            new_stats, new_stats_eos, total_eos, sequences, sequences_eos, _, _ = evaluation_from_generation(
                 model,
                 grammar,
                 evaluation_dataset=evaluation_dataset,
                 T=T,
-                strategy = strategy,
+                decoding_strategy=decoding_strategy,
+                sampling_strategy=sampling_strategy,
                 temperature=temperature,
+                eb_gamma=eb_gamma,
                 write_steps=False,
                 device=device,
                 figures_path=dirs.figure_path,

@@ -1,0 +1,380 @@
+Opening file: /Users/kseniia/Desktop/programming/Projects/AI/discrete-diffusion/results/combined_6_grammar.csv
+aNbN                                     ar                  : best settings: sampling_strategy=categorical, mean_both_rules: 1.0000
+aNbN                                     ar                  : best settings: sampling_strategy=greedy, mean_both_rules: 1.0000
+aNbN                                     ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=25.568, mean_both_rules: 0.6300
+aNbN                                     ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=25.568, mean_both_rules: 0.6300
+aNbN                                     ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=25.568, mean_both_rules: 0.6300
+aNbN                                     ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=25.568, mean_both_rules: 0.6300
+aNbN                                     ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=25.568, mean_both_rules: 0.6300
+aNbN                                     ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=25.568, mean_both_rules: 0.6300
+aNbN                                     ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=25.568, mean_both_rules: 0.6300
+aNbN                                     ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=25.568, mean_both_rules: 0.6300
+aNbN                                     ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=25.568, mean_both_rules: 0.6300
+aNbN                                     ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.5, n_steps_mean=8.31, mean_both_rules: 0.4560
+aNbN                                     ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.5, n_steps_mean=29.0, mean_both_rules: 1.0000
+aNbN                                     ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.5, n_steps_mean=29.0, mean_both_rules: 1.0000
+aNbN                                     ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=5.0, n_steps_mean=8.0, mean_both_rules: 1.0000
+aNbN                                     ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=2.0, n_steps_mean=14.0, mean_both_rules: 1.0000
+aNbN                                     ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=5.0, n_steps_mean=8.0, mean_both_rules: 1.0000
+aNbN                                     ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.1, n_steps_mean=62.0, mean_both_rules: 1.0000
+aNbN                                     ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.9, n_steps_mean=22.0, mean_both_rules: 1.0000
+aNbN                                     ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.5, n_steps_mean=29.0, mean_both_rules: 1.0000
+aNbN                                     ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=5.0, n_steps_mean=8.0, mean_both_rules: 1.0000
+aNbN                                     ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=2.0, n_steps_mean=14.0, mean_both_rules: 1.0000
+aNbN                                     gaussian            : best settings: sampling_strategy=categorical, sigma=50.0, T=256, mean_both_rules: 0.9620
+aNbN                                     gaussian            : best settings: sampling_strategy=categorical, sigma=100.0, T=256, mean_both_rules: 0.9560
+aNbN                                     gaussian            : best settings: sampling_strategy=categorical, sigma=20.0, T=256, mean_both_rules: 0.9460
+aNbN                                     gaussian            : best settings: sampling_strategy=categorical, sigma=10.0, T=256, mean_both_rules: 0.9340
+aNbN                                     gaussian            : best settings: sampling_strategy=categorical, sigma=50.0, T=128, mean_both_rules: 0.9320
+aNbN                                     gaussian            : best settings: sampling_strategy=categorical, sigma=5.0, T=256, mean_both_rules: 0.9280
+aNbN                                     gaussian            : best settings: sampling_strategy=categorical, sigma=100.0, T=128, mean_both_rules: 0.9120
+aNbN                                     gaussian            : best settings: sampling_strategy=categorical, sigma=100.0, T=64, mean_both_rules: 0.8900
+aNbN                                     gaussian            : best settings: sampling_strategy=categorical, sigma=1.0, T=256, mean_both_rules: 0.8860
+aNbN                                     gaussian            : best settings: sampling_strategy=categorical, sigma=10.0, T=128, mean_both_rules: 0.8740
+aNbN                                     gaussian            : best settings: sampling_strategy=greedy, sigma=2.0, T=16, mean_both_rules: 1.0000
+aNbN                                     gaussian            : best settings: sampling_strategy=greedy, sigma=2.0, T=8, mean_both_rules: 1.0000
+aNbN                                     gaussian            : best settings: sampling_strategy=greedy, sigma=5.0, T=16, mean_both_rules: 1.0000
+aNbN                                     gaussian            : best settings: sampling_strategy=greedy, sigma=10.0, T=16, mean_both_rules: 1.0000
+aNbN                                     gaussian            : best settings: sampling_strategy=greedy, sigma=1.0, T=32, mean_both_rules: 1.0000
+aNbN                                     gaussian            : best settings: sampling_strategy=greedy, sigma=10.0, T=32, mean_both_rules: 1.0000
+aNbN                                     gaussian            : best settings: sampling_strategy=greedy, sigma=5.0, T=32, mean_both_rules: 1.0000
+aNbN                                     gaussian            : best settings: sampling_strategy=greedy, sigma=2.0, T=32, mean_both_rules: 1.0000
+aNbN                                     gaussian            : best settings: sampling_strategy=greedy, sigma=1.0, T=64, mean_both_rules: 1.0000
+aNbN                                     gaussian            : best settings: sampling_strategy=greedy, sigma=2.0, T=64, mean_both_rules: 1.0000
+aNbN                                     uniform             : best settings: sampling_strategy=categorical, T=256, mean_both_rules: 0.9000
+aNbN                                     uniform             : best settings: sampling_strategy=categorical, T=128, mean_both_rules: 0.8500
+aNbN                                     uniform             : best settings: sampling_strategy=categorical, T=64, mean_both_rules: 0.6860
+aNbN                                     uniform             : best settings: sampling_strategy=categorical, T=32, mean_both_rules: 0.4620
+aNbN                                     uniform             : best settings: sampling_strategy=categorical, T=16, mean_both_rules: 0.2080
+aNbN                                     uniform             : best settings: sampling_strategy=categorical, T=8, mean_both_rules: 0.0820
+aNbN                                     uniform             : best settings: sampling_strategy=categorical, T=4, mean_both_rules: 0.0160
+aNbN                                     uniform             : best settings: sampling_strategy=categorical, T=2, mean_both_rules: 0.0020
+aNbN                                     uniform             : best settings: sampling_strategy=categorical, T=1, mean_both_rules: 0.0000
+aNbN                                     uniform             : best settings: sampling_strategy=greedy, T=256, mean_both_rules: 0.9960
+aNbN                                     uniform             : best settings: sampling_strategy=greedy, T=128, mean_both_rules: 0.9820
+aNbN                                     uniform             : best settings: sampling_strategy=greedy, T=64, mean_both_rules: 0.9420
+aNbN                                     uniform             : best settings: sampling_strategy=greedy, T=32, mean_both_rules: 0.9120
+aNbN                                     uniform             : best settings: sampling_strategy=greedy, T=16, mean_both_rules: 0.7540
+aNbN                                     uniform             : best settings: sampling_strategy=greedy, T=8, mean_both_rules: 0.4400
+aNbN                                     uniform             : best settings: sampling_strategy=greedy, T=4, mean_both_rules: 0.1160
+aNbN                                     uniform             : best settings: sampling_strategy=greedy, T=2, mean_both_rules: 0.0040
+aNbN                                     uniform             : best settings: sampling_strategy=greedy, T=1, mean_both_rules: 0.0000
+--------------------------------------------------------------------------------
+
+aNbNcN                                   ar                  : best settings: sampling_strategy=categorical, mean_both_rules: 1.0000
+aNbNcN                                   ar                  : best settings: sampling_strategy=greedy, mean_both_rules: 1.0000
+aNbNcN                                   ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=23.09, mean_both_rules: 1.0000
+aNbNcN                                   ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=23.09, mean_both_rules: 1.0000
+aNbNcN                                   ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=23.09, mean_both_rules: 1.0000
+aNbNcN                                   ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=23.09, mean_both_rules: 1.0000
+aNbNcN                                   ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=23.09, mean_both_rules: 1.0000
+aNbNcN                                   ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=23.09, mean_both_rules: 1.0000
+aNbNcN                                   ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=23.09, mean_both_rules: 1.0000
+aNbNcN                                   ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=23.09, mean_both_rules: 1.0000
+aNbNcN                                   ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=23.09, mean_both_rules: 1.0000
+aNbNcN                                   ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.9, n_steps_mean=4.596, mean_both_rules: 0.2960
+aNbNcN                                   ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.1, n_steps_mean=42.0, mean_both_rules: 1.0000
+aNbNcN                                   ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.5, n_steps_mean=28.0, mean_both_rules: 1.0000
+aNbNcN                                   ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.5, n_steps_mean=28.0, mean_both_rules: 1.0000
+aNbNcN                                   ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.5, n_steps_mean=28.0, mean_both_rules: 1.0000
+aNbNcN                                   ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=2.0, n_steps_mean=13.0, mean_both_rules: 1.0000
+aNbNcN                                   ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.9, n_steps_mean=19.0, mean_both_rules: 1.0000
+aNbNcN                                   ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.9, n_steps_mean=19.0, mean_both_rules: 1.0000
+aNbNcN                                   ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=2.0, n_steps_mean=13.0, mean_both_rules: 1.0000
+aNbNcN                                   ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.5, n_steps_mean=28.0, mean_both_rules: 1.0000
+aNbNcN                                   ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=2.0, n_steps_mean=13.0, mean_both_rules: 1.0000
+aNbNcN                                   gaussian            : best settings: sampling_strategy=categorical, sigma=50.0, T=256, mean_both_rules: 0.9520
+aNbNcN                                   gaussian            : best settings: sampling_strategy=categorical, sigma=100.0, T=256, mean_both_rules: 0.9420
+aNbNcN                                   gaussian            : best settings: sampling_strategy=categorical, sigma=20.0, T=256, mean_both_rules: 0.9360
+aNbNcN                                   gaussian            : best settings: sampling_strategy=categorical, sigma=5.0, T=256, mean_both_rules: 0.9340
+aNbNcN                                   gaussian            : best settings: sampling_strategy=categorical, sigma=10.0, T=256, mean_both_rules: 0.9320
+aNbNcN                                   gaussian            : best settings: sampling_strategy=categorical, sigma=100.0, T=128, mean_both_rules: 0.9220
+aNbNcN                                   gaussian            : best settings: sampling_strategy=categorical, sigma=2.0, T=256, mean_both_rules: 0.8860
+aNbNcN                                   gaussian            : best settings: sampling_strategy=categorical, sigma=20.0, T=128, mean_both_rules: 0.8860
+aNbNcN                                   gaussian            : best settings: sampling_strategy=categorical, sigma=50.0, T=128, mean_both_rules: 0.8800
+aNbNcN                                   gaussian            : best settings: sampling_strategy=categorical, sigma=10.0, T=128, mean_both_rules: 0.8780
+aNbNcN                                   gaussian            : best settings: sampling_strategy=greedy, sigma=2.0, T=256, mean_both_rules: 1.0000
+aNbNcN                                   gaussian            : best settings: sampling_strategy=greedy, sigma=5.0, T=4, mean_both_rules: 1.0000
+aNbNcN                                   gaussian            : best settings: sampling_strategy=greedy, sigma=5.0, T=32, mean_both_rules: 1.0000
+aNbNcN                                   gaussian            : best settings: sampling_strategy=greedy, sigma=1.0, T=32, mean_both_rules: 1.0000
+aNbNcN                                   gaussian            : best settings: sampling_strategy=greedy, sigma=10.0, T=32, mean_both_rules: 1.0000
+aNbNcN                                   gaussian            : best settings: sampling_strategy=greedy, sigma=2.0, T=32, mean_both_rules: 1.0000
+aNbNcN                                   gaussian            : best settings: sampling_strategy=greedy, sigma=5.0, T=16, mean_both_rules: 1.0000
+aNbNcN                                   gaussian            : best settings: sampling_strategy=greedy, sigma=2.0, T=16, mean_both_rules: 1.0000
+aNbNcN                                   gaussian            : best settings: sampling_strategy=greedy, sigma=1.0, T=16, mean_both_rules: 1.0000
+aNbNcN                                   gaussian            : best settings: sampling_strategy=greedy, sigma=10.0, T=16, mean_both_rules: 1.0000
+aNbNcN                                   uniform             : best settings: sampling_strategy=categorical, T=256, mean_both_rules: 0.8900
+aNbNcN                                   uniform             : best settings: sampling_strategy=categorical, T=128, mean_both_rules: 0.8040
+aNbNcN                                   uniform             : best settings: sampling_strategy=categorical, T=64, mean_both_rules: 0.6360
+aNbNcN                                   uniform             : best settings: sampling_strategy=categorical, T=32, mean_both_rules: 0.3620
+aNbNcN                                   uniform             : best settings: sampling_strategy=categorical, T=16, mean_both_rules: 0.1080
+aNbNcN                                   uniform             : best settings: sampling_strategy=categorical, T=8, mean_both_rules: 0.0140
+aNbNcN                                   uniform             : best settings: sampling_strategy=categorical, T=1, mean_both_rules: 0.0000
+aNbNcN                                   uniform             : best settings: sampling_strategy=categorical, T=2, mean_both_rules: 0.0000
+aNbNcN                                   uniform             : best settings: sampling_strategy=categorical, T=4, mean_both_rules: 0.0000
+aNbNcN                                   uniform             : best settings: sampling_strategy=greedy, T=256, mean_both_rules: 0.9740
+aNbNcN                                   uniform             : best settings: sampling_strategy=greedy, T=128, mean_both_rules: 0.9100
+aNbNcN                                   uniform             : best settings: sampling_strategy=greedy, T=64, mean_both_rules: 0.8160
+aNbNcN                                   uniform             : best settings: sampling_strategy=greedy, T=32, mean_both_rules: 0.6240
+aNbNcN                                   uniform             : best settings: sampling_strategy=greedy, T=16, mean_both_rules: 0.3140
+aNbNcN                                   uniform             : best settings: sampling_strategy=greedy, T=8, mean_both_rules: 0.0580
+aNbNcN                                   uniform             : best settings: sampling_strategy=greedy, T=4, mean_both_rules: 0.0020
+aNbNcN                                   uniform             : best settings: sampling_strategy=greedy, T=1, mean_both_rules: 0.0000
+aNbNcN                                   uniform             : best settings: sampling_strategy=greedy, T=2, mean_both_rules: 0.0000
+--------------------------------------------------------------------------------
+
+baN                                      ar                  : best settings: sampling_strategy=categorical, mean_both_rules: 1.0000
+baN                                      ar                  : best settings: sampling_strategy=greedy, mean_both_rules: 1.0000
+baN                                      ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=128.0, mean_both_rules: 1.0000
+baN                                      ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=128.0, mean_both_rules: 1.0000
+baN                                      ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=128.0, mean_both_rules: 1.0000
+baN                                      ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.5, n_steps_mean=128.0, mean_both_rules: 1.0000
+baN                                      ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=128.0, mean_both_rules: 1.0000
+baN                                      ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=128.0, mean_both_rules: 1.0000
+baN                                      ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.5, n_steps_mean=128.0, mean_both_rules: 1.0000
+baN                                      ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=128.0, mean_both_rules: 1.0000
+baN                                      ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.5, n_steps_mean=128.0, mean_both_rules: 1.0000
+baN                                      ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.5, n_steps_mean=128.0, mean_both_rules: 1.0000
+baN                                      ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.1, n_steps_mean=128.0, mean_both_rules: 1.0000
+baN                                      ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.5, n_steps_mean=128.0, mean_both_rules: 1.0000
+baN                                      ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.1, n_steps_mean=128.0, mean_both_rules: 1.0000
+baN                                      ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.1, n_steps_mean=128.0, mean_both_rules: 1.0000
+baN                                      ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.1, n_steps_mean=128.0, mean_both_rules: 1.0000
+baN                                      ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.5, n_steps_mean=128.0, mean_both_rules: 1.0000
+baN                                      ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.5, n_steps_mean=128.0, mean_both_rules: 1.0000
+baN                                      ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.5, n_steps_mean=128.0, mean_both_rules: 1.0000
+baN                                      ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.5, n_steps_mean=128.0, mean_both_rules: 1.0000
+baN                                      ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.1, n_steps_mean=128.0, mean_both_rules: 1.0000
+baN                                      gaussian            : best settings: sampling_strategy=categorical, sigma=20.0, T=256, mean_both_rules: 0.9720
+baN                                      gaussian            : best settings: sampling_strategy=categorical, sigma=10.0, T=256, mean_both_rules: 0.9640
+baN                                      gaussian            : best settings: sampling_strategy=categorical, sigma=50.0, T=256, mean_both_rules: 0.9580
+baN                                      gaussian            : best settings: sampling_strategy=categorical, sigma=5.0, T=256, mean_both_rules: 0.9540
+baN                                      gaussian            : best settings: sampling_strategy=categorical, sigma=50.0, T=128, mean_both_rules: 0.9420
+baN                                      gaussian            : best settings: sampling_strategy=categorical, sigma=20.0, T=128, mean_both_rules: 0.9420
+baN                                      gaussian            : best settings: sampling_strategy=categorical, sigma=10.0, T=128, mean_both_rules: 0.9260
+baN                                      gaussian            : best settings: sampling_strategy=categorical, sigma=2.0, T=256, mean_both_rules: 0.9180
+baN                                      gaussian            : best settings: sampling_strategy=categorical, sigma=1.0, T=256, mean_both_rules: 0.9160
+baN                                      gaussian            : best settings: sampling_strategy=categorical, sigma=5.0, T=128, mean_both_rules: 0.9160
+baN                                      gaussian            : best settings: sampling_strategy=greedy, sigma=20.0, T=256, mean_both_rules: 0.9380
+baN                                      gaussian            : best settings: sampling_strategy=greedy, sigma=10.0, T=256, mean_both_rules: 0.9360
+baN                                      gaussian            : best settings: sampling_strategy=greedy, sigma=5.0, T=256, mean_both_rules: 0.9320
+baN                                      gaussian            : best settings: sampling_strategy=greedy, sigma=2.0, T=256, mean_both_rules: 0.9160
+baN                                      gaussian            : best settings: sampling_strategy=greedy, sigma=10.0, T=128, mean_both_rules: 0.9120
+baN                                      gaussian            : best settings: sampling_strategy=greedy, sigma=20.0, T=128, mean_both_rules: 0.9120
+baN                                      gaussian            : best settings: sampling_strategy=greedy, sigma=50.0, T=256, mean_both_rules: 0.9040
+baN                                      gaussian            : best settings: sampling_strategy=greedy, sigma=5.0, T=128, mean_both_rules: 0.8880
+baN                                      gaussian            : best settings: sampling_strategy=greedy, sigma=1.0, T=256, mean_both_rules: 0.8720
+baN                                      gaussian            : best settings: sampling_strategy=greedy, sigma=50.0, T=128, mean_both_rules: 0.8680
+baN                                      uniform             : best settings: sampling_strategy=categorical, T=256, mean_both_rules: 0.8840
+baN                                      uniform             : best settings: sampling_strategy=categorical, T=128, mean_both_rules: 0.7960
+baN                                      uniform             : best settings: sampling_strategy=categorical, T=64, mean_both_rules: 0.6740
+baN                                      uniform             : best settings: sampling_strategy=categorical, T=32, mean_both_rules: 0.5700
+baN                                      uniform             : best settings: sampling_strategy=categorical, T=1, mean_both_rules: 0.5020
+baN                                      uniform             : best settings: sampling_strategy=categorical, T=16, mean_both_rules: 0.4720
+baN                                      uniform             : best settings: sampling_strategy=categorical, T=8, mean_both_rules: 0.4500
+baN                                      uniform             : best settings: sampling_strategy=categorical, T=2, mean_both_rules: 0.4380
+baN                                      uniform             : best settings: sampling_strategy=categorical, T=4, mean_both_rules: 0.4040
+baN                                      uniform             : best settings: sampling_strategy=greedy, T=256, mean_both_rules: 0.7880
+baN                                      uniform             : best settings: sampling_strategy=greedy, T=128, mean_both_rules: 0.5700
+baN                                      uniform             : best settings: sampling_strategy=greedy, T=64, mean_both_rules: 0.2980
+baN                                      uniform             : best settings: sampling_strategy=greedy, T=32, mean_both_rules: 0.0680
+baN                                      uniform             : best settings: sampling_strategy=greedy, T=16, mean_both_rules: 0.0020
+baN                                      uniform             : best settings: sampling_strategy=greedy, T=1, mean_both_rules: 0.0000
+baN                                      uniform             : best settings: sampling_strategy=greedy, T=4, mean_both_rules: 0.0000
+baN                                      uniform             : best settings: sampling_strategy=greedy, T=2, mean_both_rules: 0.0000
+baN                                      uniform             : best settings: sampling_strategy=greedy, T=8, mean_both_rules: 0.0000
+--------------------------------------------------------------------------------
+
+bbaN                                     ar                  : best settings: sampling_strategy=categorical, mean_both_rules: 1.0000
+bbaN                                     ar                  : best settings: sampling_strategy=greedy, mean_both_rules: 1.0000
+bbaN                                     ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=52.924, mean_both_rules: 0.9500
+bbaN                                     ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=52.924, mean_both_rules: 0.9500
+bbaN                                     ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=52.924, mean_both_rules: 0.9500
+bbaN                                     ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=52.924, mean_both_rules: 0.9500
+bbaN                                     ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=52.924, mean_both_rules: 0.9500
+bbaN                                     ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=52.924, mean_both_rules: 0.9500
+bbaN                                     ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=52.924, mean_both_rules: 0.9500
+bbaN                                     ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=52.924, mean_both_rules: 0.9500
+bbaN                                     ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=52.924, mean_both_rules: 0.9500
+bbaN                                     ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.5, n_steps_mean=11.408, mean_both_rules: 0.3420
+bbaN                                     ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.5, n_steps_mean=46.0, mean_both_rules: 1.0000
+bbaN                                     ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.1, n_steps_mean=111.0, mean_both_rules: 1.0000
+bbaN                                     ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.1, n_steps_mean=111.0, mean_both_rules: 1.0000
+bbaN                                     ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=10.0, n_steps_mean=7.0, mean_both_rules: 1.0000
+bbaN                                     ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.5, n_steps_mean=46.0, mean_both_rules: 1.0000
+bbaN                                     ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.9, n_steps_mean=31.0, mean_both_rules: 1.0000
+bbaN                                     ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=10.0, n_steps_mean=7.0, mean_both_rules: 1.0000
+bbaN                                     ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.5, n_steps_mean=46.0, mean_both_rules: 1.0000
+bbaN                                     ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.1, n_steps_mean=111.0, mean_both_rules: 1.0000
+bbaN                                     ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.1, n_steps_mean=111.0, mean_both_rules: 1.0000
+bbaN                                     gaussian            : best settings: sampling_strategy=categorical, sigma=50.0, T=256, mean_both_rules: 0.9700
+bbaN                                     gaussian            : best settings: sampling_strategy=categorical, sigma=100.0, T=256, mean_both_rules: 0.9380
+bbaN                                     gaussian            : best settings: sampling_strategy=categorical, sigma=10.0, T=256, mean_both_rules: 0.9220
+bbaN                                     gaussian            : best settings: sampling_strategy=categorical, sigma=100.0, T=128, mean_both_rules: 0.9160
+bbaN                                     gaussian            : best settings: sampling_strategy=categorical, sigma=50.0, T=128, mean_both_rules: 0.9020
+bbaN                                     gaussian            : best settings: sampling_strategy=categorical, sigma=20.0, T=256, mean_both_rules: 0.8980
+bbaN                                     gaussian            : best settings: sampling_strategy=categorical, sigma=5.0, T=256, mean_both_rules: 0.8860
+bbaN                                     gaussian            : best settings: sampling_strategy=categorical, sigma=20.0, T=128, mean_both_rules: 0.8840
+bbaN                                     gaussian            : best settings: sampling_strategy=categorical, sigma=100.0, T=64, mean_both_rules: 0.8420
+bbaN                                     gaussian            : best settings: sampling_strategy=categorical, sigma=50.0, T=64, mean_both_rules: 0.8120
+bbaN                                     gaussian            : best settings: sampling_strategy=greedy, sigma=1.0, T=1, mean_both_rules: 1.0000
+bbaN                                     gaussian            : best settings: sampling_strategy=greedy, sigma=2.0, T=1, mean_both_rules: 1.0000
+bbaN                                     gaussian            : best settings: sampling_strategy=greedy, sigma=5.0, T=1, mean_both_rules: 1.0000
+bbaN                                     gaussian            : best settings: sampling_strategy=greedy, sigma=10.0, T=1, mean_both_rules: 1.0000
+bbaN                                     gaussian            : best settings: sampling_strategy=greedy, sigma=20.0, T=1, mean_both_rules: 1.0000
+bbaN                                     gaussian            : best settings: sampling_strategy=greedy, sigma=20.0, T=256, mean_both_rules: 0.9940
+bbaN                                     gaussian            : best settings: sampling_strategy=greedy, sigma=50.0, T=256, mean_both_rules: 0.9920
+bbaN                                     gaussian            : best settings: sampling_strategy=greedy, sigma=100.0, T=256, mean_both_rules: 0.9920
+bbaN                                     gaussian            : best settings: sampling_strategy=greedy, sigma=100.0, T=128, mean_both_rules: 0.9920
+bbaN                                     gaussian            : best settings: sampling_strategy=greedy, sigma=10.0, T=256, mean_both_rules: 0.9860
+bbaN                                     uniform             : best settings: sampling_strategy=categorical, T=256, mean_both_rules: 0.9220
+bbaN                                     uniform             : best settings: sampling_strategy=categorical, T=128, mean_both_rules: 0.8520
+bbaN                                     uniform             : best settings: sampling_strategy=categorical, T=64, mean_both_rules: 0.7120
+bbaN                                     uniform             : best settings: sampling_strategy=categorical, T=32, mean_both_rules: 0.5460
+bbaN                                     uniform             : best settings: sampling_strategy=categorical, T=16, mean_both_rules: 0.2640
+bbaN                                     uniform             : best settings: sampling_strategy=categorical, T=8, mean_both_rules: 0.0740
+bbaN                                     uniform             : best settings: sampling_strategy=categorical, T=4, mean_both_rules: 0.0040
+bbaN                                     uniform             : best settings: sampling_strategy=categorical, T=1, mean_both_rules: 0.0000
+bbaN                                     uniform             : best settings: sampling_strategy=categorical, T=2, mean_both_rules: 0.0000
+bbaN                                     uniform             : best settings: sampling_strategy=greedy, T=1, mean_both_rules: 1.0000
+bbaN                                     uniform             : best settings: sampling_strategy=greedy, T=256, mean_both_rules: 0.9960
+bbaN                                     uniform             : best settings: sampling_strategy=greedy, T=128, mean_both_rules: 0.9940
+bbaN                                     uniform             : best settings: sampling_strategy=greedy, T=64, mean_both_rules: 0.9840
+bbaN                                     uniform             : best settings: sampling_strategy=greedy, T=32, mean_both_rules: 0.9700
+bbaN                                     uniform             : best settings: sampling_strategy=greedy, T=16, mean_both_rules: 0.9500
+bbaN                                     uniform             : best settings: sampling_strategy=greedy, T=8, mean_both_rules: 0.8960
+bbaN                                     uniform             : best settings: sampling_strategy=greedy, T=4, mean_both_rules: 0.8340
+bbaN                                     uniform             : best settings: sampling_strategy=greedy, T=2, mean_both_rules: 0.6920
+--------------------------------------------------------------------------------
+
+parentheses_and_brackets                 ar                  : best settings: sampling_strategy=categorical, mean_both_rules: 1.0000
+parentheses_and_brackets                 ar                  : best settings: sampling_strategy=categorical, mean_both_rules: 1.0000
+parentheses_and_brackets                 ar                  : best settings: sampling_strategy=greedy, mean_both_rules: 1.0000
+parentheses_and_brackets                 ar                  : best settings: sampling_strategy=greedy, mean_both_rules: 1.0000
+parentheses_and_brackets                 ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=31.526, mean_both_rules: 1.0000
+parentheses_and_brackets                 ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=31.526, mean_both_rules: 1.0000
+parentheses_and_brackets                 ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=31.526, mean_both_rules: 1.0000
+parentheses_and_brackets                 ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=31.52, mean_both_rules: 1.0000
+parentheses_and_brackets                 ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=31.52, mean_both_rules: 1.0000
+parentheses_and_brackets                 ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=31.52, mean_both_rules: 1.0000
+parentheses_and_brackets                 ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=31.52, mean_both_rules: 1.0000
+parentheses_and_brackets                 ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=31.52, mean_both_rules: 1.0000
+parentheses_and_brackets                 ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=31.52, mean_both_rules: 1.0000
+parentheses_and_brackets                 ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=31.526, mean_both_rules: 1.0000
+parentheses_and_brackets                 ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.1, n_steps_mean=33.0, mean_both_rules: 1.0000
+parentheses_and_brackets                 ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.5, n_steps_mean=32.0, mean_both_rules: 1.0000
+parentheses_and_brackets                 ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.9, n_steps_mean=31.0, mean_both_rules: 1.0000
+parentheses_and_brackets                 ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=10.0, n_steps_mean=4.0, mean_both_rules: 1.0000
+parentheses_and_brackets                 ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.9, n_steps_mean=31.0, mean_both_rules: 1.0000
+parentheses_and_brackets                 ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.1, n_steps_mean=33.0, mean_both_rules: 1.0000
+parentheses_and_brackets                 ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.5, n_steps_mean=32.0, mean_both_rules: 1.0000
+parentheses_and_brackets                 ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=10.0, n_steps_mean=4.0, mean_both_rules: 1.0000
+parentheses_and_brackets                 ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=10.0, n_steps_mean=4.0, mean_both_rules: 1.0000
+parentheses_and_brackets                 ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.1, n_steps_mean=33.0, mean_both_rules: 1.0000
+parentheses_and_brackets                 gaussian            : best settings: sampling_strategy=categorical, sigma=20.0, T=64, mean_both_rules: 0.8200
+parentheses_and_brackets                 gaussian            : best settings: sampling_strategy=categorical, sigma=50.0, T=64, mean_both_rules: 0.8200
+parentheses_and_brackets                 gaussian            : best settings: sampling_strategy=categorical, sigma=20.0, T=64, mean_both_rules: 0.7820
+parentheses_and_brackets                 gaussian            : best settings: sampling_strategy=categorical, sigma=50.0, T=64, mean_both_rules: 0.7800
+parentheses_and_brackets                 gaussian            : best settings: sampling_strategy=categorical, sigma=10.0, T=64, mean_both_rules: 0.7160
+parentheses_and_brackets                 gaussian            : best settings: sampling_strategy=categorical, sigma=50.0, T=32, mean_both_rules: 0.7000
+parentheses_and_brackets                 gaussian            : best settings: sampling_strategy=categorical, sigma=10.0, T=64, mean_both_rules: 0.7000
+parentheses_and_brackets                 gaussian            : best settings: sampling_strategy=categorical, sigma=5.0, T=64, mean_both_rules: 0.6760
+parentheses_and_brackets                 gaussian            : best settings: sampling_strategy=categorical, sigma=50.0, T=32, mean_both_rules: 0.6440
+parentheses_and_brackets                 gaussian            : best settings: sampling_strategy=categorical, sigma=5.0, T=64, mean_both_rules: 0.6400
+parentheses_and_brackets                 gaussian            : best settings: sampling_strategy=greedy, sigma=1.0, T=64, mean_both_rules: 0.9600
+parentheses_and_brackets                 gaussian            : best settings: sampling_strategy=greedy, sigma=20.0, T=64, mean_both_rules: 0.9600
+parentheses_and_brackets                 gaussian            : best settings: sampling_strategy=greedy, sigma=1.0, T=64, mean_both_rules: 0.9540
+parentheses_and_brackets                 gaussian            : best settings: sampling_strategy=greedy, sigma=5.0, T=64, mean_both_rules: 0.9400
+parentheses_and_brackets                 gaussian            : best settings: sampling_strategy=greedy, sigma=5.0, T=64, mean_both_rules: 0.9320
+parentheses_and_brackets                 gaussian            : best settings: sampling_strategy=greedy, sigma=20.0, T=64, mean_both_rules: 0.9300
+parentheses_and_brackets                 gaussian            : best settings: sampling_strategy=greedy, sigma=2.0, T=64, mean_both_rules: 0.9280
+parentheses_and_brackets                 gaussian            : best settings: sampling_strategy=greedy, sigma=10.0, T=64, mean_both_rules: 0.9200
+parentheses_and_brackets                 gaussian            : best settings: sampling_strategy=greedy, sigma=10.0, T=64, mean_both_rules: 0.9120
+parentheses_and_brackets                 gaussian            : best settings: sampling_strategy=greedy, sigma=2.0, T=64, mean_both_rules: 0.9000
+parentheses_and_brackets                 uniform             : best settings: sampling_strategy=categorical, T=32, mean_both_rules: 0.9000
+parentheses_and_brackets                 uniform             : best settings: sampling_strategy=categorical, T=64, mean_both_rules: 0.8420
+parentheses_and_brackets                 uniform             : best settings: sampling_strategy=categorical, T=64, mean_both_rules: 0.7400
+parentheses_and_brackets                 uniform             : best settings: sampling_strategy=categorical, T=32, mean_both_rules: 0.7200
+parentheses_and_brackets                 uniform             : best settings: sampling_strategy=categorical, T=16, mean_both_rules: 0.5020
+parentheses_and_brackets                 uniform             : best settings: sampling_strategy=categorical, T=16, mean_both_rules: 0.4200
+parentheses_and_brackets                 uniform             : best settings: sampling_strategy=categorical, T=8, mean_both_rules: 0.2120
+parentheses_and_brackets                 uniform             : best settings: sampling_strategy=categorical, T=8, mean_both_rules: 0.2000
+parentheses_and_brackets                 uniform             : best settings: sampling_strategy=categorical, T=4, mean_both_rules: 0.0600
+parentheses_and_brackets                 uniform             : best settings: sampling_strategy=categorical, T=4, mean_both_rules: 0.0600
+parentheses_and_brackets                 uniform             : best settings: sampling_strategy=greedy, T=64, mean_both_rules: 0.8220
+parentheses_and_brackets                 uniform             : best settings: sampling_strategy=greedy, T=64, mean_both_rules: 0.7600
+parentheses_and_brackets                 uniform             : best settings: sampling_strategy=greedy, T=32, mean_both_rules: 0.6580
+parentheses_and_brackets                 uniform             : best settings: sampling_strategy=greedy, T=32, mean_both_rules: 0.6000
+parentheses_and_brackets                 uniform             : best settings: sampling_strategy=greedy, T=16, mean_both_rules: 0.4540
+parentheses_and_brackets                 uniform             : best settings: sampling_strategy=greedy, T=8, mean_both_rules: 0.4000
+parentheses_and_brackets                 uniform             : best settings: sampling_strategy=greedy, T=16, mean_both_rules: 0.4000
+parentheses_and_brackets                 uniform             : best settings: sampling_strategy=greedy, T=8, mean_both_rules: 0.2820
+parentheses_and_brackets                 uniform             : best settings: sampling_strategy=greedy, T=4, mean_both_rules: 0.1200
+parentheses_and_brackets                 uniform             : best settings: sampling_strategy=greedy, T=4, mean_both_rules: 0.1100
+--------------------------------------------------------------------------------
+
+not_nested_parentheses_and_brackets      ar                  : best settings: sampling_strategy=categorical, mean_both_rules: 1.0000
+not_nested_parentheses_and_brackets      ar                  : best settings: sampling_strategy=categorical, mean_both_rules: 1.0000
+not_nested_parentheses_and_brackets      ar                  : best settings: sampling_strategy=greedy, mean_both_rules: 1.0000
+not_nested_parentheses_and_brackets      ar                  : best settings: sampling_strategy=greedy, mean_both_rules: 1.0000
+not_nested_parentheses_and_brackets      ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.5, n_steps_mean=31.14, mean_both_rules: 1.0000
+not_nested_parentheses_and_brackets      ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.5, n_steps_mean=31.14, mean_both_rules: 1.0000
+not_nested_parentheses_and_brackets      ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=32.82, mean_both_rules: 1.0000
+not_nested_parentheses_and_brackets      ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=32.82, mean_both_rules: 1.0000
+not_nested_parentheses_and_brackets      ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.5, n_steps_mean=31.14, mean_both_rules: 1.0000
+not_nested_parentheses_and_brackets      ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=32.82, mean_both_rules: 1.0000
+not_nested_parentheses_and_brackets      ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.5, n_steps_mean=31.14, mean_both_rules: 1.0000
+not_nested_parentheses_and_brackets      ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=32.82, mean_both_rules: 1.0000
+not_nested_parentheses_and_brackets      ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.5, n_steps_mean=31.14, mean_both_rules: 1.0000
+not_nested_parentheses_and_brackets      ebsampler           : best settings: sampling_strategy=categorical, eb_gamma=0.1, n_steps_mean=32.82, mean_both_rules: 1.0000
+not_nested_parentheses_and_brackets      ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.1, n_steps_mean=33.0, mean_both_rules: 1.0000
+not_nested_parentheses_and_brackets      ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.9, n_steps_mean=31.0, mean_both_rules: 1.0000
+not_nested_parentheses_and_brackets      ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.1, n_steps_mean=33.0, mean_both_rules: 1.0000
+not_nested_parentheses_and_brackets      ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.5, n_steps_mean=32.0, mean_both_rules: 1.0000
+not_nested_parentheses_and_brackets      ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.9, n_steps_mean=31.0, mean_both_rules: 1.0000
+not_nested_parentheses_and_brackets      ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=5.0, n_steps_mean=8.0, mean_both_rules: 1.0000
+not_nested_parentheses_and_brackets      ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=2.0, n_steps_mean=16.0, mean_both_rules: 1.0000
+not_nested_parentheses_and_brackets      ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.5, n_steps_mean=32.0, mean_both_rules: 1.0000
+not_nested_parentheses_and_brackets      ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=0.1, n_steps_mean=33.0, mean_both_rules: 1.0000
+not_nested_parentheses_and_brackets      ebsampler           : best settings: sampling_strategy=greedy, eb_gamma=2.0, n_steps_mean=16.0, mean_both_rules: 1.0000
+not_nested_parentheses_and_brackets      gaussian            : best settings: sampling_strategy=categorical, sigma=50.0, T=64, mean_both_rules: 0.9000
+not_nested_parentheses_and_brackets      gaussian            : best settings: sampling_strategy=categorical, sigma=50.0, T=64, mean_both_rules: 0.8840
+not_nested_parentheses_and_brackets      gaussian            : best settings: sampling_strategy=categorical, sigma=20.0, T=64, mean_both_rules: 0.8500
+not_nested_parentheses_and_brackets      gaussian            : best settings: sampling_strategy=categorical, sigma=20.0, T=64, mean_both_rules: 0.8400
+not_nested_parentheses_and_brackets      gaussian            : best settings: sampling_strategy=categorical, sigma=10.0, T=64, mean_both_rules: 0.8260
+not_nested_parentheses_and_brackets      gaussian            : best settings: sampling_strategy=categorical, sigma=5.0, T=64, mean_both_rules: 0.8260
+not_nested_parentheses_and_brackets      gaussian            : best settings: sampling_strategy=categorical, sigma=50.0, T=32, mean_both_rules: 0.7800
+not_nested_parentheses_and_brackets      gaussian            : best settings: sampling_strategy=categorical, sigma=20.0, T=32, mean_both_rules: 0.7800
+not_nested_parentheses_and_brackets      gaussian            : best settings: sampling_strategy=categorical, sigma=10.0, T=64, mean_both_rules: 0.7800
+not_nested_parentheses_and_brackets      gaussian            : best settings: sampling_strategy=categorical, sigma=5.0, T=64, mean_both_rules: 0.7800
+not_nested_parentheses_and_brackets      gaussian            : best settings: sampling_strategy=greedy, sigma=1.0, T=1, mean_both_rules: 1.0000
+not_nested_parentheses_and_brackets      gaussian            : best settings: sampling_strategy=greedy, sigma=2.0, T=1, mean_both_rules: 1.0000
+not_nested_parentheses_and_brackets      gaussian            : best settings: sampling_strategy=greedy, sigma=10.0, T=1, mean_both_rules: 1.0000
+not_nested_parentheses_and_brackets      gaussian            : best settings: sampling_strategy=greedy, sigma=5.0, T=1, mean_both_rules: 1.0000
+not_nested_parentheses_and_brackets      gaussian            : best settings: sampling_strategy=greedy, sigma=2.0, T=1, mean_both_rules: 1.0000
+not_nested_parentheses_and_brackets      gaussian            : best settings: sampling_strategy=greedy, sigma=1.0, T=1, mean_both_rules: 1.0000
+not_nested_parentheses_and_brackets      gaussian            : best settings: sampling_strategy=greedy, sigma=5.0, T=1, mean_both_rules: 1.0000
+not_nested_parentheses_and_brackets      gaussian            : best settings: sampling_strategy=greedy, sigma=10.0, T=1, mean_both_rules: 1.0000
+not_nested_parentheses_and_brackets      gaussian            : best settings: sampling_strategy=greedy, sigma=20.0, T=1, mean_both_rules: 0.9980
+not_nested_parentheses_and_brackets      gaussian            : best settings: sampling_strategy=greedy, sigma=50.0, T=1, mean_both_rules: 0.9900
+not_nested_parentheses_and_brackets      uniform             : best settings: sampling_strategy=categorical, T=64, mean_both_rules: 0.9200
+not_nested_parentheses_and_brackets      uniform             : best settings: sampling_strategy=categorical, T=64, mean_both_rules: 0.8480
+not_nested_parentheses_and_brackets      uniform             : best settings: sampling_strategy=categorical, T=32, mean_both_rules: 0.7200
+not_nested_parentheses_and_brackets      uniform             : best settings: sampling_strategy=categorical, T=32, mean_both_rules: 0.6960
+not_nested_parentheses_and_brackets      uniform             : best settings: sampling_strategy=categorical, T=16, mean_both_rules: 0.5200
+not_nested_parentheses_and_brackets      uniform             : best settings: sampling_strategy=categorical, T=16, mean_both_rules: 0.4400
+not_nested_parentheses_and_brackets      uniform             : best settings: sampling_strategy=categorical, T=8, mean_both_rules: 0.2820
+not_nested_parentheses_and_brackets      uniform             : best settings: sampling_strategy=categorical, T=8, mean_both_rules: 0.2800
+not_nested_parentheses_and_brackets      uniform             : best settings: sampling_strategy=categorical, T=4, mean_both_rules: 0.1200
+not_nested_parentheses_and_brackets      uniform             : best settings: sampling_strategy=categorical, T=4, mean_both_rules: 0.0980
+not_nested_parentheses_and_brackets      uniform             : best settings: sampling_strategy=greedy, T=1, mean_both_rules: 1.0000
+not_nested_parentheses_and_brackets      uniform             : best settings: sampling_strategy=greedy, T=1, mean_both_rules: 1.0000
+not_nested_parentheses_and_brackets      uniform             : best settings: sampling_strategy=greedy, T=64, mean_both_rules: 0.7700
+not_nested_parentheses_and_brackets      uniform             : best settings: sampling_strategy=greedy, T=32, mean_both_rules: 0.7000
+not_nested_parentheses_and_brackets      uniform             : best settings: sampling_strategy=greedy, T=64, mean_both_rules: 0.6600
+not_nested_parentheses_and_brackets      uniform             : best settings: sampling_strategy=greedy, T=32, mean_both_rules: 0.5960
+not_nested_parentheses_and_brackets      uniform             : best settings: sampling_strategy=greedy, T=16, mean_both_rules: 0.3600
+not_nested_parentheses_and_brackets      uniform             : best settings: sampling_strategy=greedy, T=16, mean_both_rules: 0.3200
+not_nested_parentheses_and_brackets      uniform             : best settings: sampling_strategy=greedy, T=8, mean_both_rules: 0.2200
+not_nested_parentheses_and_brackets      uniform             : best settings: sampling_strategy=greedy, T=8, mean_both_rules: 0.1240
+--------------------------------------------------------------------------------
