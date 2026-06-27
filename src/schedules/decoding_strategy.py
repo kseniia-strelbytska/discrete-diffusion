@@ -139,6 +139,9 @@ class EBSamplerDecoding(DecodingStrategy):
 
         # Entropy-bounded cumulative criterion.
         ent_sorted = entropy[masked_sorted]
+        
+        print("Entropy:", entropy)
+        
         acc_entropy = torch.cumsum(ent_sorted, dim=0)
         cummax_ent = torch.cummax(ent_sorted, dim=0).values
         k = int((acc_entropy - cummax_ent <= self.gamma).sum().item())
@@ -146,5 +149,10 @@ class EBSamplerDecoding(DecodingStrategy):
         k = min(k, masked_sorted.numel())
 
         sel = torch.zeros(L, dtype=torch.bool, device=device)
+        
+        print(f"Selected positions: {masked_sorted[:k]}, k={k}, gamma={self.gamma}")
+        print(f'{content_probs}')
+        
+        print('-' * 20)
         sel[masked_sorted[:k]] = True
         return sel

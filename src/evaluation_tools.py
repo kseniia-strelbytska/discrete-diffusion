@@ -188,9 +188,6 @@ def evaluation_from_generation(model,
             seq_str = ''.join([str(i) for i in y_pred_cpu.tolist()])
             sequences.append(seq_str)
             
-            if y_pred_stats[2] == 1:
-                print(y_pred_stats, y_pred)
-
             # Collect sequences satisfying both_rules AND format
             if y_pred_stats[2] == 1 and y_pred_stats[3] == 1:
                 correct_sequences.append(y_pred_cpu)

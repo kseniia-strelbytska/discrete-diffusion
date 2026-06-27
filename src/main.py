@@ -241,7 +241,7 @@ def main():
         0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0,
         0, 1, 1, 1, 0, 1, 1, 4, 2, 4], dtype=torch.long)))
     
-    exit(0)
+    # exit(0)
     
     print(f'Sample of generated grammar data:\n{grammar.data[0:5, 0:20]}')
 

@@ -1411,3 +1411,15 @@ Cells to run: 388
 >> parentheses_and_brackets L=32   T=512  strat=gaussian   samp=categorical  σ=5.0
   built (parentheses_and_brackets, L=32, T=512)  vocab=8  |X|=100
    → both_rules=0.9640 ± 0.0102 (5 reps)  steps=427.1/498  n_corr=482  elapsed=24114.5s
+[388/388  eta=0.0min]
+>> parentheses_and_brackets L=32   T=512  strat=gaussian   samp=categorical  σ=10.0
+  built (parentheses_and_brackets, L=32, T=512)  vocab=8  |X|=100
+   → both_rules=0.9460 ± 0.0080 (5 reps)  steps=426.4/498  n_corr=473  elapsed=25184.3s
+
+============================================================
+T-SWEEP COMPLETE
+============================================================
+CSV: results/T-sweep-Dyck-5/oracle_T_sweep_results.csv
+Distributions: results/T-sweep-Dyck-5/distributions
+
+Log: results/T-sweep-Dyck-5/run.log

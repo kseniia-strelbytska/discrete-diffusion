@@ -246,7 +246,7 @@ class REGrammar(FormalGrammar):
         eval_seq = seq[:eos_positions[0] + 1] if len(eos_positions) > 0 else seq
         r1 = self.does_satisfy_rule1(eval_seq)
         r2 = self.does_satisfy_rule2(eval_seq)
-        fmt = self.does_satisfy_format(seq)
+        fmt = self.does_satisfy_format(eval_seq)
         grammatical = r1 and r2 and fmt # Format matters! Otherwise, e.g., 3 0 4 4 4 1 2 is accepted for aNbN
         return np.array([int(r1), int(r2), int(grammatical), int(fmt)])
 

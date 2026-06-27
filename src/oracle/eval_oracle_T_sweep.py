@@ -81,12 +81,12 @@ from schedules import CategoricalSchedule, GaussianSchedule
 # ---------------------------------------------------------------------------
 # Sweep grid (edit these to control the sweep)
 # ---------------------------------------------------------------------------
-# GRAMMARS = ['baN', 'bbaN', 'aNbN', 'aNbNcN']
-GRAMMARS = ['parentheses_and_brackets', 'not_nested_parentheses_and_brackets']
-LENGTHS  = [32]
+GRAMMARS = ['baN', 'bbaN', 'aNbN', 'aNbNcN']
+# GRAMMARS = ['parentheses_and_brackets', 'not_nested_parentheses_and_brackets']
+LENGTHS  = [128]
 SAMPLING_STRATEGIES = ['greedy', 'categorical']
 
-T_VALUES = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512]
+T_VALUES = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]
 GAUSSIAN_SIGMAS = [1.0, 2.0, 5.0, 10.0, 20.0, 50.0, 100.0, 256.0]
 EB_GAMMAS       = [0.1, 0.5, 0.9, 2.0, 5.0, 10.0]
 
