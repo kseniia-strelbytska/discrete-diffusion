@@ -1,0 +1,8 @@
+benchmark,config,decoder,sampler,nfe_requested,sigma,gamma,temperature,num_samples,mean_nfe,n_problems,pass@1,pass@1_plus
+humaneval,eb_greedy_gamma0.5,eb,greedy,32,32.0,0.5,1.0,1,57.13,164,0.122,0.122
+humaneval,gaussian_greedy_sigma32_nfe16,gaussian,greedy,16,32.0,0.5,1.0,1,16.04,164,0.091,0.085
+humaneval,gaussian_greedy_sigma32_nfe32,gaussian,greedy,32,32.0,0.5,1.0,1,31.51,164,0.098,0.098
+humaneval,gaussian_greedy_sigma8_nfe16,gaussian,greedy,16,8.0,0.5,1.0,1,16.04,164,0.049,0.043
+humaneval,gaussian_greedy_sigma8_nfe32,gaussian,greedy,32,8.0,0.5,1.0,1,31.64,164,0.128,0.122
+humaneval,uniform_greedy_nfe16,uniform,greedy,16,32.0,0.5,1.0,1,16.0,164,0.043,0.043
+humaneval,uniform_greedy_nfe32,uniform,greedy,32,32.0,0.5,1.0,1,32.0,164,0.085,0.085

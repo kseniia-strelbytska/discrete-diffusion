@@ -1,0 +1,14 @@
+{
+  "config": {
+    "decoder": "uniform",
+    "sampler": "greedy",
+    "nfe": 64,
+    "sigma": 32.0,
+    "gamma": 0.5,
+    "temperature": 1.0,
+    "max_new_tokens": 256,
+    "num_samples": 1
+  },
+  "mean_nfe": 63.96951219512195,
+  "n_problems": 164
+}

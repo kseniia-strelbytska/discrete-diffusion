@@ -1,0 +1,14 @@
+{
+  "config": {
+    "decoder": "gaussian",
+    "sampler": "greedy",
+    "nfe": 32,
+    "sigma": 32.0,
+    "gamma": 0.5,
+    "temperature": 1.0,
+    "max_new_tokens": 256,
+    "num_samples": 1
+  },
+  "mean_nfe": 31.50609756097561,
+  "n_problems": 164
+}

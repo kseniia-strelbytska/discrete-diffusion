@@ -28,9 +28,31 @@ from realmodel.decode import DecodeConfig, generate
 
 # ── instruction templates ────────────────────────────────────────────────────
 
-def humaneval_instruction(problem: dict) -> str:
-    return ("Complete the following Python function. Return only the complete "
-            "function in a markdown code block.\n\n" + problem["prompt"])
+def humaneval_instruction(problem: dict) -> tuple:
+    """Official CoDA eval format (mirrors humaneval_instruct.yaml + eval script).
+
+    Returns (user_msg, gen_prefix) so decode.generate() uses
+    build_prompt_ids_instruct, placing the function signature in fixed context
+    before the masked generation region.
+    """
+    user_msg = (
+        "Write a solution to the following problem and make sure that it "
+        f"passes the tests:\n```{problem['prompt']}"
+    )
+    gen_prefix = f"Here is the completed function:\n```python\n{problem['prompt']}\n"
+    return (user_msg, gen_prefix)
+
+
+def _postprocess_humaneval(raw: str, prompt: str) -> str:
+    """Extract function body from model response and prepend signature.
+
+    The model generates continuation after gen_prefix (which already contains
+    ```python\\n{prompt}\\n), so raw is the body code followed by closing ```.
+    """
+    body = raw.split("```python\n", 1)[-1].split("```")[0]
+    if not body.strip():
+        body = raw.split("```")[0]
+    return prompt + "\n" + body
 
 
 def mbpp_instruction(problem: dict) -> str:
@@ -38,7 +60,18 @@ def mbpp_instruction(problem: dict) -> str:
 
 
 def load_problems(benchmark: str):
-    from evalplus.data import get_human_eval_plus, get_mbpp_plus
+    # src/datasets/ shadows the pip `datasets` package; remove src/ from sys.path
+    # temporarily so evalplus.data can import the real HuggingFace datasets.
+    import sys, os
+    _src = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    _had = _src in sys.path
+    if _had:
+        sys.path.remove(_src)
+    try:
+        from evalplus.data import get_human_eval_plus, get_mbpp_plus
+    finally:
+        if _had:
+            sys.path.insert(0, _src)
     if benchmark == "humaneval":
         return get_human_eval_plus(), humaneval_instruction
     if benchmark == "mbpp":
@@ -114,9 +147,13 @@ def main():
         t0 = time.time()
         with open(samples_path, "w") as f:
             for task_id in task_ids:
-                res = generate(den, instr_fn(problems[task_id]), cfg)
+                prob = problems[task_id]
+                instruction = instr_fn(prob)
+                res = generate(den, instruction, cfg)
                 nfe_log.append(res.realised_nfe)
                 for sol in res.completions:
+                    if isinstance(instruction, tuple):
+                        sol = _postprocess_humaneval(sol, prob["prompt"])
                     f.write(json.dumps({"task_id": task_id, "solution": sol}) + "\n")
         mean_nfe = sum(nfe_log) / max(1, len(nfe_log))
         with open(os.path.join(out_dir, "meta.json"), "w") as f:

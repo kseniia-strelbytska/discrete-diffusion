@@ -54,9 +54,12 @@ def _sample_tokens(content_probs: torch.Tensor, sampler: str) -> torch.Tensor:
 
 
 @torch.no_grad()
-def generate(den: CodaDenoiser, instruction: str, cfg: DecodeConfig) -> DecodeResult:
+def generate(den: CodaDenoiser, instruction, cfg: DecodeConfig) -> DecodeResult:
     device = den.device
-    prompt_ids = den.build_prompt_ids(instruction)
+    if isinstance(instruction, tuple):
+        prompt_ids = den.build_prompt_ids_instruct(*instruction)
+    else:
+        prompt_ids = den.build_prompt_ids(instruction)
     P = prompt_ids.shape[0]
     M = cfg.max_new_tokens
     B = cfg.num_samples

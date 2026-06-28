@@ -7,6 +7,9 @@ analog of the paper's results CSVs.
 
     python -m realmodel.aggregate_results --out-dir results_realmodel \
         --benchmark humaneval --csv results_realmodel/humaneval_passk.csv
+        
+    python -m realmodel.aggregate_results --out-dir results_realmodel_v2 \
+        --benchmark humaneval --csv results_realmodel_v2/humaneval_passk.csv
 """
 
 from __future__ import annotations
@@ -23,16 +26,21 @@ PASS1 = re.compile(r"pass@1:\s*([0-9.]+)")
 
 def run(cmd: list[str]) -> str:
     print("  $", " ".join(cmd))
-    out = subprocess.run(cmd, capture_output=True, text=True)
+    # Strip PYTHONPATH so src/datasets/ doesn't shadow the pip `datasets` package
+    # in evalplus subprocesses.
+    env = {k: v for k, v in os.environ.items() if k != "PYTHONPATH"}
+    out = subprocess.run(cmd, capture_output=True, text=True, env=env)
+    if out.returncode != 0:
+        print(f"  [WARN] exit {out.returncode}: {(out.stderr or out.stdout)[:300]}")
     return out.stdout + out.stderr
 
 
 def evaluate_config(cfg_dir: str, dataset: str) -> dict:
     samples = os.path.join(cfg_dir, "samples.jsonl")
-    run(["evalplus.sanitize", "--samples", samples])
+    run(["evalplus.sanitize", samples])
     sanitized = samples.replace(".jsonl", "-sanitized.jsonl")
     sanitized = sanitized if os.path.exists(sanitized) else samples
-    log = run(["evalplus.evaluate", "--dataset", dataset, "--samples", sanitized])
+    log = run(["evalplus.evaluate", dataset, "--samples", sanitized])
     nums = PASS1.findall(log)
     base = float(nums[0]) if len(nums) >= 1 else None
     plus = float(nums[1]) if len(nums) >= 2 else None

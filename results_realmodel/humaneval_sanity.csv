@@ -1,0 +1,2 @@
+benchmark,config,decoder,sampler,nfe_requested,sigma,gamma,temperature,num_samples,mean_nfe,n_problems,pass@1,pass@1_plus
+humaneval,eb_greedy_gamma0.5,eb,greedy,32,32.0,0.5,1.0,1,63.05,164,0.122,0.122

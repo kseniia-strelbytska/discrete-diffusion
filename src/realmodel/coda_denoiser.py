@@ -34,19 +34,22 @@ class CodaDenoiser:
     @classmethod
     def load(cls, model_name: str = DEFAULT_MODEL, device: str = "cuda",
              dtype: str = "bfloat16") -> "CodaDenoiser":
-        from transformers import AutoModel, AutoModelForCausalLM, AutoTokenizer
+        from transformers import AutoModel, AutoTokenizer
 
         torch_dtype = getattr(torch, dtype)
         tok = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
-        # Prefer the CausalLM class (exposes .generate); fall back to AutoModel.
-        try:
-            model = AutoModelForCausalLM.from_pretrained(
-                model_name, trust_remote_code=True, torch_dtype=torch_dtype,
-            )
-        except (ValueError, KeyError):
-            model = AutoModel.from_pretrained(
-                model_name, trust_remote_code=True, torch_dtype=torch_dtype,
-            )
+        # CoDA auto_map maps AutoModel -> CoDALanguageModel (not AutoModelForCausalLM).
+        # attn_implementation="eager" required: inner CoDAModel doesn't support SDPA.
+        # rope_scaling={'rope_type':'default',...} uses a newer HF format not accepted by
+        # CoDA's own RopeScaling dataclass; rope_type='default' means no special scaling,
+        # and rope_theta is already in config.rope_theta, so nullifying is correct.
+        from transformers import AutoConfig
+        cfg = AutoConfig.from_pretrained(model_name, trust_remote_code=True)
+        cfg.rope_scaling = None
+        model = AutoModel.from_pretrained(
+            model_name, config=cfg, trust_remote_code=True, torch_dtype=torch_dtype,
+            attn_implementation="eager",
+        )
         model = model.to(device).eval()
 
         gen_cfg = getattr(model, "generation_config", None)
@@ -73,6 +76,19 @@ class CodaDenoiser:
         )[0]
         return ids.to(self.device)
 
+    def build_prompt_ids_instruct(self, user_msg: str, gen_prefix: str) -> torch.Tensor:
+        """Official CoDA eval format: chat template + generation prefix as one string.
+
+        Matches eval_mbpp_humaneval.sh: the gen_prefix is fixed context, not masked.
+        Tokenize full string at once to avoid boundary tokenization artefacts.
+        """
+        chat_str = self.tokenizer.apply_chat_template(
+            [{"role": "user", "content": user_msg}],
+            tokenize=False, add_generation_prompt=True,
+        )
+        ids = self.tokenizer(chat_str + gen_prefix, return_tensors="pt").input_ids[0]
+        return ids.to(self.device)
+
     def make_canvas(self, prompt_ids: torch.Tensor, max_new_tokens: int,
                     batch: int) -> torch.Tensor:
         """[B, P + max_new_tokens] with the tail filled by mask tokens."""
@@ -85,9 +101,15 @@ class CodaDenoiser:
     # ── forward ───────────────────────────────────────────────────────────────
     @torch.no_grad()
     def logits(self, canvas_ids: torch.Tensor) -> torch.Tensor:
-        """One denoising forward pass. canvas_ids: (B, L) -> logits (B, L, V)."""
-        out = self.model(input_ids=canvas_ids)
-        return out.logits if hasattr(out, "logits") else out[0]
+        """One denoising forward pass. canvas_ids: (B, L) -> logits (B, L, V).
+
+        CoDA.forward() at inference returns (logits, None). The logits are then
+        right-shifted by 1 (repeating position 0) to align causal predictions
+        with their target positions — matching CoDA's _sample() convention.
+        """
+        raw_logits, _ = self.model(input_ids=canvas_ids)
+        # right-shift: shifted[:, i] = raw[:, i-1] for i >= 1
+        return torch.cat([raw_logits[:, :1], raw_logits[:, :-1]], dim=1)
 
     def decode_completion(self, generated_ids: torch.Tensor) -> str:
         """Decode the generated region, truncating at the first EOS."""

@@ -1,0 +1,8 @@
+{
+  "steps": 768,
+  "max_new_tokens": 768,
+  "alg": "entropy",
+  "temperature": 0.1,
+  "top_p": 0.9,
+  "n_problems": 164
+}

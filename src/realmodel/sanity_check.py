@@ -35,7 +35,7 @@ def main():
             [{"role": "user", "content": PROMPT}],
             add_generation_prompt=True, return_tensors="pt",
         ).to(den.device)
-        out = den.model.generate(ids, max_tokens=256, diffusion_steps=64, temperature=0.0)
+        out = den.model.diffusion_generate(ids, max_new_tokens=256, steps=64, temperature=0.0)
         print(den.tokenizer.decode(out[0][ids.shape[1]:], skip_special_tokens=True))
     except Exception as e:  # interface may differ; surfaces the real signature
         print(f"[native generate failed — inspect signature] {e}")
