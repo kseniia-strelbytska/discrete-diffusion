@@ -56,7 +56,7 @@ def add_wilson_ci(df, n_per_rep=100, stat='both_rules'):
     return df
 
 
-def monotonicity_plot(name='monotonicity_dyck_grammars.png'):
+def monotonicity_plot(name='results/analysis/monotonicity_dyck_grammars.png'):
     random.seed(42)
     # make a line plot with 4 subplots (2x2):
     xs = [[] for _ in range(len(GRAMMARS))]
@@ -137,7 +137,7 @@ def plot_accuracy_vs_compute(df):
                 plt.ylim(0, 1.05)
                 plt.ylabel('mean_both_rules')
                 plt.title(f'Accuracy vs Compute for {grammar} with {decoder} and {sampler}')
-                plt.savefig(f"./x_figures/{id}.png")
+                plt.savefig(f"./results/x_figures/{id}.png")
                 plt.clf()  # Clear the figure for the next plot
     
 def plot_accuracy_vs_compute_uniform(df):
@@ -161,7 +161,7 @@ def plot_accuracy_vs_compute_uniform(df):
         plt.ylim(0, 1.05)
         plt.legend(loc='lower right')
         plt.title(f'Accuracy vs Compute for {decoder} ({sampler} sampling)')
-        plt.savefig(f"./x_clean_figures/{id}.png")
+        plt.savefig(f"./results/x_clean_figures/{id}.png")
         plt.clf()  # Clear the figure for the next plot
 
 def plot_categorical_and_greedy(df, n_per_rep=100):
@@ -191,7 +191,7 @@ def plot_categorical_and_greedy(df, n_per_rep=100):
         ax.legend(loc='lower right', fontsize=8)
     
     plt.suptitle(f'Accuracy vs Compute under {decoder} strategy', fontsize=12)
-    plt.savefig(f"./x_clean_figures/{id}.png")
+    plt.savefig(f"./results/x_clean_figures/{id}.png")
 
 # Map each language to its corresponding metrics
 DIVERSITY_METRICS = {
@@ -238,7 +238,7 @@ NEEDED_SETTINGS = {
 }
 
 def main():
-    # monotonicity_plot(name='monotonicity_dyck_grammars.png')
+    # monotonicity_plot(name='results/analysis/monotonicity_dyck_grammars.png')
     # exit(0)
     
     # get file as argument
@@ -299,7 +299,7 @@ def main():
     #                     min_steps = filtered.n_steps_mean.min()
     #                     print(f"{grammar:<40} {strategy:<20} {sampler:>20}: {min_steps:>5.2f} steps, mean_both_rules: {line.mean_both_rules:.4f}")
 
-    with open('results_summary.txt', 'w') as f:
+    with open('results/analysis/results_summary.txt', 'w') as f:
         sys.stdout = f  # Change the standard output to the file we created.
         for grammar in GRAMMARS:
             for strategy in STRATEGIES:

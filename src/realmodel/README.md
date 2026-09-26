@@ -40,9 +40,9 @@ adjust `coda_denoiser.py` / `sanity_check.py`.
 ### 2. Reproduce CoDA's published HumanEval (~54%) with the default-style sampler
 ```bash
 python -m realmodel.run_code_eval --benchmark humaneval \
-    --decoders eb --samplers greedy --gammas 0.5 --out-dir results_realmodel
+    --decoders eb --samplers greedy --gammas 0.5 --out-dir results/realmodel
 python -m realmodel.aggregate_results --benchmark humaneval \
-    --out-dir results_realmodel --csv results_realmodel/humaneval_sanity.csv
+    --out-dir results/realmodel --csv results/realmodel/humaneval_sanity.csv
 ```
 EB/confidence ≈ CoDA's native sampler; pass@1 should land within a few points of
 ~54%. **Do not trust schedule comparisons until this matches.**
@@ -51,9 +51,9 @@ EB/confidence ≈ CoDA's native sampler; pass@1 should land within a few points 
 ```bash
 python -m realmodel.run_code_eval --benchmark humaneval \
     --decoders uniform gaussian --samplers greedy \
-    --nfes 16 32 --sigmas 8 32 --limit 40 --out-dir results_realmodel
+    --nfes 16 32 --sigmas 8 32 --limit 40 --out-dir results/realmodel
 python -m realmodel.aggregate_results --benchmark humaneval \
-    --out-dir results_realmodel --csv results_realmodel/humaneval_pilot.csv
+    --out-dir results/realmodel --csv results/realmodel/humaneval_pilot.csv
 ```
 Check the direction: does Gaussian ≥ uniform at low NFE?
 
@@ -63,9 +63,9 @@ for B in humaneval mbpp; do
   python -m realmodel.run_code_eval --benchmark $B \
       --decoders uniform gaussian eb ar --samplers greedy categorical \
       --nfes 8 16 32 64 --sigmas 2 8 32 128 --gammas 0.1 0.5 2 5 \
-      --num-samples 5 --out-dir results_realmodel
+      --num-samples 5 --out-dir results/realmodel
   python -m realmodel.aggregate_results --benchmark $B \
-      --out-dir results_realmodel --csv results_realmodel/${B}_passk.csv
+      --out-dir results/realmodel --csv results/realmodel/${B}_passk.csv
 done
 ```
 

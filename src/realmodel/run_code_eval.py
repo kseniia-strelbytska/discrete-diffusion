@@ -7,7 +7,7 @@ Run on the GPU box. Writes one ``samples.jsonl`` per config under
 Example (pilot):
     python -m realmodel.run_code_eval --benchmark humaneval \
         --decoders uniform gaussian --samplers greedy \
-        --nfes 16 32 --sigmas 8 32 --limit 20 --out-dir results_realmodel
+        --nfes 16 32 --sigmas 8 32 --limit 20 --out-dir results/realmodel
 
 Then evaluate (see aggregate_results.py / README).
 """
@@ -117,7 +117,7 @@ def main():
     ap.add_argument("--model", default="Salesforce/CoDA-v0-Instruct")
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--dtype", default="bfloat16")
-    ap.add_argument("--out-dir", default="results_realmodel")
+    ap.add_argument("--out-dir", default="results/realmodel")
     ap.add_argument("--decoders", nargs="+", default=["uniform", "gaussian", "eb"])
     ap.add_argument("--samplers", nargs="+", default=["greedy", "categorical"])
     ap.add_argument("--nfes", nargs="+", type=int, default=[8, 16, 32, 64])
