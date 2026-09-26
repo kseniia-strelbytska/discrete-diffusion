@@ -5,7 +5,7 @@ Mirrors the official eval script (CoDA/evaluation/lm_eval/eval_mbpp_humaneval.sh
   prompt = chat-template(user_msg) + gen_prefix (assistant prefix with function signature)
 
 Run:
-    python -m realmodel.replicate_coda [--limit N] [--out-dir results_realmodel]
+    python -m realmodel.replicate_coda [--limit N] [--out-dir results/realmodel]
 
 If pass@1 lands in [0.50, 0.57] the trust anchor holds and we can proceed to
 swap in our custom schedules.
@@ -86,7 +86,7 @@ def main():
     ap.add_argument("--top-p", type=float, default=0.9)
     ap.add_argument("--alg", default="entropy")
     ap.add_argument("--limit", type=int, default=0, help="first N problems (0=all)")
-    ap.add_argument("--out-dir", default="results_realmodel")
+    ap.add_argument("--out-dir", default="results/realmodel")
     args = ap.parse_args()
 
     den = CodaDenoiser.load(args.model, device=args.device, dtype=args.dtype)

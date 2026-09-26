@@ -71,10 +71,10 @@ within a few points of CoDA's published HumanEval pass@1 (~54 %).
 
 ```bash
 python -m realmodel.run_code_eval --benchmark humaneval \
-    --decoders eb --samplers greedy --gammas 0.5 --out-dir results_realmodel
+    --decoders eb --samplers greedy --gammas 0.5 --out-dir results/realmodel
 
 python -m realmodel.aggregate_results --benchmark humaneval \
-    --out-dir results_realmodel --csv results_realmodel/humaneval_sanity.csv
+    --out-dir results/realmodel --csv results/realmodel/humaneval_sanity.csv
 ```
 
 **Common failure: `pass@1=None` in the CSV.** This means `aggregate_results.py`
@@ -91,10 +91,10 @@ is meaningless until this gate passes.
 ```bash
 python -m realmodel.run_code_eval --benchmark humaneval \
     --decoders uniform gaussian --samplers greedy \
-    --nfes 16 32 --sigmas 8 32 --limit 40 --out-dir results_realmodel
+    --nfes 16 32 --sigmas 8 32 --limit 40 --out-dir results/realmodel
 
 python -m realmodel.aggregate_results --benchmark humaneval \
-    --out-dir results_realmodel --csv results_realmodel/humaneval_pilot.csv
+    --out-dir results/realmodel --csv results/realmodel/humaneval_pilot.csv
 ```
 
 Sanity question: does Gaussian ≥ uniform at low NFE (the paper's claim)?
@@ -111,9 +111,9 @@ for B in humaneval mbpp; do
   python -m realmodel.run_code_eval --benchmark $B \
       --decoders uniform gaussian eb ar --samplers greedy categorical \
       --nfes 8 16 32 64 --sigmas 2 8 32 128 --gammas 0.1 0.5 2 5 \
-      --num-samples 5 --out-dir results_realmodel
+      --num-samples 5 --out-dir results/realmodel
   python -m realmodel.aggregate_results --benchmark $B \
-      --out-dir results_realmodel --csv results_realmodel/${B}_passk.csv
+      --out-dir results/realmodel --csv results/realmodel/${B}_passk.csv
 done
 ```
 
@@ -137,7 +137,7 @@ full grid.
 
 ## Definition of done
 
-1. `results_realmodel/humaneval_passk.csv` and `results_realmodel/mbpp_passk.csv`
+1. `results/realmodel/humaneval_passk.csv` and `results/realmodel/mbpp_passk.csv`
    with real (non-None) pass@1 / pass@1_plus across the grid.
 2. The EB sanity config (Gate 2) reproduces ~54 % on HumanEval.
 3. Short written summary: does Gaussian/structured ≥ uniform at low NFE on a real

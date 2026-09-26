@@ -5,11 +5,11 @@ For each ``<out_dir>/<benchmark>/<config_tag>/samples.jsonl`` this runs
 pass@1, joining with the ``meta.json`` (mean realised NFE). Output is the
 analog of the paper's results CSVs.
 
-    python -m realmodel.aggregate_results --out-dir results_realmodel \
-        --benchmark humaneval --csv results_realmodel/humaneval_passk.csv
+    python -m realmodel.aggregate_results --out-dir results/realmodel \
+        --benchmark humaneval --csv results/realmodel/humaneval_passk.csv
         
-    python -m realmodel.aggregate_results --out-dir results_realmodel_v2 \
-        --benchmark humaneval --csv results_realmodel_v2/humaneval_passk.csv
+    python -m realmodel.aggregate_results --out-dir results/realmodel_v2 \
+        --benchmark humaneval --csv results/realmodel_v2/humaneval_passk.csv
 """
 
 from __future__ import annotations
@@ -66,7 +66,7 @@ def parse_meta(cfg_dir: str) -> dict:
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out-dir", default="results_realmodel")
+    ap.add_argument("--out-dir", default="results/realmodel")
     ap.add_argument("--benchmark", choices=["humaneval", "mbpp"], required=True)
     ap.add_argument("--csv", required=True)
     args = ap.parse_args()

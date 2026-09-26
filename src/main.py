@@ -247,7 +247,7 @@ def main():
 
     schedule = get_schedule(cfg, args)
     print(f"Noise schedule: {schedule.__class__.__name__}")
-    schedule.plot(cfg.model.max_len, device, PROJECT_ROOT / "noise_schedule.png")
+    schedule.plot(cfg.model.max_len, device, PROJECT_ROOT / "results" / "analysis" / "noise_schedule.png")
 
     dataset = NoiseScheduleDataset(
         grammar.data, device,

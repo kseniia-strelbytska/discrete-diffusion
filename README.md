@@ -227,7 +227,11 @@ discrete-diffusion/
 ├── paper/                    # Typst sources + final PDFs (paper, quad chart)
 ├── configs/                  # experiment configs (YAML)
 ├── results/                  # sweep outputs (T-sweep-*, combined_6_grammar.csv)
-├── results_realmodel*/       # CoDA HumanEval outputs
+│   ├── realmodel*/           # CoDA HumanEval outputs
+│   ├── ground_truth_14-06/   # 14/06 oracle vs. trained-model evaluations
+│   ├── analysis/             # sweep summaries, monotonicity + noise-schedule plots
+│   └── x_figures/, x_clean_figures/  # exploratory per-cell plots from analyse.py
+├── docs/                     # notes, pipeline audit, project overview, older paper PDF
 ├── tests/                    # oracle brute-force checks, decoupling, diversity, efficiency
 └── archived/                 # superseded experiments
 ```
@@ -265,9 +269,9 @@ run order (sanity check → CoDA reproduction → pilot → full grid). Requires
 ```bash
 python -m realmodel.run_code_eval --benchmark humaneval \
     --decoders uniform gaussian eb ar --samplers greedy categorical \
-    --nfes 32 128 --sigmas 2 8 32 --gammas 0.5 2 --out-dir results_realmodel
+    --nfes 32 128 --sigmas 2 8 32 --gammas 0.5 2 --out-dir results/realmodel
 python -m realmodel.aggregate_results --benchmark humaneval \
-    --out-dir results_realmodel --csv results_realmodel/humaneval_passk.csv
+    --out-dir results/realmodel --csv results/realmodel/humaneval_passk.csv
 ```
 
 **4 — Tests** (oracles vs. brute force, decoder/sampler decoupling, diversity metrics):
